@@ -1,0 +1,105 @@
+/* Contact Form specific styling */
+
+.contact-form {
+  background: var(--white);
+  max-width: 600px;
+  width: 90%;
+  margin: 50px auto;
+  padding: 40px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.contact-form h2 {
+  text-align: center;
+  color: var(--dark-slate);
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-weight: 700;
+  font-size: 26px;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  letter-spacing: 0.5px;
+}
+
+.contact-form h2::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 45px;
+  height: 3.5px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+label {
+  display: block;
+  margin-top: 18px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--dark-slate);
+  letter-spacing: 0.5px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 8px;
+  border: 1.5px solid rgba(142, 68, 173, 0.3);
+  border-radius: var(--radius-md);
+  background-color: #faf6fc;
+  color: var(--text-dark);
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #8e44ad;
+  box-shadow: 0 0 12px rgba(142, 68, 173, 0.25);
+  background-color: var(--white);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 30px;
+  background: var(--primary-gradient);
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(142, 68, 173, 0.2);
+  transition: var(--transition);
+}
+
+button:hover {
+  background: linear-gradient(90deg, #9b59b6, #ff7675);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(142, 68, 173, 0.35);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(142, 68, 173, 0.2);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Business Registration - Shubhlo (शुभलो)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=30">
+  <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}?v=30">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .vendor-reg-wrapper {
+      min-height: calc(100vh - 80px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      background: radial-gradient(circle at 10% 20%, rgba(39, 174, 96, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(142, 68, 173, 0.08) 0%, transparent 40%);
+    }
+
+    .vendor-reg-card {
+      width: 100%;
+      max-width: 650px;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 40px 38px;
+      box-shadow: 0 15px 35px rgba(39, 174, 96, 0.15), 0 5px 15px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(39, 174, 96, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vendor-reg-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #27ae60, #2ecc71, #8e44ad);
+    }
+
+    .vendor-reg-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .vendor-reg-header h2 {
+      margin: 0 0 8px 0;
+      color: #1e8449;
+      font-size: 28px;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .vendor-reg-header p {
+      margin: 0;
+      color: #7f8c8d;
+      font-size: 14.5px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #34495e;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      font-size: 16px;
+      color: #27ae60;
+      pointer-events: none;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      color: #1e293b;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.2s ease;
+      background: #f8fafc;
+    }
+
+    .form-control:focus {
+      border-color: #27ae60;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15);
+    }
+
+    select.form-control {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%27ae60' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 38px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .service-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #475569;
+      transition: all 0.2s ease;
+    }
+
+    .service-pill input[type="checkbox"] {
+      accent-color: #27ae60;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .service-pill:hover {
+      border-color: #27ae60;
+      background: #e6f4ea;
+    }
+
+    .terms-scroll-box {
+      max-height: 120px;
+      overflow-y: auto;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 12px 15px;
+      font-size: 12px;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+
+    .terms-scroll-box h4 {
+      margin: 8px 0 4px 0;
+      color: #1e8449;
+      font-size: 12.5px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #27ae60, #1e8449);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(39, 174, 96, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .submit-btn:disabled {
+      background: #cbd5e1;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(39, 174, 96, 0.45);
+    }
+
+    /* Modal Popup Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 24px;
+      max-width: 540px;
+      width: 100%;
+      padding: 35px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+      text-align: center;
+      border: 2px solid #27ae60;
+      position: relative;
+      animation: modalPop 0.35s ease-out;
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-icon {
+      width: 75px;
+      height: 75px;
+      background: #e6f4ea;
+      color: #27ae60;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 18px auto;
+      box-shadow: 0 8px 20px rgba(39, 174, 96, 0.25);
+    }
+
+    .modal-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      color: #1e8449;
+      margin: 0 0 8px 0;
+    }
+
+    .modal-details {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      text-align: left;
+      font-size: 13.5px;
+      color: #334155;
+    }
+
+    .modal-btn {
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13.5px;
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .modal-btn-gold {
+      background: linear-gradient(135deg, #d4af37, #b8860b);
+      color: #000;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    }
+
+    .modal-btn-green {
+      background: linear-gradient(135deg, #27ae60, #1e8449);
+      color: white;
+      box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    .modal-btn-blue {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+  </style>
+</head>
+<body class="watermark-bg">
+
+  <!-- Header / Navbar -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- SUCCESS REGISTRATION POPUP MODAL -->
+  <div id="successRegModal" class="modal-overlay" style="display: {% if registration_status == 'success' %}flex{% else %}none{% endif %};">
+    <div class="modal-card">
+      <button onclick="window.location.href='{{ url_for('vendor_dashboard') }}'" style="position: absolute; top: 15px; right: 18px; background: #f1f5f9; border: none; font-size: 18px; font-weight: bold; color: #64748b; cursor: pointer; border-radius: 50%; width: 32px; height: 32px;" title="Go to Dashboard">✕</button>
+
+      <div class="modal-icon">🎉</div>
+
+      <h2 class="modal-title">
+        Registration Submitted Successfully! <br>
+        <span style="font-size: 18px; color: #2c3e50;">पंजीकरण सफलतापूर्वक सबमिट हो गया है!</span>
+      </h2>
+
+      <div class="modal-details">
+        <p style="margin: 0 0 6px 0;"><strong>🏢 Business Name:</strong> <span id="modalVendorName">{{ registered_vendor_name or session.get('vendor_name', 'Registered Vendor Business') }}</span></p>
+        <p style="margin: 0 0 6px 0;"><strong>🛠️ Service Category:</strong> <span id="modalVendorService">{{ (registered_vendor_service or session.get('vendor_service', 'Selected Event Service')) | title }}</span></p>
+        <p style="margin: 0 0 6px 0;"><strong>📍 Registered Tehsil:</strong> <span id="modalVendorTehsil">{{ registered_vendor_tehsil or 'Itarsi' }}</span></p>
+        <p style="margin: 0;"><strong>⏳ Status:</strong> <span style="background: #fef08a; color: #854d0e; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 12px;">Under Owner Review / ऑनर्स द्वारा दस्तावेज़ जांच जारी</span></p>
+      </div>
+
+      <p style="font-size: 13.5px; color: #64748b; line-height: 1.5; margin: 0 0 25px 0;">
+        आपके दस्तावेज़ और जानकारी ऑनर्स पैनल को सत्यापन हेतु भेज दी गई है। ऑनर्स द्वारा प्रोफाइल अप्रूव होते ही आपका व्यवसाय ग्राहकों की बुकिंग लिस्ट में दिखने लगेगा।
+      </p>
+
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('vendor_dashboard') }}" class="modal-btn modal-btn-green">
+          🏢 Go to Vendor Dashboard
+        </a>
+        <a href="{{ url_for('home') }}" class="modal-btn modal-btn-blue">
+          🏠 Home Page
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ALREADY REGISTERED POPUP MODAL -->
+  <div id="alreadyRegModal" class="modal-overlay" style="display: {% if registration_status == 'already_registered' %}flex{% else %}none{% endif %};">
+    <div class="modal-card" style="border: 2px solid #eab308; box-shadow: 0 25px 60px rgba(234, 179, 8, 0.25);">
+      <button onclick="document.getElementById('alreadyRegModal').style.display='none'" style="position: absolute; top: 15px; right: 18px; background: #f1f5f9; border: none; font-size: 18px; font-weight: bold; color: #64748b; cursor: pointer; border-radius: 50%; width: 32px; height: 32px;">✕</button>
+
+      <div class="modal-icon" style="background: #fef9c3; color: #ca8a04;">⚠️</div>
+
+      <h2 class="modal-title" style="color: #a16207;">
+        Vendor Already Registered! <br>
+        <span style="font-size: 18px; color: #1e293b;">यह वेंडर प्रोफाइल पहले से पंजीकृत है!</span>
+      </h2>
+
+      <div class="modal-details" style="background: #fffbeb; border-color: #fde68a;">
+        <p style="margin: 0 0 6px 0;"><strong>✉️ Email Address:</strong> {{ registered_vendor_email or 'This Email' }}</p>
+        <p style="margin: 0 0 6px 0;"><strong>📞 Mobile Number:</strong> {{ registered_vendor_phone or 'This Phone' }}</p>
+        <p style="margin: 0;"><strong>⚠️ Status:</strong> <span style="background: #fef08a; color: #854d0e; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 12px;">Already Registered / यह खाता पहले से मौजूद है</span></p>
+      </div>
+
+      <p style="font-size: 13.5px; color: #64748b; line-height: 1.5; margin: 0 0 25px 0;">
+        इस ईमेल या मोबाइल नंबर से वेंडर प्रोफाइल पहले ही Shubhlo प्लेटफॉर्म पर बनाई जा चुकी है। कृपया अपने गुप्त पासवर्ड का उपयोग करके सीधे वेंडर पोर्टल पर लॉगिन करें।
+      </p>
+
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('vendor_login') }}" class="modal-btn modal-btn-gold" style="background: linear-gradient(135deg, #eab308, #ca8a04); color: white; box-shadow: 0 4px 15px rgba(202, 138, 4, 0.4);">
+          🔑 Go to Vendor Login Portal / वेंडर लॉगिन करें
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendor Registration Form -->
+  <div class="vendor-reg-wrapper">
+    <div class="vendor-reg-card">
+      <div class="vendor-reg-header">
+        <h2>Vendor Business Registration 🤝</h2>
+        <p>Register your service business on Shubhlo Event Platform</p>
+      </div>
+
+      {% if registration_closed %}
+        <div style="background: linear-gradient(135deg, #fff1f2, #ffe4e6); border: 2px solid #fecdd3; border-radius: 20px; padding: 40px 25px; text-align: center; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(225, 29, 72, 0.08);">
+          <span style="font-size: 56px; display: block; margin-bottom: 15px;">🔒</span>
+          <h3 style="margin: 0 0 12px; color: #9f1239; font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900;">
+            Vendor Registration Temporarily Closed / नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है 🔒
+          </h3>
+          <p style="font-size: 15px; line-height: 1.7; color: #be123c; margin: 0 0 20px 0; font-weight: 600; max-width: 600px; margin-left: auto; margin-right: auto;">
+            {{ closure_msg or 'Shubhlo Owner dwara naye vendor business registrations filhal paused hain. Kripya thodi der baad check karein ya Helpline (+91 7067883131) par sampark karein! / New vendor registrations are currently paused by Shubhlo Owner. Please check back soon!' }}
+          </p>
+          <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <a href="{{ url_for('vendor_login') }}" style="background: linear-gradient(135deg, #8e44ad, #732d91); color: white; padding: 12px 24px; border-radius: 10px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 15px rgba(142,68,173,0.3);">
+              🤝 Existing Vendor Login
+            </a>
+            <a href="{{ url_for('home') }}" style="background: #0f172a; color: white; padding: 12px 24px; border-radius: 10px; font-weight: 800; text-decoration: none;">
+              🏠 Back to Home Page
+            </a>
+          </div>
+        </div>
+      {% else %}
+        <!-- Vendor Token Payout & Commission Declaration Banner -->
+        <div style="background: linear-gradient(135deg, #faf4ff, #fdf4ff); border: 1.5px solid #d8b4fe; border-radius: 14px; padding: 18px 20px; margin-bottom: 25px; color: #581c87;">
+          <h4 style="margin: 0 0 8px 0; color: #7e22ce; font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            💰 OFFICIAL DECLARATION: Vendor Financial & Payout Terms
+          </h4>
+          <div style="font-size: 13px; line-height: 1.6; color: #6b21a8;">
+            • <strong>Customer Final Bill Deduction:</strong> Customer pays <strong>₹5,118 Token Money</strong> to Shubhlo. Vendor agrees to <strong>deduct ₹5,000 from customer's final invoice balance</strong>.<br>
+            • <strong>Platform Commission Fee:</strong> Shubhlo charges <strong>₹500 Platform Commission Fee</strong> per verified booking.<br>
+            • <strong>Vendor Net Bank Payout:</strong> Shubhlo transfers <strong>₹4,500 Net Payout</strong> directly to vendor bank account (₹5,000 Deposit - ₹500 Platform Fee).<br>
+            • <strong>Direct Commercial Rights:</strong> Vendor retains full rights to negotiate and collect all remaining event package amounts directly from the customer.
+          </div>
+        </div>
+
+        <form id="vendorRegForm" action="{{ url_for('vendor_register') }}" method="POST" enctype="multipart/form-data">
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name">Business / Vendor Name *</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🏢</span>
+                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Royal Palace Garden" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Mobile Number *</label>
+              <div class="input-wrapper">
+                <span class="input-icon">📞</span>
+                <input type="text" id="phone" name="phone" class="form-control" placeholder="10-digit mobile number" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <div class="input-wrapper">
+                <span class="input-icon">✉️</span>
+                <input type="email" id="email" name="email" class="form-control" placeholder="name@example.com" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Create Password / पासवर्ड बनाएँ *</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Create secret password" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="price">Starting Package Rate (₹) / शुरुआती पैकेज दर *</label>
+            <div class="input-wrapper">
+              <span class="input-icon">💰</span>
+              <input type="number" step="0.01" id="price" name="price" class="form-control" placeholder="e.g. 50000" value="50000" required>
+            </div>
+          </div>
+
+          <!-- Dynamic Location Cascading Selector -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+            <h4 style="margin: 0 0 12px 0; color: #1e8449; font-size: 13.5px; font-weight: 700; text-transform: uppercase;">
+              📍 Registered Business Location / कार्यक्षेत्र स्थान
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="state">State / राज्य *</label>
+                <select id="state" name="state" class="form-control" required>
+                  <option value="Madhya Pradesh">Madhya Pradesh</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="district">District / ज़िला *</label>
+                <select id="district" name="district" class="form-control" required>
+                  <option value="Hoshangabad">Hoshangabad</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="tehsil">Tehsil / तहसील *</label>
+                <select id="tehsil" name="tehsil" class="form-control" required>
+                  <option value="Itarsi">Itarsi</option>
+                  <option value="Pipariya">Pipariya</option>
+                  <option value="Hoshangabad">Hoshangabad</option>
+                  <option value="Seoni Malwa">Seoni Malwa</option>
+                  <option value="Indore">Indore</option>
+                  <option value="Bhopal">Bhopal</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Category Checkboxes -->
+          <div class="form-group">
+            <label>Select Services Provided / प्रदान की जाने वाली सेवाएं (Select At least 1) *</label>
+            <div class="services-grid">
+              <label class="service-pill"><input type="checkbox" name="service" value="venue" checked> 🏰 Venue / मैरिज गार्डन</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="catering"> 🍲 Catering / कैटरिंग</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="dj"> 🎧 DJ Sound / डीजे</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="decoration"> 💐 Decor / डेकोरेशन</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="transport"> 🚘 Transport / गाड़ियां</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="photography"> 📸 Photo & Video / फोटो</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="makeup"> 💄 Makeup / मेकअप</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="mehendi"> 🎨 Mehendi / मेहंदी</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="dhol_band"> 🥁 Dhol Band / ढोल</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="security_guard"> 🛡️ Security / सिक्योरिटी</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="shahi_sawari"> 🐎 Shahi Sawari / घोड़ी बग्गी</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="invitation_card"> 💌 Card / निमंत्रण कार्ड</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="pandit"> 🛕 Pandit Ji / पंडित जी</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="choreographer"> 💃 Choreographer / डांस</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="wedding_planner"> 📋 Wedding Planner / प्लानर</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="anchor"> 🎙️ Anchor / एंकर</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="fireworks"> 🎆 Fireworks / आतिशबाजी</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="mocktail"> 🍹 Mocktail Bar / मॉकटेल</label>
+              <label class="service-pill"><input type="checkbox" name="service" value="safa"> 👳 Safa / साफा पगड़ी</label>
+            </div>
+          </div>
+
+          <!-- Identity Verification Block -->
+          <div style="background: rgba(30, 132, 73, 0.05); border: 1.5px solid rgba(39, 174, 96, 0.25); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #1e8449; font-size: 13.5px; font-weight: 700;">
+              🛡️ Identity & Document Verification / पहचान सत्यापन
+            </h4>
+            <div class="form-grid">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="govt_id_number">Aadhaar / PAN / GST Number *</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">💳</span>
+                  <input type="text" id="govt_id_number" name="govt_id_number" class="form-control" placeholder="12-digit Aadhaar / PAN" value="998877665544" required>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="govt_id_proof">Upload ID Proof / Banner Photo</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">📄</span>
+                  <input type="file" id="govt_id_proof" name="govt_id_proof" class="form-control" accept="image/*,.pdf">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms and Conditions Checkbox -->
+          <div class="form-group">
+            <label style="font-weight: 800; color: #991b1b; margin-bottom: 8px; display: block;">🛡️ STRICT VENDOR LEGAL DECLARATION & ZERO LIABILITY AGREEMENT / वेंडर वैधानिक घोषणा व दायित्व मुक्ती</label>
+            <div class="terms-scroll-box" style="border: 2px solid #fca5a5; background: #fff5f5; color: #7f1d1d; max-height: 160px; overflow-y: auto; padding: 14px; border-radius: 12px; font-size: 12.5px; line-height: 1.6;">
+              <h4 style="color: #991b1b; margin-top: 0; font-size: 13px;">1. ABSOLUTE ZERO LIABILITY OF COMPANY & OWNER / कंपनी व मालिक पूर्ण दायित्व मुक्ती</h4>
+              <p>Under no circumstances shall Shubhlo, Setu Infotech Pvt Ltd, its Owner, Directors, or Management be liable for any direct, indirect, or accidental losses, property damages, cancellations, food safety issues, police/sound permit fines, or customer disputes. Vendor operates as an independent business entity and assumes 100% legal responsibility for their services.</p>
+              
+              <h4 style="color: #991b1b; font-size: 13px;">2. PERMITS & TAX COMPLIANCE / पुलिस व टैक्स अनुपालन</h4>
+              <p>Vendor is 100% responsible for local government permits, police sound permissions, FSSAI hygiene standards, and GST tax filings. Shubhlo shall never be named in any legal notice or court dispute.</p>
+              
+              <h4 style="color: #991b1b; font-size: 13px;">3. JURISDICTION / कानूनी क्षेत्राधिकार</h4>
+              <p>All legal disputes shall be subject exclusively to the courts of Itarsi / Hoshangabad, Madhya Pradesh.</p>
+            </div>
+
+            <div class="terms-checkbox-box" style="padding: 12px 14px; background: #fee2e2; border: 1.5px solid #fca5a5; border-radius: 10px; margin-top: 10px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 800; color: #991b1b;">
+                <input type="checkbox" name="accept_terms_vendor" id="vendorTermsCheckbox" style="width: 20px; height: 20px; accent-color: #dc2626; cursor: pointer;" required>
+                <span>मैं घोषणा करता हूँ कि किसी भी विवाद या दुर्घटना में कंपनी व कंपनी मालिक पूरी तरह दायित्व मुक्त (Not Liable) रहेंगे। I agree to Strict Zero Liability Terms. *</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" id="vendorRegisterBtn" class="submit-btn" style="opacity: 0.6; cursor: not-allowed;">Register Vendor Business / वेंडर रजिस्ट्रेशन जमा करें 🚀</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const vendorRegForm = document.getElementById('vendorRegForm');
+      const vendorTermsCheckbox = document.getElementById('vendorTermsCheckbox');
+      const vendorRegisterBtn = document.getElementById('vendorRegisterBtn');
+
+      function updateSubmitBtnState() {
+        if (vendorTermsCheckbox && vendorRegisterBtn) {
+          if (vendorTermsCheckbox.checked) {
+            vendorRegisterBtn.style.opacity = '1';
+            vendorRegisterBtn.style.cursor = 'pointer';
+          } else {
+            vendorRegisterBtn.style.opacity = '0.6';
+            vendorRegisterBtn.style.cursor = 'not-allowed';
+          }
+        }
+      }
+
+      if (vendorTermsCheckbox) {
+        vendorTermsCheckbox.addEventListener('change', updateSubmitBtnState);
+        updateSubmitBtnState();
+      }
+
+      if (vendorRegForm) {
+        vendorRegForm.addEventListener('submit', function(e) {
+          if (!vendorTermsCheckbox || !vendorTermsCheckbox.checked) {
+            e.preventDefault();
+            alert('⚠️ REQUIRED ACTION / अनिवार्य चेतावनी:\n\nपंजीकरण जमा करने के लिए "Strict Zero Liability Terms & Conditions" के चेकबॉक्स को टिक (Check) करना अनिवार्य है!\n\nYou MUST check the Terms & Conditions checkbox before submitting registration.');
+            if (vendorTermsCheckbox) {
+              vendorTermsCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              vendorTermsCheckbox.focus();
+              vendorTermsCheckbox.parentElement.style.outline = '3px solid #ef4444';
+              vendorTermsCheckbox.parentElement.style.borderRadius = '8px';
+            }
+            return false;
+          }
+        });
+      }
+
+      // Dynamic Locations API
+      const stateSel = document.getElementById('state');
+      const distSel = document.getElementById('district');
+      const tehsilSel = document.getElementById('tehsil');
+
+      if (stateSel && distSel && tehsilSel) {
+        fetch('/api/allowed-locations')
+          .then(res => res.json())
+          .then(data => {
+            if (Object.keys(data).length > 0) {
+              stateSel.innerHTML = '';
+              Object.keys(data).forEach(st => {
+                const opt = document.createElement('option');
+                opt.value = st;
+                opt.textContent = st;
+                stateSel.appendChild(opt);
+              });
+
+              stateSel.addEventListener('change', function() {
+                const stateVal = this.value;
+                distSel.innerHTML = '';
+                tehsilSel.innerHTML = '';
+                if (data[stateVal]) {
+                  Object.keys(data[stateVal]).forEach(dist => {
+                    const opt = document.createElement('option');
+                    opt.value = dist;
+                    opt.textContent = dist;
+                    distSel.appendChild(opt);
+                  });
+                }
+              });
+
+              distSel.addEventListener('change', function() {
+                const stateVal = stateSel.value;
+                const distVal = this.value;
+                tehsilSel.innerHTML = '';
+                if (data[stateVal] && data[stateVal][distVal]) {
+                  data[stateVal][distVal].forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t;
+                    opt.textContent = t;
+                    tehsilSel.appendChild(opt);
+                  });
+                }
+              });
+            }
+          })
+          .catch(err => console.log('Location API:', err));
+      }
+    });
+  </script>
+</body>
+</html>

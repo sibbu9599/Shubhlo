@@ -1,0 +1,76 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(120deg, #8e44ad, #e84393); /* VenueHeaven theme */
+  margin:0;
+  padding:0;
+}
+
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: rgba(255,255,255,0.95);
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.2);
+}
+
+h2 {
+  text-align:center;
+  color:#FFD700; /* Gold heading */
+  margin-bottom:20px;
+}
+
+label {
+  display:block;
+  margin-top:15px;
+  font-weight:bold;
+  color:#333;
+}
+
+input, select, textarea {
+  width:100%;
+  padding:12px;
+  margin-top:5px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  font-size:14px;
+}
+
+button {
+  margin-top:25px;
+  width:100%;
+  padding:14px;
+  background:#FFD700;
+  color:#2C3E50;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background:#e67e22;
+  color:#fff;
+  transform: scale(1.05);
+}
+
+/* Fixed Logo bottom-right */
+.company-logo {
+  position: fixed;
+  right: 20px;
+  bottom: 15px;
+  z-index: 1000;
+}
+
+.company-logo img {
+  width: 120px;
+  height: auto;
+  opacity: 0.9; /* हल्का transparent ताकि elegant लगे */
+  transition: transform 0.3s ease;
+}
+
+.company-logo img:hover {
+  transform: scale(1.1);
+}

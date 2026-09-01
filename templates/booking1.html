@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Booking Details - Step 1 - Shubhlo</title>
+  <meta name="description" content="Step 1 of event booking on Shubhlo. Enter your event location, date, and budget details to view top available vendors.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .booking-wrapper {
+      min-height: calc(100vh - 160px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px 70px;
+      box-sizing: border-box;
+    }
+
+    /* Stepper Wizard Bar */
+    .stepper-container {
+      width: 100%;
+      max-width: 780px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 35px;
+      padding: 0 10px;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 2;
+    }
+    .step-badge {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 18px;
+      transition: all 0.35s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .step-item.active .step-badge {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.45);
+      transform: scale(1.1);
+    }
+    .step-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .step-item.active .step-label {
+      color: #10b981;
+      font-weight: 800;
+    }
+    .step-line {
+      flex: 1;
+      height: 4px;
+      background: #e2e8f0;
+      margin: 0 16px 24px;
+      border-radius: 4px;
+    }
+    .step-line.active {
+      background: linear-gradient(90deg, #10b981, #8b5cf6);
+    }
+
+    .booking-card {
+      width: 100%;
+      max-width: 820px;
+      background: white;
+      border-radius: 28px;
+      padding: 45px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      border: 1.5px solid #e2e8f0;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+    }
+    .booking-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #10b981, #8b5cf6, #f59e0b);
+    }
+    .booking-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+    .booking-header h2 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0 0 8px;
+      color: #0f172a;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .booking-header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 15px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+    }
+    .form-group {
+      margin-bottom: 22px;
+    }
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      font-size: 17px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    .form-control, select.form-control, textarea.form-control {
+      width: 100%;
+      padding: 14px 16px 14px 46px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-family: inherit;
+      color: #0f172a;
+      background: #f8fafc;
+      transition: all 0.25s ease;
+      box-sizing: border-box;
+      outline: none;
+    }
+    textarea.form-control {
+      padding-top: 14px;
+      min-height: 90px;
+      resize: vertical;
+    }
+    .form-control:focus, select.form-control:focus, textarea.form-control:focus {
+      border-color: #8b5cf6;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      transition: all 0.25s ease;
+      margin-top: 10px;
+    }
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
+    }
+
+    @media (max-width: 720px) {
+      .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+      .booking-card { padding: 30px 20px; }
+      .booking-header h2 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Booking Container Wrapper -->
+  <div class="booking-wrapper">
+    <!-- Stepper Bar -->
+    <div class="stepper-container">
+      <div class="step-item active">
+        <div class="step-badge">1</div>
+        <span class="step-label">Event Details</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-badge">2</div>
+        <span class="step-label">Select Vendors</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-badge">3</div>
+        <span class="step-label">Confirmation</span>
+      </div>
+    </div>
+
+    <div class="booking-card">
+      <div class="booking-header">
+        <h2>Event Booking Details / कार्यक्रम विवरण ✨</h2>
+        <p>Enter location and event date to view top-rated available vendors near you</p>
+      </div>
+
+      <!-- Token Money Policy Declaration Banner -->
+      <div style="background: linear-gradient(135deg, #ecfdf5, #f0fdf4); border: 1.5px solid #a7f3d0; border-radius: 16px; padding: 18px 20px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.08);">
+        <h4 style="margin: 0 0 8px 0; color: #047857; font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          💡 OFFICIAL DECLARATION: Shubhlo Token Money & Billing Policy
+        </h4>
+        <div style="font-size: 13.5px; color: #065f46; line-height: 1.6;">
+          • <strong>Token Amount Payable:</strong> Customers pay only <strong>₹5,118 Token Money</strong> per vendor selected.<br>
+          • <strong>100% Vendor Bill Deduction:</strong> <strong>₹5,000 will be 100% deducted from your final event bill with the vendor.</strong><br>
+          • <strong>Platform Fee & GST:</strong> Remaining <strong>₹100</strong> is Shubhlo platform processing fee and <strong>₹18</strong> is 18% GST tax.<br>
+          • <strong>Direct Vendor Deal:</strong> The remaining event balance is negotiated and settled directly between customer and vendor.
+        </div>
+      </div>
+
+      {% if booking_system_closed %}
+        <div style="background: #fee2e2; border: 1.5px solid #fca5a5; border-radius: 18px; padding: 30px; text-align: center; margin-bottom: 25px; color: #991b1b;">
+          <span style="font-size: 48px; display: block; margin-bottom: 12px;">🚫</span>
+          <h3 style="margin: 0 0 10px; color: #991b1b; font-family: 'Outfit', sans-serif; font-size: 22px;">Customer Bookings Temporarily Closed / ग्राहक बुकिंग सेवा फ़िलहाल बंद है</h3>
+          <p style="font-size: 15px; line-height: 1.6; margin: 0; font-weight: 600;">
+            {{ closure_msg or 'Customer bookings are currently paused by Shubhlo Admin. Please check back soon!' }}
+          </p>
+        </div>
+      {% else %}
+        <form id="bookingForm" action="{{ url_for('booking2') }}" method="GET">
+          <input type="hidden" name="select_service" value="{{ request.args.get('select_service', '') }}">
+          
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="name">NAME / पूरा नाम</label>
+              <div class="input-wrapper">
+                <span class="input-icon">👤</span>
+                <input type="text" id="name" name="name" class="form-control" value="{{ session.get('user_name', '') }}" placeholder="Enter full name" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">EMAIL / ईमेल पता</label>
+              <div class="input-wrapper">
+                <span class="input-icon">✉️</span>
+                <input type="email" id="email" name="email" class="form-control" value="{{ session.get('user', '') }}" placeholder="Enter email address" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="phone">PHONE NO. / मोबाइल नंबर (10 अंक)</label>
+              <div class="input-wrapper">
+                <span class="input-icon">📱</span>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="10-digit Mobile (उदा. 9876543210)" required pattern="[6-9][0-9]{9}" maxlength="10" minlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" title="Enter valid 10 digit Indian mobile number starting with 6, 7, 8, or 9">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="event_date">EVENT DATE / कार्यक्रम की तिथि *</label>
+              <div class="input-wrapper">
+                <span class="input-icon">📅</span>
+                <input type="date" id="event_date" name="event_date" class="form-control" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="event_name">EVENT NAME & TYPE / कार्यक्रम का नाम व प्रकार (अनिवार्य) *</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🎉</span>
+              <select id="event_name" name="event_name" class="form-control" required style="cursor: pointer; background-color: #ffffff; font-weight: 700;">
+                <option value="">-- Select Event Name / कार्यक्रम का नाम चुनें --</option>
+                <option value="Wedding / शादी विवाह">💒 Wedding / शादी विवाह</option>
+                <option value="Ring Ceremony / सगाई (Engagement)">💍 Ring Ceremony / सगाई (Engagement)</option>
+                <option value="Birthday Party / जन्मदिन">🎂 Birthday Party / जन्मदिन</option>
+                <option value="Reception Party / रिसेप्शन">🎉 Reception Party / रिसेप्शन</option>
+                <option value="Anniversary / सालगिरह">💑 Anniversary / सालगिरह</option>
+                <option value="Corporate Event / ऑफिस इवेंट">🏢 Corporate Event / ऑफिस इवेंट</option>
+                <option value="Religious Function / कथा व पूजा">🕉️ Religious Function / कथा व पूजा</option>
+                <option value="Tilak & Sangeet Ceremony">✨ Tilak, Sangeet & Mehendi Night</option>
+                <option value="Baby Shower / गोद भराई">🥳 Baby Shower / गोद भराई</option>
+                <option value="Other Royal Event / अन्य कार्यक्रम">🎈 Other Grand Event / अन्य भव्य कार्यक्रम</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="address">ADDRESS / पूरा पता (कम से कम 10 अक्षर)</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🏠</span>
+              <textarea id="address" name="address" class="form-control" placeholder="House No., Ward/Colony, Street, Landmark (उदा. मकान न. 45, रेलवे स्टेशन रोड, इटारसी)" required minlength="10" maxlength="250"></textarea>
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label for="state">STATE / राज्य</label>
+              <div class="input-wrapper">
+                <span class="input-icon">📍</span>
+                <select id="state" name="state" class="form-control" required>
+                  <option value="">Select State / राज्य चुनें</option>
+                  <option value="Madhya Pradesh">Madhya Pradesh</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="district">DISTRICT / जिला</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🏢</span>
+                <select id="district" name="district" class="form-control" required>
+                  <option value="">Select District / जिला चुनें</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="tehsil">TEHSIL / तहसील</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🗺️</span>
+                <select id="tehsil" name="tehsil" class="form-control" required>
+                  <option value="">Select Tehsil / तहसील चुनें</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="target_budget">TARGET BUDGET (₹) / लक्ष्य बजट</label>
+              <div class="input-wrapper">
+                <span class="input-icon">💰</span>
+                <input type="number" id="target_budget" name="target_budget" class="form-control" placeholder="e.g. 50000 / उदा. 50000" min="1000" step="1000">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="budget_flexible">BUDGET FLEXIBILITY / लचीलापन</label>
+              <div class="input-wrapper">
+                <span class="input-icon">⚖️</span>
+                <select id="budget_flexible" name="budget_flexible" class="form-control">
+                  <option value="Negotiable" selected>Negotiable / बातचीत योग्य (Custom Offers)</option>
+                  <option value="Strict">Strict / तय बजट (Strict Rate)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Next: Choose Vendors ➔ (आगे बढ़ें)</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const stateSel = document.getElementById('state');
+      const distSel = document.getElementById('district');
+      const tehsilSel = document.getElementById('tehsil');
+
+      if (stateSel) {
+        fetch('/api/allowed-locations')
+          .then(res => res.json())
+          .then(data => {
+            stateSel.addEventListener('change', function() {
+              const stateVal = this.value;
+              distSel.innerHTML = '<option value="">Select District / जिला चुनें</option>';
+              tehsilSel.innerHTML = '<option value="">Select Tehsil / तहसील चुनें</option>';
+              
+              if (data[stateVal]) {
+                Object.keys(data[stateVal]).forEach(dist => {
+                  const opt = document.createElement('option');
+                  opt.value = dist;
+                  opt.textContent = dist;
+                  distSel.appendChild(opt);
+                });
+              }
+            });
+
+            distSel.addEventListener('change', function() {
+              const stateVal = stateSel.value;
+              const distVal = this.value;
+              tehsilSel.innerHTML = '<option value="">Select Tehsil / तहसील चुनें</option>';
+
+              if (data[stateVal] && data[stateVal][distVal]) {
+                data[stateVal][distVal].forEach(t => {
+                  const opt = document.createElement('option');
+                  opt.value = t;
+                  opt.textContent = t;
+                  tehsilSel.appendChild(opt);
+                });
+              }
+            });
+          })
+          .catch(err => console.log('Location API Error:', err));
+      }
+    });
+  </script>
+
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>

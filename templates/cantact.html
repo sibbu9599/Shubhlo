@@ -1,0 +1,51 @@
+<!DOCTYPE html>\r
+<html lang="en">\r
+<head>\r
+<meta charset="UTF-8">\r
+<title>Signup - Shubhlo</title>\r
+<!-- External CSS files -->\r
+<link rel="stylesheet" href="/static/sinup.css">\r
+<link rel="stylesheet" href="/static/master.css">\r
+</head>\r
+<body>\r
+<!-- Header / Navbar -->\r
+<header>\r
+<h1 class="logo">Shubhlo<span class="halo">👑</span></h1>\r
+<nav>\r
+<ul>\r
+<li><a href="{{ url_for('home') }}">Home</a></li>
+<li><a href="{{ url_for('services') }}">Services</a></li>
+<li><a href="{{ url_for('booking1') }}">Book Now</a></li>
+<li><a href="{{ url_for('contact') }}">Contact</a></li>
+<li><a href="{{ url_for('vendor_register') }}">Vendor</a></li>
+<li><a href="{{ url_for('about') }}">About</a></li>
+</ul>
+</nav>
+</header>
+
+<!-- Signup Form -->
+<div class="signup-container">
+<div class="signup-box">
+<h2>Create Account</h2>
+<form action="/signup" method="POST">
+<input type="text" name="name" placeholder="Enter Name" required>
+<input type="email" name="email" placeholder="Enter Email" required>
+<input type="password" name="password" placeholder="Enter Password" required>
+<input type="password" name="confirm_password" placeholder="Confirm Password" required>
+<button type="submit">Signup</button>
+</form>
+<p class="links">Already registered? <a href="{{ url_for('login') }}">Login here</a></p>\r
+</div>\r
+</div>\r
+\r
+<!-- Footer -->\r
+<footer>\r
+<div class="footer-container">\r
+<p>© 2026 Shubhlo. All rights reserved.</p>\r
+</div>\r
+<div class="company-logo">\r
+<img src="/static/logo.png" alt="Setu Infotech Pvt Ltd Logo">\r
+</div>\r
+</footer>\r
+</body>\r
+</html>

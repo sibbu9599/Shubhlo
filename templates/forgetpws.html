@@ -1,0 +1,19 @@
+<!DOCTYPE html>\r
+<html lang="hi">\r
+<head>\r
+<meta charset="UTF-8">\r
+<title>Forget Password</title>\r
+<link rel="stylesheet" href="/static/forgetpws.css">\r
+</head>\r
+<body>\r
+<div class="form-container">\r
+<h2>Forget Password</h2>\r
+<form action="{{ url_for('forget_password') }}" method="POST">\r
+<label>EMAIL / PHONE:</label>\r
+<input type="text" name="user_id" placeholder="Enter your email or phone" required>\r
+\r
+<button type="submit">Send OTP</button>\r
+</form>\r
+</div>\r
+</body>\r
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shubhlo - Video Commercial Commercial (विज्ञापन वीडियो)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold-glow: #f1c40f;
+      --purple-bg: #1a0b2e;
+      --card-dark: #271442;
+    }
+
+    body {
+      background: var(--purple-bg);
+      color: #fff;
+      font-family: 'Poppins', 'Outfit', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Navbar styling override */
+    header {
+      width: 100%;
+      background: rgba(26, 11, 46, 0.95);
+      backdrop-filter: blur(10px);
+      box-sizing: border-box;
+      border-bottom: 1px solid rgba(241, 196, 15, 0.2);
+    }
+
+    .video-hero-title {
+      text-align: center;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+
+    .video-hero-title h1 {
+      font-size: 28px;
+      margin: 0;
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .video-hero-title p {
+      color: #b3a2c7;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    /* Video Player Container */
+    .cinema-wrapper {
+      position: relative;
+      width: 90%;
+      max-width: 960px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 40px rgba(142, 68, 173, 0.4);
+      border: 3px solid rgba(241, 196, 15, 0.3);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    /* Background Animation Canvas */
+    #fxCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Scene Container */
+    .scene-frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 30px;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+
+    .scene-frame.active {
+      opacity: 1;
+    }
+
+    /* Scene Overlay Gradients */
+    .scene-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.85) 100%);
+      z-index: 3;
+    }
+
+    /* Content Overlay elements */
+    .scene-content {
+      position: relative;
+      z-index: 4;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .scene-badge {
+      align-self: flex-start;
+      background: rgba(241, 196, 15, 0.9);
+      color: #111;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4);
+      text-transform: uppercase;
+    }
+
+    /* Dialogue Speech Cards */
+    .dialogue-card {
+      background: rgba(20, 10, 35, 0.85);
+      border: 1.5px solid rgba(241, 196, 15, 0.4);
+      backdrop-filter: blur(8px);
+      padding: 16px 24px;
+      border-radius: 16px;
+      max-width: 80%;
+      margin: 0 auto;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      animation: popUp 0.5s ease-out;
+    }
+
+    @keyframes popUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .speaker-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold-glow);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .speaker-text {
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* Controls Bar */
+    .player-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(0deg, rgba(0,0,0,0.95), rgba(0,0,0,0));
+      padding: 15px 25px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .play-btn {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      color: #111;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+      transition: transform 0.2s ease;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .progress-bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #8e44ad, #f1c40f);
+      border-radius: 4px;
+      transition: width 0.1s linear;
+    }
+
+    .time-display {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e0e0e0;
+      font-family: monospace;
+    }
+
+    .control-icon-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .control-icon-btn:hover {
+      opacity: 1;
+    }
+
+    /* Start Big Play Overlay */
+    .big-play-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 5, 25, 0.85);
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: opacity 0.4s ease;
+    }
+
+    .big-play-btn {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: #111;
+      box-shadow: 0 10px 40px rgba(241, 196, 15, 0.6);
+      margin-bottom: 20px;
+      animation: pulseGlow 2s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7); }
+      70% { box-shadow: 0 0 0 25px rgba(241, 196, 15, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); }
+    }
+
+    .cta-banner-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 30px;
+      box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+      margin-top: 15px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .cta-banner-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(39, 174, 96, 0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <div class="video-hero-title">
+    <h1>🎬 Shubhlo Official Commercial Video</h1>
+    <p>Watch how Shubhlo makes event and wedding planning stress-free & budget-friendly!</p>
+  </div>
+
+  <!-- Main Video Frame -->
+  <div class="cinema-wrapper" id="cinemaWrapper">
+    <!-- FX Canvas -->
+    <canvas id="fxCanvas"></canvas>
+
+    <!-- Start Overlay -->
+    <div class="big-play-overlay" id="bigPlayOverlay" onclick="startVideo()">
+      <div class="big-play-btn">▶</div>
+      <h2 style="margin: 0; color: #fff; font-size: 22px;">Click to Play Commercial Video (विद वॉइसओवर)</h2>
+      <p style="color: #d1c4e9; font-size: 14px; margin-top: 6px;">Duration: 45 Seconds | HD Cinematic Experience</p>
+    </div>
+
+    <!-- Scene 1 -->
+    <div class="scene-frame active" id="scene1" style="background-image: url('{{ url_for('static', filename='image/vanue.png') }}');">
+      <div class="scene-overlay" style="background: linear-gradient(180deg, rgba(20,5,30,0.85) 0%, rgba(20,5,30,0.6) 100%);"></div>
+      <div class="scene-content">
+        <div class="scene-badge">Scene 1/4: Event Planning Stress (तनाव और परेशानी)</div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+          <span style="font-size: 60px; display: inline-block; animation: shake 1s infinite;">🤯 📞 📋</span>
+        </div>
+
+        <div class="dialogue-card">
+          <div class="speaker-name">👴 Sharma Ji (Dad):</div>
+          <p class="speaker-text" id="dlg1">"अरे भाई! मैरिज गार्डन का रेट कुछ और बता रहे हैं, कैटरिंग वाले कुछ और! इतने वेंडर्स के चक्कर कैसे काटेंगे?!"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 2 -->
+    <div class="scene-frame" id="scene2" style="background-image: url('{{ url_for('static', filename='image/catering.png') }}');">
+      <div class="scene-overlay" style="background: linear-gradient(180deg, rgba(26,11,46,0.85) 0%, rgba(26,11,46,0.65) 100%);"></div>
+      <div class="scene-content">
+        <div class="scene-badge" style="background: #8e44ad; color: #fff;">Scene 2/4: Shubhlo Solution (समाधान)</div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <h2 style="font-size: 32px; color: var(--gold-glow); margin: 0;">Shubhlo 👑</h2>
+          <p style="color: #e0e0e0; font-size: 16px;">एक ही प्लेटफॉर्म पर सभी वेरीफाइड वेंडर्स!</p>
+        </div>
+
+        <div class="dialogue-card">
+          <div class="speaker-name">👦 Rahul (Groom):</div>
+          <p class="speaker-text" id="dlg2">"पापा, टेंशन क्यों ले रहे हो? अब सब कुछ एक जगह है — Shubhlo! ₹5,100 के टोकन अमाउंट से सीधे बुकिंग पक्की करो!"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 3 -->
+    <div class="scene-frame" id="scene3" style="background-image: url('{{ url_for('static', filename='image/dj.png') }}');">
+      <div class="scene-overlay" style="background: linear-gradient(180deg, rgba(10,35,20,0.85) 0%, rgba(10,35,20,0.65) 100%);"></div>
+      <div class="scene-content">
+        <div class="scene-badge" style="background: #27ae60; color: #fff;">Scene 3/4: Direct Vendor Deal (0% बिचौलिया)</div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+          <span style="font-size: 65px;">🤝 💰 ✨</span>
+        </div>
+
+        <div class="dialogue-card">
+          <div class="speaker-name">👔 Rajesh Ji (Vendor):</div>
+          <p class="speaker-text" id="dlg3">"नमस्ते शर्मा जी! सेलिब्रेटो से 0% डायरेक्ट डील है—ग्राहक के अंतिम बिल में ₹5,000 टोकन डिस्काउंट सीधे कम होगा!"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 4 -->
+    <div class="scene-frame" id="scene4" style="background-image: url('{{ url_for('static', filename='image/decoration.png') }}');">
+      <div class="scene-overlay" style="background: linear-gradient(180deg, rgba(40,10,30,0.85) 0%, rgba(40,10,30,0.7) 100%);"></div>
+      <div class="scene-content" style="align-items: center; justify-content: center; text-align: center;">
+        <div class="scene-badge" style="background: #e67e22; color: #fff; position: absolute; top: 20px; left: 20px;">Scene 4/4: Grand Celebration!</div>
+        
+        <h1 style="font-size: 38px; color: var(--gold-glow); margin: 0; text-shadow: 0 4px 20px rgba(241,196,15,0.6);">
+          Shubhlo👑
+        </h1>
+        <h3 style="font-size: 20px; color: #fff; margin-top: 10px;">शादी और इवेंट्स की टेंशन खत्म!</h3>
+        
+        <div class="dialogue-card" style="margin-top: 20px;">
+          <div class="speaker-name">🎙️ Announcer:</div>
+          <p class="speaker-text" id="dlg4">"आज ही विजिट करें Shubhlo.in पर और अपने इवेंट की बुकिंग करें बिल्कुल आसान और भरोसेमंद तरीके से!"</p>
+        </div>
+
+        <a href="{{ url_for('booking1') }}" class="cta-banner-btn">Book Your Event Now ➔</a>
+      </div>
+    </div>
+
+    <!-- Controls Bar -->
+    <div class="player-controls">
+      <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+      <div class="progress-bar-wrap" onclick="seekVideo(event)">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="time-display" id="timeDisplay">00:00 / 00:45</div>
+      <button class="control-icon-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+      <button class="control-icon-btn" onclick="toggleFullscreen()">⛶</button>
+    </div>
+  </div>
+
+  <script>
+    const totalDuration = 45; // 45 seconds ad
+    let currentTime = 0;
+    let isPlaying = false;
+    let isMuted = false;
+    let timer = null;
+
+    const dialogues = [
+      "अरे भाई! मैरिज गार्डन का रेट कुछ और बता रहे हैं, कैटरिंग वाले कुछ और! इतने वेंडर्स के चक्कर कैसे काटेंगे?!",
+      "पापा, टेंशन क्यों ले रहे हो? अब सब कुछ एक जगह है — Shubhlo! ₹5,100 के टोकन अमाउंट से सीधे बुकिंग पक्की करो!",
+      "नमस्ते शर्मा जी! सेलिब्रेटो से 0% डायरेक्ट डील है—ग्राहक के अंतिम बिल में ₹5,000 टोकन डिस्काउंट सीधे कम होगा!",
+      "आज ही विजिट करें Shubhlo पर और अपने इवेंट की बुकिंग करें बिल्कुल आसान और भरोसेमंद तरीके से!"
+    ];
+
+    function speakText(text) {
+      if (isMuted || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel(); // stop prior speech
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'hi-IN';
+      msg.rate = 1.0;
+      msg.pitch = 1.1;
+      window.speechSynthesis.speak(msg);
+    }
+
+    function startVideo() {
+      document.getElementById('bigPlayOverlay').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('bigPlayOverlay').style.display = 'none';
+      }, 400);
+      playVideo();
+    }
+
+    function playVideo() {
+      isPlaying = true;
+      document.getElementById('playBtn').innerHTML = '❚❚';
+      timer = setInterval(tick, 1000);
+      updateScene();
+    }
+
+    function pauseVideo() {
+      isPlaying = false;
+      document.getElementById('playBtn').innerHTML = '▶';
+      clearInterval(timer);
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    function togglePlay() {
+      if (isPlaying) pauseVideo();
+      else playVideo();
+    }
+
+    function tick() {
+      if (currentTime >= totalDuration) {
+        pauseVideo();
+        currentTime = 0;
+        updateProgress();
+        return;
+      }
+      currentTime++;
+      updateProgress();
+      updateScene();
+    }
+
+    function updateProgress() {
+      const pct = (currentTime / totalDuration) * 100;
+      document.getElementById('progressFill').style.width = pct + '%';
+      const curSec = String(currentTime % 60).padStart(2, '0');
+      document.getElementById('timeDisplay').innerText = `00:${curSec} / 00:45`;
+    }
+
+    let lastScene = 0;
+    function updateScene() {
+      let activeScene = 1;
+      if (currentTime >= 10 && currentTime < 23) activeScene = 2;
+      else if (currentTime >= 23 && currentTime < 35) activeScene = 3;
+      else if (currentTime >= 35) activeScene = 4;
+
+      if (activeScene !== lastScene) {
+        document.querySelectorAll('.scene-frame').forEach(f => f.classList.remove('active'));
+        document.getElementById(`scene${activeScene}`).classList.add('active');
+        speakText(dialogues[activeScene - 1]);
+        lastScene = activeScene;
+      }
+    }
+
+    function seekVideo(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      currentTime = Math.floor(pos * totalDuration);
+      updateProgress();
+      lastScene = 0; // force scene update & voice
+      updateScene();
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊';
+      if (isMuted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    function toggleFullscreen() {
+      const elem = document.getElementById('cinemaWrapper');
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => console.log(err));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Particle FX on Canvas
+    const canvas = document.getElementById('fxCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 3 + 1,
+        dx: (Math.random() - 0.5) * 1.5,
+        dy: (Math.random() - 0.5) * 1.5,
+        color: `rgba(241, 196, 15, ${Math.random() * 0.7 + 0.3})`
+      });
+    }
+
+    function animateFX() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      });
+      requestAnimationFrame(animateFX);
+    }
+    animateFX();
+  </script>
+</body>
+</html>

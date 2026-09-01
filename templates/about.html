@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - Shubhlo Event Platform</title>
+  <meta name="description" content="Learn more about Shubhlo - India's premiere event planning platform connecting customers with verified vendors across Madhya Pradesh.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .about-wrapper {
+      max-width: 1150px;
+      margin: 40px auto 80px;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    .about-hero {
+      text-align: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      color: white;
+      border-radius: 28px;
+      padding: 60px 40px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      margin-bottom: 45px;
+      position: relative;
+      overflow: hidden;
+    }
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #10b981, #8b5cf6, #f59e0b);
+    }
+    .about-hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      margin: 0 0 16px;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .about-hero h1 span {
+      background: linear-gradient(135deg, #ffffff 30%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .about-hero p {
+      font-size: 17px;
+      color: #94a3b8;
+      max-width: 800px;
+      margin: 0 auto 40px;
+      line-height: 1.65;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 22px;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 24px 18px;
+      text-align: center;
+      transition: all 0.35s ease;
+    }
+    .stat-card:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-5px);
+      border-color: #10b981;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+    }
+    .stat-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 34px;
+      font-weight: 900;
+      color: #fbbf24;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 50px;
+    }
+    .section-card {
+      background: white;
+      border-radius: 24px;
+      padding: 38px 32px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.35s ease;
+    }
+    .section-card:hover {
+      box-shadow: 0 20px 40px rgba(139, 92, 246, 0.12);
+      transform: translateY(-4px);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+    .section-card h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-card p {
+      font-size: 15px;
+      color: #64748b;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 50px;
+    }
+    .value-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px 24px;
+      border: 1.5px solid #e2e8f0;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+      transition: all 0.35s ease;
+    }
+    .value-card:hover {
+      border-color: #10b981;
+      transform: translateY(-6px);
+      box-shadow: 0 18px 35px rgba(16, 185, 129, 0.15);
+    }
+    .value-icon {
+      font-size: 40px;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .value-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 19px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 10px;
+    }
+    .value-card p {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .cta-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      border-radius: 28px;
+      padding: 50px 35px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .cta-banner h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      margin: 0 0 14px;
+      background: linear-gradient(135deg, #ffffff 30%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .cta-banner p {
+      font-size: 16px;
+      color: #94a3b8;
+      margin: 0 0 30px;
+    }
+    .cta-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-btn {
+      padding: 14px 30px;
+      border-radius: 50px;
+      font-size: 15px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+    .cta-btn-primary {
+      background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      color: #0f172a;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+    }
+    .cta-btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(245, 158, 11, 0.5);
+    }
+    .cta-btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(8px);
+    }
+    .cta-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .about-hero h1 { font-size: 30px; }
+      .cta-banner h2 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- About Us Container -->
+  <div class="about-wrapper">
+    <!-- Hero Banner -->
+    <div class="about-hero">
+      <h1>Revolutionizing Event Planning with <span>Shubhlo 👑</span></h1>
+      <p>
+        Shubhlo is India’s premier event planning directory connecting families with top-rated verified venues, caterers, photographers, DJs, makeup artists & decorators with 100% price transparency.
+      </p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-num">10,000+</span>
+          <span class="stat-label">Happy Events 🎉</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">1,500+</span>
+          <span class="stat-label">Verified Vendors 🤝</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">50+</span>
+          <span class="stat-label">Tehsils & Towns 📍</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">4.9 ★</span>
+          <span class="stat-label">Trust Score ⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mission & Vision -->
+    <div class="grid-2">
+      <div class="section-card">
+        <h2>🎯 Our Mission / हमारा लक्ष्य</h2>
+        <p>
+          To make event and wedding planning completely stress-free, transparent, and accessible to everyone. We empower families to discover top local vendors, compare transparent prices, and secure date lock advance bookings without hidden fees.
+        </p>
+      </div>
+
+      <div class="section-card">
+        <h2>👁️ Our Vision / हमारा दृष्टिकोण</h2>
+        <p>
+          To build India's largest and most trusted event ecosystem where local vendor partners grow their business effortlessly, while families celebrate life's grandest moments with royal elegance and peace of mind.
+        </p>
+      </div>
+    </div>
+
+    <!-- Core Values Grid -->
+    <h2 style="text-align: center; color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 900; margin-bottom: 30px;">
+      Why Choose Shubhlo? / शुभलो ही क्यों चुनें? ✨
+    </h2>
+
+    <div class="values-grid">
+      <div class="value-card">
+        <span class="value-icon">🛡️</span>
+        <h3>100% Verified Vendors</h3>
+        <p>Every listed garden, caterer, photographer & DJ undergoes thorough quality checks and document verification.</p>
+      </div>
+
+      <div class="value-card">
+        <span class="value-icon">💰</span>
+        <h3>Guaranteed Best Pricing</h3>
+        <p>Direct transparent prices with custom packages tailored for weddings, birthdays, and grand corporate functions.</p>
+      </div>
+
+      <div class="value-card">
+        <span class="value-icon">🔒</span>
+        <h3>₹5,100 Token Protection</h3>
+        <p>Lock your preferred event date with just a ₹5,100 initial token advance and complete balance upon verification.</p>
+      </div>
+
+      <div class="value-card">
+        <span class="value-icon">🤝</span>
+        <h3>Bilingual & Regional Support</h3>
+        <p>Fully supported in Hindi & English across all districts & tehsils with dedicated helpline assistance.</p>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="cta-banner">
+      <h2>Ready to plan your next royal celebration? 🎊</h2>
+      <p>Explore top venues, caterers, photographers & artists near you or register your service today!</p>
+      <div class="cta-btns">
+        <a href="{{ url_for('booking1') }}" class="cta-btn cta-btn-primary">Book Event Now ➔</a>
+        <a href="{{ url_for('vendor_register') }}" class="cta-btn cta-btn-secondary">Register as Vendor 🤝</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
+    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+    <div style="text-align: center; margin-top: 15px;">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Shubhlo Brand Logo" style="max-height: 52px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
+    </div>
+  </footer>
+</body>
+</html>

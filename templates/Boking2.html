@@ -1,0 +1,80 @@
+<!DOCTYPE html>\r
+<html lang="en">\r
+<head>\r
+<meta charset="UTF-8">\r
+<title>Booking Step 2 - Shubhlo</title>\r
+<link rel="stylesheet" href="/static/Boking2.css">\r
+<script src="{{ url_for('static', filename='booking2.js') }}"></script>\r
+</head>\r
+<body>\r
+<header>\r
+<h1>✨ Choose Your Services ✨</h1>\r
+</header>\r
+\r
+<div class="container">\r
+<form action="{{ url_for('confirm_booking') }}" method="post">\r
+\r
+<div class="form-group">\r
+<label for="venue">Venue</label>\r
+<select id="venue" name="venue" required>\r
+<option value="">--Select Venue--</option>\r
+{% for v in venues %}\r
+<option value="{{ v.id }}">{{ v.name }}</option>\r
+{% endfor %}\r
+</select>\r
+</div>\r
+\r
+<div class="form-group">\r
+<label for="catering">Catering</label>\r
+<select id="catering" name="catering">\r
+<option value="">--Select Catering--</option>\r
+{% for c in caterings %}\r
+<option value="{{ c.id }}">{{ c.name }}</option>\r
+{% endfor %}\r
+</select>\r
+</div>\r
+\r
+<div class="form-group">\r
+<label for="dj">DJ & Music</label>\r
+<select id="dj" name="dj">\r
+<option value="">--Select DJ--</option>\r
+{% for d in djs %}\r
+<option value="{{ d.id }}">{{ d.name }}</option>\r
+{% endfor %}\r
+</select>\r
+</div>\r
+\r
+<div class="form-group">\r
+<label for="decoration">Decoration</label>\r
+<select id="decoration" name="decoration">\r
+<option value="">--Select Decoration--</option>\r
+{% for deco in decorations %}\r
+<option value="{{ deco.id }}">{{ deco.name }}</option>\r
+{% endfor %}\r
+</select>\r
+</div>\r
+\r
+<div class="form-group">\r
+<label for="transport">Transport</label>\r
+<select id="transport" name="transport">\r
+<option value="">--Select Transport--</option>\r
+{% for t in transports %}\r
+<option value="{{ t.id }}">{{ t.name }}</option>\r
+{% endfor %}\r
+</select>\r
+</div>\r
+\r
+<button type="submit" class="btn">Next ➝</button>\r
+</form>\r
+</div>\r
+\r
+<footer>\r
+<div class="footer-container">\r
+<!-- बाकी footer content -->\r
+</div>\r
+<div class="company-logo">\r
+<img src="/static/logo.png" alt="Setu Infotech Pvt Ltd Logo">\r
+</div>\r
+</footer>\r
+</body>\r
+</html>

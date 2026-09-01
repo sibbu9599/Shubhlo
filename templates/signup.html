@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - Shubhlo Platform</title>
+  <meta name="description" content="Sign up for a Shubhlo account to book verified venues, caterers, photographers, DJs, and artists with price transparency.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.08) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .signup-wrapper {
+      min-height: calc(100vh - 160px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 50px 20px;
+      box-sizing: border-box;
+    }
+
+    .signup-card {
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      border-radius: 28px;
+      padding: 42px 38px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      border: 1.5px solid #e2e8f0;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s ease;
+    }
+
+    .signup-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #10b981, #8b5cf6, #f59e0b);
+    }
+
+    .signup-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .signup-header h2 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0 0 8px;
+      color: #0f172a;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .signup-header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 14.5px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      font-size: 17px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 16px 14px 46px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-family: inherit;
+      color: #0f172a;
+      background: #f8fafc;
+      transition: all 0.25s ease;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: #8b5cf6;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      transition: all 0.25s ease;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 24px 0 20px;
+      color: #94a3b8;
+      font-size: 12.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .divider span {
+      padding: 0 14px;
+    }
+
+    .social-login-container {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .social-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .google-btn {
+      background: #ffffff;
+      color: #334155;
+      border: 1.5px solid #cbd5e1;
+    }
+
+    .google-btn:hover {
+      background: #f8fafc;
+      transform: translateY(-2px);
+    }
+
+    .facebook-btn {
+      background: #1877f2;
+      color: white;
+      border: 1.5px solid #1877f2;
+    }
+
+    .facebook-btn:hover {
+      background: #166fe5;
+      transform: translateY(-2px);
+    }
+
+    .footer-links {
+      text-align: center;
+      font-size: 14px;
+      color: #64748b;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 20px;
+    }
+
+    .footer-links a {
+      color: #8b5cf6;
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .vendor-toggle-banner {
+      margin-top: 16px;
+      padding: 14px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      text-align: center;
+      font-size: 13.5px;
+      color: #059669;
+      font-weight: 700;
+    }
+
+    .vendor-toggle-banner a {
+      color: #059669;
+      text-decoration: none;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Signup Form Wrapper -->
+  <div class="signup-wrapper">
+    <div class="signup-card">
+      <div class="signup-header">
+        <h2>Create Account ✨</h2>
+        <p>Join Shubhlo to book event vendors, track offers & instant confirmation!</p>
+      </div>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div style="padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; margin-bottom: 20px; background: {% if category=='danger' %}#fee2e2{% elif category=='info' %}#eff6ff{% else %}#ecfdf5{% endif %}; color: {% if category=='danger' %}#991b1b{% elif category=='info' %}#1e40af{% else %}#065f46{% endif %}; border: 1px solid {% if category=='danger' %}#fca5a5{% elif category=='info' %}#bfdbfe{% else %}#a7f3d0{% endif %}; text-align: center;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form action="{{ url_for('signup') }}" method="POST">
+        <div class="form-group">
+          <label for="name">Full Name / आपका नाम</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Enter your full name" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉️</span>
+            <input type="email" id="email" name="email" class="form-control" placeholder="user@example.com" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Mobile Number</label>
+          <div class="input-wrapper">
+            <span class="input-icon">📱</span>
+            <input type="tel" id="phone" name="phone" class="form-control" placeholder="10-digit Mobile Number" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Create Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Create Account / अकाउंट बनाएं ➔</button>
+      </form>
+
+      <div class="divider">
+        <span>OR QUICK SIGNUP WITH</span>
+      </div>
+
+      <div class="social-login-container">
+        <a href="{{ url_for('oauth_login', provider='google') }}" class="social-btn google-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M12 5.04c1.62 0 3.08.56 4.22 1.65l3.15-3.15C17.45 1.68 14.93 1 12 1 7.35 1 3.39 3.68 1.48 7.61l3.77 2.92C6.14 7.21 8.84 5.04 12 5.04z"/>
+            <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.47h6.44c-.28 1.47-1.11 2.71-2.36 3.55l3.67 2.85c2.15-1.98 3.74-4.89 3.74-8.51z"/>
+            <path fill="#FBBC05" d="M5.25 14.77c-.24-.72-.38-1.5-.38-2.31s.14-1.59.38-2.31L1.48 7.23C.54 9.17 0 11.31 0 13.57s.54 4.4 1.48 6.34l3.77-2.92c-.24-.72-.38-1.5-.38-2.31s.14-1.59.38-2.31z"/>
+            <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.67-2.85c-1.12.75-2.55 1.2-4.29 1.2-3.16 0-5.86-2.17-6.75-5.49L1.48 15.87C3.39 19.8 7.35 23 12 23z"/>
+          </svg>
+          Google
+        </a>
+        <a href="{{ url_for('oauth_login', provider='facebook') }}" class="social-btn facebook-btn">
+          <svg width="18" height="18" fill="white" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Facebook
+        </a>
+      </div>
+
+      <div class="footer-links">
+        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+      </div>
+
+      <div class="vendor-toggle-banner">
+        Are you an Event Vendor? <a href="{{ url_for('vendor_register') }}">Register Vendor Business 🤝</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>

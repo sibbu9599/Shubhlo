@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Summary & Tax Invoice #{{ booking.id }} - Shubhlo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #f4f6f9;
+      font-family: 'Roboto', sans-serif;
+      color: #2c3e50;
+      margin: 0;
+      padding: 30px 15px;
+    }
+
+    .invoice-card {
+      max-width: 850px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+      border: 1px solid rgba(142, 68, 173, 0.15);
+      position: relative;
+    }
+
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #8e44ad;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+    }
+
+    .invoice-logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: #8e44ad;
+    }
+
+    .invoice-logo span {
+      color: #f1c40f;
+    }
+
+    .invoice-title-badge {
+      text-align: right;
+    }
+
+    .invoice-title-badge h2 {
+      margin: 0;
+      font-size: 20px;
+      color: #2c3e50;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .invoice-title-badge p {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: #7f8c8d;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: #faf6fc;
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(142,68,173,0.1);
+    }
+
+    .meta-item label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #8e44ad;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .meta-item p {
+      margin: 0;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+
+    .invoice-table th {
+      background: #8e44ad;
+      color: #ffffff;
+      padding: 12px;
+      text-align: left;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .invoice-table td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .summary-box {
+      background: rgba(39, 174, 96, 0.05);
+      border: 1.5px solid rgba(39, 174, 96, 0.25);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .summary-row.total {
+      border-top: 2px dashed #2ecc71;
+      padding-top: 10px;
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #27ae60;
+    }
+
+    .legal-notice {
+      background: rgba(231, 76, 60, 0.06);
+      border-left: 4px solid #e74c3c;
+      padding: 14px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #c0392b;
+      margin-bottom: 25px;
+    }
+
+    .action-btns {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .btn-print {
+      background: linear-gradient(135deg, #8e44ad, #9b59b6);
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(142,68,173,0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-print:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-back {
+      background: #e2e8f0;
+      color: #2d3748;
+      text-decoration: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .invoice-card { box-shadow: none; border: none; padding: 0; }
+      .action-btns { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="invoice-card">
+    
+    <!-- Invoice Header -->
+    <div class="invoice-header">
+      <div class="invoice-logo">
+        Shubhlo<span>👑</span>
+        <div style="font-size: 12px; font-weight: 500; color: #7f8c8d; margin-top: 2px;">
+          Setu Infotech Pvt Ltd | GSTIN: 23AAAAA0000A1Z5
+        </div>
+      </div>
+      <div class="invoice-title-badge">
+        <h2>Order Summary & Tax Invoice</h2>
+        <p>ऑर्डर विवरण व कर रसीद #INV-2026-{{ booking.id }}</p>
+      </div>
+    </div>
+
+    <!-- Meta Details Grid -->
+    <div class="meta-grid">
+      <div class="meta-item">
+        <label>Customer Name / ग्राहक नाम</label>
+        <p>{{ booking.name }}</p>
+      </div>
+      <div class="meta-item">
+        <label>Event Date / कार्यक्रम तिथि</label>
+        <p>📅 {{ booking.event_date | format_date_indian }}</p>
+      </div>
+      <div class="meta-item">
+        <label>Phone / मोबाइल नंबर</label>
+        <p>{{ booking.phone }}</p>
+      </div>
+      <div class="meta-item">
+        <label>Location / स्थान (तहसील)</label>
+        <p>📍 {{ booking.tehsil }}, {{ booking.district }}</p>
+      </div>
+      <div class="meta-item">
+        <label>Email / ईमेल</label>
+        <p>{{ booking.email }}</p>
+      </div>
+      <div class="meta-item">
+        <label>Booking Status / स्थिति</label>
+        <p style="color: #27ae60;">✔ {{ booking.payment_status or 'Token Paid' }}</p>
+      </div>
+    </div>
+
+    <!-- Itemized Vendors Table -->
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Service Category / सेवा श्रेणी</th>
+          <th>Selected Vendor Name / वेंडर का नाम</th>
+          <th style="text-align: right;">Token Deposit Credit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in selected_items %}
+          <tr>
+            <td><strong>{{ item.category }}</strong></td>
+            <td>{{ item.name }}</td>
+            <td style="text-align: right; color: #27ae60; font-weight: bold;">₹5,000.00</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Tax & Fee Summary Box -->
+    <div class="summary-box">
+      <h3 style="margin-top: 0; font-size: 16px; color: #2c3e50; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 8px;">
+        🧾 Price & GST Tax Breakdown / मूल्य व टैक्स विवरण ({{ num_vendors }} Services)
+      </h3>
+
+      <div class="summary-row">
+        <span>Vendor Deposit Credit (वेंडर के अंतिम बिल में 100% छूट):</span>
+        <span style="font-weight: bold; color: #27ae60;">₹{{ "{:,.2f}".format(deposit_credit) }}</span>
+      </div>
+
+      <div class="summary-row">
+        <span>Platform Processing Fee (₹100 × {{ num_vendors }}):</span>
+        <span>₹{{ "{:,.2f}".format(platform_fee) }}</span>
+      </div>
+
+      <div class="summary-row">
+        <span>18% GST Tax on Platform Fee (₹18 × {{ num_vendors }}):</span>
+        <span style="color: #e67e22; font-weight: bold;">₹{{ "{:,.2f}".format(gst_tax) }}</span>
+      </div>
+
+      <div class="summary-row total">
+        <span>Total Token Advance Paid Online (कुल जमा टोकन राशि):</span>
+        <span>₹{{ "{:,.2f}".format(advance_paid) }}</span>
+      </div>
+    </div>
+
+    <!-- Vendor Direct Contact Disclaimer -->
+    <div class="legal-notice">
+      <strong>📞 Vendor Contact Notice / वेंडर प्रत्यक्ष संपर्क निर्देश:</strong><br>
+      <strong>ENGLISH:</strong> Selected vendors will contact you directly on your phone/WhatsApp to confirm the event date, time, and service details.<br>
+      <em><strong>हिंदी:</strong> चुने गए वेंडर तारीख, समय और आवश्यकताओं की पुष्टि के लिए आपसे सीधे फोन या व्हाट्सएप पर संपर्क करेंगे।</em>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-btns">
+      <button class="btn-print" onclick="window.print()">🖨️ Print / Download PDF Receipt</button>
+      <a href="{{ url_for('dashboard') }}" class="btn-back">⬅ Back to Dashboard</a>
+    </div>
+
+  </div>
+
+</body>
+</html>

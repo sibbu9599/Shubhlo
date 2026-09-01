@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Partner Login - Shubhlo</title>
+  <meta name="description" content="Vendor portal login for venues, caterers, photographers, DJs, and artists registered with Shubhlo.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.08) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .login-wrapper {
+      min-height: calc(100vh - 160px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 50px 20px;
+      box-sizing: border-box;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 460px;
+      background: white;
+      border-radius: 28px;
+      padding: 42px 38px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      border: 1.5px solid #e2e8f0;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #10b981, #059669, #8b5cf6);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-header h2 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0 0 8px;
+      color: #0f172a;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .login-header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 14.5px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      font-size: 17px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 16px 14px 46px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-family: inherit;
+      color: #0f172a;
+      background: #f8fafc;
+      transition: all 0.25s ease;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: #10b981;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      transition: all 0.25s ease;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
+    }
+
+    .footer-links {
+      text-align: center;
+      font-size: 14px;
+      color: #64748b;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+
+    .footer-links a {
+      color: #10b981;
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .customer-toggle-banner {
+      margin-top: 16px;
+      padding: 14px;
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 12px;
+      text-align: center;
+      font-size: 13.5px;
+      color: #8b5cf6;
+      font-weight: 700;
+    }
+
+    .customer-toggle-banner a {
+      color: #8b5cf6;
+      text-decoration: none;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <h2>Vendor Portal Login 🤝</h2>
+        <p>Access your vendor dashboard, manage bookings & respond to inquiries</p>
+      </div>
+
+      <!-- Vendor Token Payout & Commission Declaration Card -->
+      <div style="background: #fdf4ff; border: 1.5px solid #f0abfc; border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; text-align: left; font-size: 12.5px; color: #701a75; line-height: 1.5;">
+        <strong style="font-size: 13.5px; display: block; margin-bottom: 4px; color: #86198f;">💡 OFFICIAL VENDOR FINANCIAL DECLARATION:</strong>
+        • <strong>₹5,000 Bill Deduction:</strong> Deduct ₹5,000 from customer final event invoice.<br>
+        • <strong>₹500 Platform Fee:</strong> Shubhlo platform service commission fee.<br>
+        • <strong>₹4,500 Bank Payout:</strong> Shubhlo transfers ₹4,500 net payout to vendor bank account upon booking confirmation.
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div style="padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; margin-bottom: 22px; background: {% if category=='danger' %}#fee2e2{% else %}#ecfdf5{% endif %}; color: {% if category=='danger' %}#991b1b{% else %}#065f46{% endif %}; border: 1px solid {% if category=='danger' %}#fca5a5{% else %}#a7f3d0{% endif %}; text-align: center;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form action="{{ url_for('vendor_login') }}" method="POST">
+        <div class="form-group">
+          <label for="email">Registered Email / Phone</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉️</span>
+            <input type="text" id="email" name="email" class="form-control" placeholder="vendor@example.com or 10-digit phone" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Enter vendor password" required>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Login to Vendor Portal ➔</button>
+      </form>
+
+      <div style="margin-top: 20px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 18px;">
+        <p style="margin-bottom: 12px; font-size: 13.5px; font-weight: 600; color: #64748b;">New Event Vendor? Grow your business with Shubhlo</p>
+        <a href="{{ url_for('vendor_register') }}" style="display: block; width: 100%; padding: 13px; border-radius: 10px; background: linear-gradient(135deg, #eab308, #ca8a04); color: #ffffff; font-weight: 700; font-size: 14.5px; text-decoration: none; box-shadow: 0 4px 15px rgba(234, 179, 8, 0.35); text-align: center; transition: all 0.2s ease-in-out;">
+          ✨ Register New Vendor Business 🤝
+        </a>
+      </div>
+
+      <div class="customer-toggle-banner">
+        Are you an Event Customer? <a href="{{ url_for('login') }}">Customer Login 👤</a>
+      </div>
+    </div>
+  </div>
+
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>

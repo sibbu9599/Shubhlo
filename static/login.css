@@ -1,0 +1,240 @@
+/* Master Login Stylesheet for Shubhlo */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #faf6fc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(232, 67, 147, 0.05) 0px, transparent 50%), 
+    radial-gradient(at 100% 100%, rgba(142, 68, 173, 0.05) 0px, transparent 50%);
+  min-height: 100vh;
+}
+
+/* Outer Container */
+.login-container, .login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+/* Central Card Box */
+.login-box, .login-card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 40px 35px;
+  box-shadow: 0 15px 35px rgba(142, 68, 173, 0.15), 0 5px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(142, 68, 173, 0.15);
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.login-box::before, .login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #8e44ad, #e84393, #FFD700);
+}
+
+/* Headings */
+.login-box h2, .login-card h2, .login-header h2 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.login-box p.subtitle, .login-card p, .login-header p {
+  margin: 0 0 25px 0;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+/* Form & Inputs */
+.login-box form, .login-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #34495e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.login-box input[type="email"],
+.login-box input[type="text"],
+.login-box input[type="password"],
+.login-card input[type="email"],
+.login-card input[type="text"],
+.login-card input[type="password"],
+.form-control {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14.5px;
+  font-family: 'Poppins', sans-serif;
+  color: #2d3748;
+  background: #f8fafc;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.login-box input:focus, .login-card input:focus, .form-control:focus {
+  border-color: #8e44ad;
+  background: #ffffff;
+  box-shadow: 0 0 0 3.5px rgba(142, 68, 173, 0.15);
+}
+
+/* Submit Buttons */
+.login-box button[type="submit"],
+.login-card button[type="submit"],
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #8e44ad, #e84393);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15.5px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(142, 68, 173, 0.35);
+  transition: all 0.25s ease;
+  margin-top: 10px;
+}
+
+.login-box button[type="submit"]:hover,
+.login-card button[type="submit"]:hover,
+.submit-btn:hover {
+  background: linear-gradient(135deg, #7d3c98, #d81b60);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(142, 68, 173, 0.45);
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0 18px;
+  color: #a0aec0;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.divider span {
+  padding: 0 12px;
+}
+
+/* Social Login Buttons */
+.social-login-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.social-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.social-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.google-btn {
+  background: #ffffff;
+  color: #2d3748;
+  border: 1px solid #cbd5e0;
+}
+
+.google-btn:hover {
+  background: #f7fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.facebook-btn {
+  background: #1877f2;
+  color: #ffffff;
+  border: 1px solid #1877f2;
+}
+
+.facebook-btn:hover {
+  background: #166fe5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+}
+
+/* Links */
+.links, .footer-links {
+  text-align: center;
+  font-size: 13.5px;
+  color: #718096;
+  margin-top: 15px;
+}
+
+.links a, .footer-links a {
+  color: #8e44ad;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.links a:hover, .footer-links a:hover {
+  text-decoration: underline;
+  color: #e84393;
+}
+
+/* Alert Styling */
+.alert {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}

@@ -1,0 +1,114 @@
+/* Vendor Registration Page - Form Styles */
+
+.container {
+  background: var(--white);
+  padding: 40px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 550px;
+  width: 90%;
+  margin: 50px auto;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.container h2 {
+  text-align: center;
+  color: var(--dark-slate) !important;
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-weight: 700;
+  font-size: 26px;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  letter-spacing: 0.5px;
+}
+
+.container h2::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 45px;
+  height: 3.5px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--dark-slate);
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid rgba(142, 68, 173, 0.3);
+  border-radius: var(--radius-md);
+  outline: none;
+  font-size: 14px;
+  background-color: #faf6fc;
+  color: var(--text-dark);
+  font-family: 'Poppins', sans-serif;
+  transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #8e44ad;
+  box-shadow: 0 0 12px rgba(142, 68, 173, 0.25);
+  background-color: var(--white);
+}
+
+/* Specific styling for file input */
+.form-group input[type="file"] {
+  padding: 8px 10px;
+  background-color: #fafbfc;
+}
+
+/* Button */
+.btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--btn-gradient);
+  color: #2C3E50;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.35);
+  transition: var(--transition);
+  margin-top: 15px;
+}
+
+.btn:hover {
+  background: var(--btn-gradient-hover);
+  color: #1a252f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.45);
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

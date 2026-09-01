@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rate Your Vendor & Service - Shubhlo</title>
+  <meta name="description" content="Submit vendor reviews, ratings, and feedback for your event booked via Shubhlo.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.12) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .rating-wrapper {
+      min-height: calc(100vh - 160px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 50px 20px;
+      box-sizing: border-box;
+    }
+
+    .rating-card {
+      width: 100%;
+      max-width: 580px;
+      background: white;
+      border-radius: 28px;
+      padding: 42px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      border: 1.5px solid #e2e8f0;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rating-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24, #10b981);
+    }
+
+    .rating-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .rating-header h2 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0 0 8px;
+      color: #0f172a;
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .rating-header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 14.5px;
+    }
+
+    .star-picker {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      font-size: 48px;
+      cursor: pointer;
+      margin: 22px 0 10px;
+      user-select: none;
+    }
+
+    .star-picker span {
+      color: #cbd5e1;
+      transition: all 0.2s ease;
+    }
+
+    .star-picker span.active, .star-picker span:hover {
+      color: #f59e0b;
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
+    }
+
+    .rating-label-display {
+      text-align: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #d97706;
+      margin-bottom: 24px;
+      min-height: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      color: #334155;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control, select.form-control, textarea.form-control {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-family: inherit;
+      color: #0f172a;
+      background: #f8fafc;
+      transition: all 0.25s ease;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    textarea.form-control {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .form-control:focus, select.form-control:focus, textarea.form-control:focus {
+      border-color: #f59e0b;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      color: #0f172a;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+      transition: all 0.25s ease;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(245, 158, 11, 0.45);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <div class="rating-wrapper">
+    <div class="rating-card">
+      <div class="rating-header">
+        <h2>Rate Vendor Services ⭐</h2>
+        <p>Share your experience to help future families select top-rated event partners</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div style="padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; margin-bottom: 22px; background: {% if category=='danger' %}#fee2e2{% else %}#ecfdf5{% endif %}; color: {% if category=='danger' %}#991b1b{% else %}#065f46{% endif %}; border: 1px solid {% if category=='danger' %}#fca5a5{% else %}#a7f3d0{% endif %}; text-align: center;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form action="{{ url_for('submit_rating') }}" method="POST">
+        <input type="hidden" name="booking_id" value="{{ booking_id }}">
+        <input type="hidden" name="rating_score" id="rating_score" value="5">
+
+        {% if user_bookings %}
+          <div class="form-group">
+            <label for="booking_select">Select Event Booking</label>
+            <select id="booking_select" name="booking_id_select" class="form-control">
+              {% for b in user_bookings %}
+                <option value="{{ b.booking_id }}" {% if b.booking_id == booking_id %}selected{% endif %}>
+                  Booking #{{ b.booking_id }} - {{ b.event_date }} (₹{{ b.total_price }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label for="vendor_name">Vendor Name</label>
+          <input type="text" id="vendor_name" name="vendor_name" class="form-control" value="{{ vendor_name or 'Shubhlo Event Vendor' }}" placeholder="Vendor name" required>
+        </div>
+
+        <!-- Star Rating Picker -->
+        <div class="form-group" style="text-align: center;">
+          <label>Overall Experience Rating</label>
+          <div class="star-picker" id="starPicker">
+            <span data-val="1" class="active">★</span>
+            <span data-val="2" class="active">★</span>
+            <span data-val="3" class="active">★</span>
+            <span data-val="4" class="active">★</span>
+            <span data-val="5" class="active">★</span>
+          </div>
+          <div class="rating-label-display" id="ratingLabel">5.0 - Royal Excellence! 👑</div>
+        </div>
+
+        <div class="form-group">
+          <label for="review_comment">Your Review Feedback / अनुभव का विवरण</label>
+          <textarea id="review_comment" name="review_comment" class="form-control" placeholder="Write about vendor punctuality, service quality, food taste, or behavior..." required></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Verified Rating & Review 🚀</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const stars = document.querySelectorAll('#starPicker span');
+      const scoreInput = document.getElementById('rating_score');
+      const labelDisplay = document.getElementById('ratingLabel');
+
+      const labels = {
+        1: "1.0 - Poor Experience 😞",
+        2: "2.0 - Average Service 😐",
+        3: "3.0 - Good Work 🙂",
+        4: "4.0 - Very Good Service! 🌟",
+        5: "5.0 - Royal Excellence! 👑"
+      };
+
+      stars.forEach(star => {
+        star.addEventListener('click', function() {
+          const val = parseInt(this.getAttribute('data-val'));
+          scoreInput.value = val;
+          labelDisplay.textContent = labels[val];
+
+          stars.forEach((s, idx) => {
+            if (idx < val) {
+              s.classList.add('active');
+            } else {
+              s.classList.remove('active');
+            }
+          });
+        });
+      });
+    });
+  </script>
+
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>

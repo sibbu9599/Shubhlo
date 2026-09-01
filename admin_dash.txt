@@ -1,0 +1,113 @@
+# Admin Dashboard
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    if 'admin' not in session:
+        flash("Unauthorized access. Admin login required.", "danger")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    bookings = []
+    sms_logs = []
+    all_vendors = []
+
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                # Fetch all bookings
+                cursor.execute("SELECT * FROM booking ORDER BY created_at DESC")
+                bookings = cursor.fetchall()
+
+                # For each booking, fetch verification records
+                for b in bookings:
+                    cursor.execute(
+                        "SELECT vendor_name, service_type, status, verified_at FROM booking_verification WHERE booking_id=%s",
+                        (b['id'],)
+                    )
+                    b['verifications'] = cursor.fetchall()
+
+                # Fetch all simulated SMS logs
+                cursor.execute("SELECT * FROM simulated_sms ORDER BY created_at DESC")
+                sms_logs = cursor.fetchall()
+
+                # Fetch all vendors for Admin Approval & Verification
+                cursor.execute("SELECT * FROM vendor ORDER BY created_at DESC")
+                all_vendors = cursor.fetchall()
+        except Exception as e:
+            print(f"Error fetching admin dashboard data: {e}")
+        finally:
+            conn.close()
+    else:
+        # Fallback simulation
+        mock_bookings = session.get('mock_bookings', [])
+        import copy
+        bookings = copy.deepcopy(mock_bookings)
+        mock_verifications = session.get('mock_verifications', [])
+        
+        for b in bookings:
+            b['verifications'] = [
+                v for v in mock_verifications if v['booking_id'] == b['id']
+            ]
+            
+        sms_logs = session.get('mock_sms', [])
+        sms_logs = copy.deepcopy(sms_logs)
+        all_vendors = session.get('mock_vendors', [])
+
+    return render_template(
+        'admin_dashboard.html',
+        bookings=bookings,
+        sms_logs=sms_logs,
+        all_vendors=all_vendors,
+        total_bookings=len(bookings)
+    )
+
+# Admin approve vendor
+@app.route('/admin/vendor/approve/<int:vendor_id>', methods=['POST'])
+def admin_approve_vendor(vendor_id):
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE vendor SET approval_status='Approved' WHERE id=%s", (vendor_id,))
+                conn.commit()
+                flash(f"Vendor #{vendor_id} Approved successfully! 🎉", "success")
+        except Exception as e:
+            flash(f"Error approving vendor: {e}", "danger")
+        finally:
+            conn.close()
+    else:
+        session_vendors = session.get('mock_vendors', [])
+        for v in session_vendors:
+            if v['id'] == vendor_id:
+                v['approval_status'] = 'Approved'
+        session['mock_vendors'] = session_vendors
+        session.modified = True
+        flash(f"Vendor #{vendor_id} Approved (Simulated)! 🎉", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# Admin reject vendor
+@app.route('/admin/vendor/reject/<int:vendor_id>', methods=['POST'])
+def admin_reject_vendor(vendor_id):
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE vendor SET approval_status='Rejected' WHERE id=%s", (vendor_id,))
+                conn.commit()
+                flash(f"Vendor #{vendor_id} Rejected.", "info")
+        except Exception as e:
+            flash(f"Error rejecting vendor: {e}", "danger")
+        finally:
+            conn.close()
+    else:
+        session_vendors = session.get('mock_vendors', [])
+        for v in session_vendors:
+            if v['id'] == vendor_id:
+                v['approval_status'] = 'Rejected'
+        session['mock_vendors'] = session_vendors
+        session.modified = True
+        flash(f"Vendor #{vendor_id} Rejected (Simulated).", "info")
+    return redirect(url_for('admin_dashboard'))

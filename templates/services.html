@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services & Verified Vendors - Shubhlo</title>
+  <meta name="description" content="Discover and book top-rated marriage gardens, caterers, DJs, photographers, and event vendors at best prices across MP.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --primary-dark-emerald: #059669;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+      --glass-bg: rgba(15, 23, 42, 0.88);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    /* Page Banner Hero */
+    .services-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      color: white;
+      padding: 50px 20px 70px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .services-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .services-hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 40px;
+      font-weight: 900;
+      margin: 0 0 12px;
+      background: linear-gradient(135deg, #ffffff 30%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .services-hero p {
+      font-size: 16px;
+      color: #94a3b8;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Floating Search & Filter Wrapper */
+    .filter-section {
+      max-width: 1200px;
+      margin: -35px auto 40px;
+      padding: 0 20px;
+      position: relative;
+      z-index: 20;
+    }
+    .filter-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 22px 28px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.1);
+      border: 1.5px solid rgba(139, 92, 246, 0.18);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-input-group {
+      flex: 2;
+      min-width: 260px;
+      position: relative;
+    }
+    .filter-input-group input {
+      width: 100%;
+      padding: 14px 18px 14px 44px;
+      border-radius: 12px;
+      border: 1.5px solid #e2e8f0;
+      font-size: 14.5px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.25s ease;
+      background: #f8fafc;
+    }
+    .filter-input-group input:focus {
+      border-color: #8b5cf6;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    }
+    .filter-input-group .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 17px;
+      color: #94a3b8;
+    }
+    .filter-select-group {
+      flex: 1;
+      min-width: 190px;
+    }
+    .filter-select-group select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1.5px solid #e2e8f0;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-weight: 600;
+      color: #334155;
+    }
+    .filter-select-group select:focus {
+      border-color: #8b5cf6;
+      background: white;
+    }
+
+    /* Grid Layout - 3 Cards per row (3, 3, 3) */
+    .vendors-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+    }
+    @media (max-width: 991px) {
+      .vendors-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+    }
+    @media (max-width: 639px) {
+      .vendors-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+    .vendor-card-item {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    .vendor-card-item:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 22px 40px rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+    .vendor-img-wrap {
+      position: relative;
+      height: 200px;
+      background: #0f172a;
+      overflow: hidden;
+    }
+    .vendor-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .vendor-card-item:hover .vendor-img-wrap img {
+      transform: scale(1.08);
+    }
+    .badge-service {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 5px 14px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+    .badge-location {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(8px);
+      color: white;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .vendor-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+    }
+    .vendor-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 8px;
+    }
+    .vendor-desc {
+      color: #64748b;
+      font-size: 13.5px;
+      line-height: 1.55;
+      margin: 0 0 18px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 62px;
+    }
+    .vendor-footer {
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .price-label {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+      display: block;
+    }
+    .price-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: #10b981;
+    }
+    .btn-book-now {
+      background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      color: #0f172a;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-book-now:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(245, 158, 11, 0.45);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="/home" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="/home" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="/services" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="/booking1" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="/admin/dashboard" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="/dashboard" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="/vendor_dashboard" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="/vendor_login" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="/about" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="/contact" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="/terms" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="/logout" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="/login" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Header Banner -->
+  <section class="services-hero">
+    <h1>Explore Verified Event Vendors</h1>
+    <p>Compare verified marriage gardens, top-tier caterers, DJs, photographers, and decorators across Madhya Pradesh with guaranteed best prices.</p>
+  </section>
+
+  <!-- Filter & Search Controls -->
+  <div class="filter-section">
+    <div class="filter-card">
+      <div class="filter-input-group">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="vendor-search" placeholder="Search by vendor name, service, or keywords..." oninput="filterVendors()">
+      </div>
+
+      <div class="filter-select-group">
+        <select id="category-filter" onchange="filterVendors()">
+          <option value="all">All Categories (सभी 20+ श्रेणियां)</option>
+          <option value="venue">Venue / मैरिज गार्डन</option>
+          <option value="catering">Catering / कैटरिंग</option>
+          <option value="dj">DJ & Sound / डीजे</option>
+          <option value="photography">Photography / फोटोग्राफी</option>
+          <option value="makeup">Makeup Artist / मेकअप</option>
+          <option value="mehendi">Mehendi Artist / मेहंदी आर्टिस्ट</option>
+          <option value="transport">Transport / यातायात</option>
+          <option value="decoration">Decoration / सजावट</option>
+          <option value="shahi_sawari">Shahi Sawari / शाही सवारी</option>
+          <option value="invitation_card">Invitation Card / निमंत्रण कार्ड</option>
+          <option value="security_guard">Security Guard / सुरक्षा गार्ड</option>
+          <option value="dhol_band">Dhol & Band / ढोल और बैंड</option>
+          <option value="pandit">Pandit Ji / पंडित जी</option>
+          <option value="choreographer">Dance Choreographer / कोरियोग्राफर</option>
+          <option value="wedding_planner">Event Planner / वेडिंग प्लानर</option>
+          <option value="anchor">Anchor & Host / एंकर और होस्ट</option>
+          <option value="fireworks">Fireworks / आतिशबाजी</option>
+          <option value="mocktail">Mocktail Bar / मॉकटेल बार</option>
+          <option value="safa">Safa & Turban / साफा पगड़ी</option>
+          <option value="birthday">Birthday Special / बर्थडे पार्टी</option>
+        </select>
+      </div>
+
+      <div class="filter-select-group">
+        <select id="location-filter" onchange="filterVendors()">
+          <option value="all">All Locations (सभी स्थान)</option>
+          {% for teh in tehsils %}
+            <option value="{{ teh }}">{{ teh }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <main style="max-width: 1200px; margin: 0 auto 60px; padding: 0 20px;">
+    <!-- Vendor Counter Badge -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+      <div style="font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
+        <span style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 14px; border-radius: 50px; font-size: 13px;" id="count-num">{{ vendors|length }}</span>
+        <span>Verified Vendors Ready to Book</span>
+      </div>
+    </div>
+
+    <!-- Live Vendors Grid -->
+    <div id="vendors-container" class="vendors-grid">
+      {% if vendors %}
+        {% for v in vendors %}
+          <div class="vendor-card-item" data-name="{{ v.name | lower }}" data-service="{{ v.service | lower }}" data-tehsil="{{ v.tehsil | lower if v.tehsil else '' }}" data-desc="{{ v.description | lower if v.description else '' }}">
+            
+            <div class="vendor-img-wrap">
+              {% if v.photo %}
+                <img src="{{ v.photo }}" alt="{{ v.name }}">
+              {% else %}
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1e1b4b, #0f172a); color: #8b5cf6; font-size: 46px;">
+                  👑
+                </div>
+              {% endif %}
+              
+              <span class="badge-service">
+                {{ v.service.replace('_', ' ') }}
+              </span>
+
+              {% if v.tehsil %}
+                <span class="badge-location">
+                  📍 {{ v.tehsil }}
+                </span>
+              {% endif %}
+            </div>
+
+            <div class="vendor-content">
+              <div>
+                <h3 class="vendor-title">{{ v.name }}</h3>
+                <p class="vendor-desc">
+                  {{ v.description or 'Premium verified event service provider in MP. Contact for customized packages.' }}
+                </p>
+              </div>
+
+              <div class="vendor-footer">
+                <div>
+                  <span class="price-label">Starting From</span>
+                  <span class="price-val">₹{{ "{:,.0f}".format(v.price) if v.price else '0' }}</span>
+                </div>
+                <a href="/booking1?select_service={{ v.service }}" class="btn-book-now">
+                  Select & Book ➔
+                </a>
+              </div>
+            </div>
+
+          </div>
+        {% endfor %}
+      {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 70px 20px; color: #94a3b8; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03);">
+          <span style="font-size: 54px; display: block; margin-bottom: 15px;">🌟</span>
+          <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">No Vendors Registered Yet</h3>
+          <p style="font-size: 14.5px; margin: 0;">Be the first event partner to register in Madhya Pradesh!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Empty State -->
+    <div id="no-results-msg" style="display: none; text-align: center; padding: 70px 20px; color: #94a3b8; background: white; border-radius: 20px; margin-top: 25px;">
+      <span style="font-size: 54px; display: block; margin-bottom: 15px;">🔍</span>
+      <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">No matching vendors found</h3>
+      <p style="font-size: 14.5px; margin: 0;">Try changing your search keywords, category, or location filter.</p>
+    </div>
+  </main>
+
+  <script>
+    function filterVendors() {
+      const searchVal = document.getElementById('vendor-search').value.toLowerCase().trim();
+      const categoryVal = document.getElementById('category-filter').value.toLowerCase();
+      const locationVal = document.getElementById('location-filter').value.toLowerCase();
+      const cards = document.querySelectorAll('.vendor-card-item');
+      
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const name = card.getAttribute('data-name') || '';
+        const service = card.getAttribute('data-service') || '';
+        const tehsil = card.getAttribute('data-tehsil') || '';
+        const desc = card.getAttribute('data-desc') || '';
+
+        const matchesSearch = !searchVal || name.includes(searchVal) || service.includes(searchVal) || desc.includes(searchVal) || tehsil.includes(searchVal);
+        const matchesCategory = categoryVal === 'all' || service === categoryVal;
+        const matchesLocation = locationVal === 'all' || tehsil === locationVal;
+
+        if (matchesSearch && matchesCategory && matchesLocation) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      document.getElementById('count-num').textContent = visibleCount;
+      const noResults = document.getElementById('no-results-msg');
+      if (visibleCount === 0 && cards.length > 0) {
+        noResults.style.display = 'block';
+      } else {
+        noResults.style.display = 'none';
+      }
+    }
+  </script>
+
+  <!-- Footer -->
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
+    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+    <div style="text-align: center; margin-top: 15px;">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Shubhlo Brand Logo" style="max-height: 52px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
+    </div>
+  </footer>
+</body>
+</html>

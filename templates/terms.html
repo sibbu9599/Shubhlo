@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms & Conditions - Shubhlo</title>
+  <meta name="description" content="Official Terms & Conditions for Shubhlo Event Platform - advance token protection, vendor policies, and user agreements.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .terms-wrapper {
+      max-width: 1000px;
+      margin: 40px auto 80px;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    .terms-card {
+      background: white;
+      border-radius: 28px;
+      padding: 50px 45px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      border: 1.5px solid #e2e8f0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .terms-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #10b981, #8b5cf6, #f59e0b);
+    }
+
+    .terms-header {
+      text-align: center;
+      margin-bottom: 38px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 28px;
+    }
+
+    .terms-header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      color: #0f172a;
+      margin: 0 0 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .terms-header p {
+      font-size: 15px;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .terms-section {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      transition: all 0.25s ease;
+    }
+
+    .terms-section:hover {
+      border-color: #10b981;
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.1);
+      background: white;
+    }
+
+    .terms-section h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .terms-section p {
+      font-size: 15px;
+      color: #334155;
+      line-height: 1.7;
+      margin: 0 0 12px;
+    }
+
+    .terms-section p.hindi-text {
+      color: #475569;
+      font-size: 14px;
+      margin-bottom: 0;
+      background: #f1f5f9;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border-left: 4px solid #10b981;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <div class="terms-wrapper">
+    <div class="terms-card">
+      <div class="terms-header">
+        <h1>Terms & Conditions / नियम एवं शर्तें 📜</h1>
+        <p>Official user agreement and booking policy powered by Setu Infotech Pvt Ltd</p>
+      </div>
+
+      <div class="terms-section" style="border: 2px solid #ef4444; background: #fff5f5;">
+        <h3 style="color: #991b1b;">
+          🛡️ 1. ABSOLUTE ZERO LIABILITY OF COMPANY & OWNER / सर्वोच्च कंपनी व मालिक पूर्ण दायित्व मुक्ती
+        </h3>
+        <p style="color: #7f1d1d; font-weight: 600; line-height: 1.7;">
+          <strong>STRICT LEGAL DISCLAIMER & INDEMNIFICATION CLAUSE:</strong><br>
+          Under no circumstances shall <strong>Shubhlo</strong>, <strong>Setu Infotech Pvt Ltd</strong>, its Directors, Shareholders, Platform Owners, Management, Officers, Employees, or Affiliates be held liable, accountable, or responsible for any direct, indirect, accidental, consequential, or punitive damages, financial losses, cancellations, quality disputes, food safety issues, accidents, noise pollution violations, police permissions, or defaults caused by independent Vendors, Customers, or Third Parties during any event or booking transaction.
+        </p>
+        <p class="hindi-text" style="border-left: 4px solid #ef4444; background: #fee2e2; color: #991b1b; font-weight: 700;">
+          <strong>मालिक व कंपनी दायित्व मुक्ती (हिंदी):</strong><br>
+          किसी भी परिस्थिति अथवा स्थिति में <strong>शुभलो (Shubhlo)</strong>, <strong>सेतु इन्फोटेक प्रा. लि. (Setu Infotech Pvt Ltd)</strong>, कंपनी के निदेशक, शेयरधारक, कंपनी मालिक, अधिकारी अथवा कर्मचारी किसी भी प्रकार के नुकसान, दुर्घटना, रद्दीकरण, सेवा की गुणवत्ता विवाद, खाद्य सुरक्षा, पुलिस/प्रशासनिक अनुमति विवाद अथवा वेंडर/ग्राहक के बीच हुए किसी भी लेन-देन के लिए <strong>ज़िम्मेदार या उत्तरदायी नहीं होंगे</strong>। प्लेटफ़ॉर्म केवल एक डिजिटल मध्यस्थ (Intermediary Marketplace) है।
+        </p>
+      </div>
+
+      <div class="terms-section" style="border-left: 4px solid #f59e0b;">
+        <h3>🏛️ 2. Digital Intermediary Facilitator Role / केवल मध्यस्थ प्लेटफ़ॉर्म श्रेणी</h3>
+        <p>Shubhlo is an independent IT marketplace facilitator connecting customers with independent vendor service providers. Shubhlo does NOT own, operate, manage, or employ any vendor staff, marriage garden, catering kitchen, or sound equipment. All contractual obligations, service performance, safety standards, and local law compliance are the sole responsibility of the respective vendor and customer.</p>
+        <p class="hindi-text">शुभलो केवल एक डिजिटल मध्यस्थ प्लेटफ़ॉर्म है। कंपनी किसी भी वेंडर, मैरिज गार्डन या सर्विस स्टाफ की मालिक अथवा नियोक्ता नहीं है। सभी सेवा समझौतों व कानूनी अनुपालनों की पूर्ण ज़िम्मेदारी संबंधित वेंडर व ग्राहक की अपनी होगी।</p>
+      </div>
+
+      <div class="terms-section" style="border-left: 4px solid #8b5cf6;">
+        <h3>⚖️ 3. Vendor Legal & Tax Compliance / वेंडर की पूर्ण वैधानिक ज़िम्मेदारी</h3>
+        <p>All registered Vendors are independent legal entities. Vendors are 100% responsible for obtaining local municipal permissions, police sound permits, FSSAI food hygiene licenses, fire safety NOCs, and proper GST tax filings. Vendors agree to indemnify and hold harmless the Company and its Owner against any claims, fines, or litigation.</p>
+        <p class="hindi-text">सभी वेंडर स्वतंत्र सेवा प्रदाता हैं। पुलिस/ध्वनि प्रदूषण अनुमति, खाद्य सुरक्षा (FSSAI) व अग्निशमन अनुमति हेतु वेंडर स्वयं पूर्ण रूप से ज़िम्मेदार होंगे। कंपनी या मालिक के विरुद्ध कोई भी दावा मान्य नहीं होगा।</p>
+      </div>
+
+      <div class="terms-section">
+        <h3>💰 4. Advance Token Booking Policy / अग्रिम टोकन नीति</h3>
+        <p>Customers can lock event dates by paying an initial advance token of ₹5,100 or 20% of total package amount. Balance payment is cleared on event day directly to vendor partners.</p>
+        <p class="hindi-text">ग्राहक अपनी कार्यक्रम तिथि को ₹5,100 या पैकेज राशि का 20% अग्रिम टोकन देकर बुक कर सकते हैं। शेष राशि का भुगतान कार्यक्रम के दिन वेंडर को किया जाएगा।</p>
+      </div>
+
+      <div class="terms-section">
+        <h3>🚫 5. Cancellation & Refund Policy / रद्दीकरण व रिफंड नीति</h3>
+        <p>Free cancellation with 100% refund is valid if cancelled at least 15 days prior to event date. Cancellations within 15 days of event carry a standard processing deduction.</p>
+        <p class="hindi-text">कार्यक्रम तिथि से 15 दिन पहले रद्द करने पर 100% रिफंड देय होगा। 15 दिनों के भीतर रद्दीकरण पर नियमानुसार प्रोसेसिंग शुल्क काटा जाएगा।</p>
+      </div>
+
+      <div class="terms-section" style="border-left: 4px solid #0f172a;">
+        <h3>⚖️ 6. Exclusive Legal Jurisdiction / कानूनी क्षेत्राधिकार</h3>
+        <p>Any dispute, claim, legal notice, or arbitration arising out of the use of this website or service bookings shall be governed exclusively by the laws of India and subject strictly to the exclusive jurisdiction of the competent courts in <strong>Itarsi / Hoshangabad, Madhya Pradesh, India</strong>.</p>
+        <p class="hindi-text">किसी भी विवाद या कानूनी प्रक्रिया की स्थिति में केवल <strong>इटारसी / होशंगाबाद, मध्य प्रदेश</strong> न्यायालय का क्षेत्राधिकार ही मान्य होगा।</p>
+      </div>
+    </div>
+  </div>
+
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Booking - Step 3 - Shubhlo</title>
+  <meta name="description" content="Review customer details, selected vendor services, and total pricing before finalizing payment on Shubhlo.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .confirm-layout {
+      max-width: 1150px;
+      margin: 35px auto 70px;
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 32px;
+      padding: 0 20px;
+    }
+    @media (max-width: 900px) {
+      .confirm-layout { grid-template-columns: 1fr; }
+    }
+
+    .stepper-container {
+      width: 100%;
+      max-width: 780px;
+      margin: 25px auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 2;
+    }
+    .step-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 17px;
+    }
+    .step-item.completed .step-badge {
+      background: #10b981;
+      color: white;
+    }
+    .step-item.active .step-badge {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.45);
+    }
+    .step-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .step-item.active .step-label {
+      color: #10b981;
+      font-weight: 800;
+    }
+    .step-line {
+      flex: 1;
+      height: 4px;
+      background: #e2e8f0;
+      margin: 0 14px 22px;
+      border-radius: 4px;
+    }
+    .step-line.active {
+      background: linear-gradient(90deg, #10b981, #8b5cf6);
+    }
+
+    .confirm-card {
+      background: white;
+      border-radius: 24px;
+      padding: 35px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+      border: 1.5px solid #e2e8f0;
+      margin-bottom: 28px;
+    }
+    .confirm-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .customer-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px 25px;
+    }
+    .info-item label {
+      display: block;
+      font-size: 11.5px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .info-item span {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .vendor-item-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 18px 0;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .vendor-item-row:last-child {
+      border-bottom: none;
+    }
+    .vendor-item-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .vendor-item-details {
+      flex: 1;
+    }
+    .vendor-cat-badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      padding: 3px 12px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .vendor-item-details h4 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .vendor-item-details p {
+      margin: 0;
+      font-size: 13.5px;
+      color: #64748b;
+      line-height: 1.45;
+    }
+    .vendor-item-price {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .summary-card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+      border: 1.5px solid rgba(139, 92, 246, 0.2);
+      position: sticky;
+      top: 100px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      font-size: 14.5px;
+      color: #475569;
+      font-weight: 600;
+    }
+    .summary-row.total-row {
+      border-top: 2px dashed #e2e8f0;
+      padding-top: 18px;
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .summary-row.total-row span:last-child {
+      font-family: 'Outfit', sans-serif;
+      color: #10b981;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .btn-confirm-pay {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 16px;
+      background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      color: #0f172a;
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
+      font-weight: 900;
+      border: none;
+      border-radius: 14px;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+      transition: all 0.25s ease;
+      margin-top: 22px;
+    }
+    .btn-confirm-pay:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(245, 158, 11, 0.5);
+    }
+    .btn-edit-selection {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 13px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 14px;
+      text-decoration: none;
+      margin-top: 12px;
+      transition: all 0.25s ease;
+    }
+    .btn-edit-selection:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Progress Bar Stepper -->
+  <div class="stepper-container">
+    <div class="step-item completed">
+      <div class="step-badge">✓</div>
+      <span class="step-label">Details</span>
+    </div>
+    <div class="step-line active"></div>
+    <div class="step-item completed">
+      <div class="step-badge">✓</div>
+      <span class="step-label">Services</span>
+    </div>
+    <div class="step-line active"></div>
+    <div class="step-item active">
+      <div class="step-badge">3</div>
+      <span class="step-label">Confirmation</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <div class="step-badge">4</div>
+      <span class="step-label">Payment</span>
+    </div>
+  </div>
+
+  <div class="confirm-layout">
+    <div class="confirm-main">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; color: #0f172a; margin: 0 0 25px;">
+        Booking Overview & Summary 🎉
+      </h2>
+
+      <!-- Customer Information Card -->
+      <div class="confirm-card">
+        <h3>📋 Customer & Event Information</h3>
+        <div class="customer-info-grid">
+          <div class="info-item">
+            <label>Customer Name</label>
+            <span>{{ booking.name }}</span>
+          </div>
+          <div class="info-item">
+            <label>Phone Number</label>
+            <span>{{ booking.phone }}</span>
+          </div>
+          <div class="info-item">
+            <label>Email Address</label>
+            <span>{{ booking.email }}</span>
+          </div>
+          <div class="info-item">
+            <label>Event Name & Type / कार्यक्रम</label>
+            <span style="color: #8b5cf6; font-weight: 800;">🎉 {{ booking.event_name or 'Wedding / शादी विवाह' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Event Date</label>
+            <span>📅 {{ booking.event_date }}</span>
+          </div>
+          <div class="info-item">
+            <label>Location (Tehsil)</label>
+            <span>📍 {{ booking.tehsil }}, {{ booking.district }} ({{ booking.state }})</span>
+          </div>
+          <div class="info-item" style="grid-column: 1 / -1;">
+            <label>Event Address</label>
+            <span>{{ booking.address }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected Vendors Card -->
+      <div class="confirm-card">
+        <h3>🎉 Selected Services Breakdown</h3>
+        {% if selected_vendors %}
+          <div class="vendor-items-list">
+            {% for item in selected_vendors %}
+              <div class="vendor-item-row">
+                <img src="{{ item.photo }}" alt="{{ item.name }}" class="vendor-item-img" onerror="this.src='/static/image/logo.png'">
+                <div class="vendor-item-details">
+                  <span class="vendor-cat-badge">{{ item.category }}</span>
+                  <h4>{{ item.name }}</h4>
+                  <p>{{ item.description }}</p>
+                </div>
+                <div class="vendor-item-price">
+                  ₹{{ "{:,.2f}".format(item.price) }}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color: #94a3b8;">No services selected.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Sidebar Price & Action -->
+    <div class="confirm-sidebar">
+      <div class="summary-card">
+        <h3 style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; border-bottom: none; margin-bottom: 15px; color: #0f172a;">💰 Shubhlo Token Payment Summary</h3>
+        
+        <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+          <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+            <span style="color: #475569;">Vendor Token Advance (₹5,000 × {{ selected_vendors | length }}):</span>
+            <strong style="color: #10b981;">₹{{ "{:,.2f}".format(selected_vendors | length * 5000) }}</strong>
+          </div>
+          <div style="font-size: 11px; color: #059669; font-weight: 700; margin-bottom: 10px; background: #ecfdf5; padding: 5px 8px; border-radius: 6px;">
+            💡 100% Fully Deductible / वेंडर के बिल में ₹{{ "{:,.0f}".format(selected_vendors | length * 5000) }} कम होंगे!
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+            <span style="color: #475569;">Customer Platform Processing Fee (₹100 × {{ selected_vendors | length }}):</span>
+            <strong style="color: #0f172a;">₹{{ "{:,.2f}".format(selected_vendors | length * 100) }}</strong>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 13px;">
+            <span style="color: #475569;">GST @ 18% on Platform Fee (₹18 × {{ selected_vendors | length }}):</span>
+            <strong style="color: #0f172a;">₹{{ "{:,.2f}".format(selected_vendors | length * 18) }}</strong>
+          </div>
+        </div>
+
+        <div class="summary-row total-row" style="background: #10b981; color: white; padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 14px; font-weight: 700;">Total Token Payable Now:</span>
+          <span style="font-size: 20px; font-weight: 900;">₹{{ "{:,.2f}".format(selected_vendors | length * 5118) }}</span>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #ecfdf5, #f0fdf4); border: 1.5px solid #6ee7b7; border-radius: 12px; padding: 14px; margin-bottom: 15px; color: #065f46; line-height: 1.55;">
+          <h4 style="margin: 0 0 6px 0; color: #047857; font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+            📢 CLEAR TOKEN MONEY INSTRUCTIONS / ग्राहक टोकन निर्देश
+          </h4>
+          <div style="font-size: 12px; color: #064e3b;">
+            • <strong>Online Token Paid Now:</strong> You pay <strong>₹5,118 Token Money</strong> per booked service.<br>
+            • <strong>₹5,000 Direct Bill Credit:</strong> Exactly <strong>₹5,000 will be DEDUCTED / KAM</strong> from your final invoice balance with the vendor on event day.<br>
+            • <strong>₹118 Platform Processing Fee:</strong> ₹100 platform fee + ₹18 GST is for Shubhlo processing.<br>
+            • <strong>Remaining Balance:</strong> Pay the remaining package balance directly to the vendor on event day.
+          </div>
+        </div>
+
+        <form action="{{ url_for('pay') }}" method="POST" id="confirmPayForm" style="margin-top: 10px;" onsubmit="return validateTermsCheckbox()">
+          <!-- Interactive English Declaration & Terms Checkbox Box -->
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; margin-bottom: 15px;">
+            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12.5px; color: #1e293b; font-weight: 600; line-height: 1.45;">
+              <input type="checkbox" name="accept_terms" id="acceptTermsCheckbox" value="on" required style="width: 18px; height: 18px; accent-color: #10b981; margin-top: 2px; cursor: pointer;">
+              <span>
+                <strong>CUSTOMER OFFICIAL DECLARATION:</strong> I have read, understood, and hereby agree to the Shubhlo <a href="{{ url_for('terms') }}" target="_blank" style="color: #10b981; font-weight: 700; text-decoration: underline;">Terms & Conditions</a>, Token Deposit Policy, and Billing Rules. *
+              </span>
+            </label>
+          </div>
+
+          <button type="submit" id="paySubmitBtn" class="btn-confirm-pay" style="width: 100%; padding: 13px; font-size: 15px; font-weight: 800; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; cursor: pointer;">
+            Pay Token Money ₹{{ "{:,.0f}".format(selected_vendors | length * 5118) }} 💳
+          </button>
+        </form>
+
+        <script>
+          function validateTermsCheckbox() {
+            const chk = document.getElementById('acceptTermsCheckbox');
+            if (!chk || !chk.checked) {
+              alert("❌ आगे बढ़ने के लिए कृपया नियम और शर्तों (Terms & Conditions) के चेकबॉक्स पर टिक लगाएं! / Please accept the Terms & Conditions to proceed!");
+              if (chk) chk.focus();
+              return false;
+            }
+            return true;
+          }
+        </script>
+        <a href="{{ url_for('booking2') }}" class="btn-edit-selection">✏️ Modify Choices</a>
+      </div>
+    </div>
+  </div>
+
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>

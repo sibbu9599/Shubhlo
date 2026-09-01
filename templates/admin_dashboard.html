@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Shubhlo</title>
+  <link rel="stylesheet" href="/static/master.css?v=3">
+  <link rel="stylesheet" href="/static/dashboard.css?v=1">
+  <style>
+    :root {
+      --admin-primary: #8e44ad;
+      --admin-gradient: linear-gradient(135deg, #8e44ad, #3498db);
+      --success: #2ecc71;
+      --warning: #f1c40f;
+      --info: #3498db;
+    }
+    .admin-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .admin-banner {
+      background: var(--admin-gradient);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 30px rgba(142, 68, 173, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .admin-banner::after {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      top: -100px;
+      right: -100px;
+    }
+    .admin-banner h2 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .admin-banner p {
+      margin: 10px 0 0;
+      opacity: 0.9;
+      font-size: 16px;
+    }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+    @media (max-width: 992px) {
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .admin-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 25px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(142, 68, 173, 0.08);
+      margin-bottom: 30px;
+    }
+    .admin-card h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 20px;
+      color: var(--dark-slate);
+      border-bottom: 2px solid rgba(142, 68, 173, 0.1);
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sms-log-list {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    .sms-log-item {
+      background: #faf6fc;
+      border-left: 4px solid var(--admin-primary);
+      border-radius: 4px;
+      padding: 12px 15px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    .sms-log-item.recipient-vendor {
+      border-left-color: var(--info);
+      background: #f0f7fc;
+    }
+    .sms-log-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #7f8c8d;
+    }
+    .sms-log-phone {
+      color: var(--dark-slate);
+    }
+    .sms-log-body {
+      color: #34495e;
+      line-height: 1.4;
+    }
+    .booking-list-admin {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .booking-card-admin {
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      background: #fdfdfd;
+      transition: var(--transition);
+    }
+    .booking-card-admin:hover {
+      box-shadow: var(--shadow-sm);
+      border-color: rgba(142, 68, 173, 0.2);
+    }
+    .booking-meta-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+      background: #faf6fc;
+      padding: 12px 15px;
+      border-radius: 6px;
+    }
+    .meta-col strong {
+      display: block;
+      font-size: 11px;
+      color: #7f8c8d;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .meta-col span {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark-slate);
+    }
+    .verifications-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 15px;
+    }
+    .verification-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1.5px solid rgba(0,0,0,0.06);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .verification-chip.verified {
+      border-color: rgba(46, 204, 113, 0.3);
+      background: rgba(46, 204, 113, 0.04);
+    }
+    .verification-chip.pending {
+      border-color: rgba(241, 196, 15, 0.3);
+      background: rgba(241, 196, 15, 0.04);
+    }
+    .status-badge-admin {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+    }
+    .status-badge-admin.verified {
+      background: rgba(46, 204, 113, 0.15);
+      color: var(--success);
+    }
+    .status-badge-admin.pending {
+      background: rgba(241, 196, 15, 0.15);
+      color: #d68910;
+    }
+    .service-icon {
+      margin-right: 5px;
+    }
+    .admin-stat-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--admin-primary);
+    }
+  </style>
+</head>
+<body class="watermark-bg">
+  <!-- Header / Navbar -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div style="max-width: 1200px; margin: 20px auto 0; padding: 0 20px;">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" style="margin-bottom: 0;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Main Container -->
+  <main class="admin-container">
+    <h2 style="display:none;">Master Admin Dashboard</h2>
+    <div class="admin-banner" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+      <div>
+        <h2 style="margin: 0;">Owner Control Panel 👑</h2>
+        <p style="margin: 5px 0 0 0;">Monitor event bookings, track vendor OTP confirmations, and view simulated SMS notifications in real-time.</p>
+      </div>
+      <form action="{{ url_for('admin_reset_all_data') }}" method="POST" onsubmit="return confirm('⚠️ Are you sure you want to TRUNCATE and ERASE all test vendors, users, and bookings? This will reset your environment 100% fresh.');" style="margin: 0;">
+        <button type="submit" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(5px);">
+          🧹 Truncate & Reset All Test Data
+        </button>
+      </form>
+    </div>
+
+    <div class="admin-grid">
+      <!-- Left: Bookings list -->
+      <div class="admin-card">
+        <h3>
+          <span>Bookings & OTP Verification Status</span>
+          <span class="admin-stat-number">{{ total_bookings }} Total</span>
+        </h3>
+
+        {% if bookings %}
+          <div class="booking-list-admin">
+            {% for b in bookings %}
+              <div class="booking-card-admin">
+                <!-- Header of card -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed rgba(0,0,0,0.06); padding-bottom: 8px;">
+                  <span style="font-weight: 700; color: var(--admin-primary); font-size: 15px;">Booking ID: #{{ b.id }}</span>
+                  <span style="font-size: 13px; color: #7f8c8d; font-weight: 600;">📅 Date: {{ b.event_date }}</span>
+                </div>
+
+                <!-- Customer Details -->
+                <div class="booking-meta-row">
+                  <div class="meta-col">
+                    <strong>Customer Name</strong>
+                    <span>{{ b.name }}</span>
+                  </div>
+                  <div class="meta-col">
+                    <strong>Contact Phone</strong>
+                    <span>{{ b.phone }}</span>
+                  </div>
+                  <div class="meta-col">
+                    <strong>Payment</strong>
+                    <span style="color: var(--success);">₹{{ "{:,.2f}".format(b.amount) }} ({{ b.payment_status }})</span>
+                  </div>
+                  <div class="meta-col">
+                    <strong>Generated OTP</strong>
+                    <span style="background: rgba(142, 68, 173, 0.1); color: var(--admin-primary); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 14px; letter-spacing: 1px;">
+                      {{ b.otp or 'N/A' }}
+                    </span>
+                  </div>
+                  <div class="meta-col">
+                    <strong>OTP Deal Status</strong>
+                    {% if b.is_otp_verified or (b.verifications and b.verifications | selectattr('status', 'equalto', 'Verified') | list | length > 0) %}
+                      <span style="color: #27ae60; font-weight: 800; font-size: 12px; background: #e8f8f5; padding: 4px 8px; border-radius: 4px; border: 1px solid #2ecc71;">
+                        🎉 Deal Complete (OTP Verified)
+                      </span>
+                    {% else %}
+                      <span style="color: #d35400; font-weight: 700; font-size: 12px; background: #fef5e7; padding: 4px 8px; border-radius: 4px; border: 1px solid #f39c12;">
+                        ⏳ Pending Vendor OTP
+                      </span>
+                    {% endif %}
+                  </div>
+                  <div class="meta-col">
+                    <strong>Admin Action</strong>
+                    {% if b.booking_status == 'Cancelled' or b.status == 'Cancelled' %}
+                      <span style="color: #e74c3c; font-weight: 700; font-size: 12px; background: #fadbd8; padding: 4px 10px; border-radius: 4px; display: inline-block;">❌ Cancelled / Rejected</span>
+                    {% else %}
+                      <div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; align-items: center;">
+                        {% if b.booking_status != 'Confirmed' and b.status != 'Confirmed' %}
+                          <form action="{{ url_for('admin_approve_booking', booking_id=b.id) }}" method="POST" style="margin: 0;">
+                            <button type="submit" style="background: linear-gradient(135deg, #27ae60, #1e8449); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);">
+                              ✔ Approve
+                            </button>
+                          </form>
+                        {% else %}
+                          <span style="color: #27ae60; font-weight: 700; font-size: 11px; background: #d4efdf; padding: 4px 8px; border-radius: 4px;">✔ Confirmed</span>
+                        {% endif %}
+
+                        <form action="{{ url_for('admin_reject_booking', booking_id=b.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to CANCEL/REJECT booking #{{ b.id }}?');">
+                          <button type="submit" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);">
+                            ❌ Reject / Cancel
+                          </button>
+                        </form>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Assigned Vendor Verifications & Selected Services Audit -->
+                <div style="margin-top: 15px; background: #fdfaff; border: 1.5px solid #e9d5ff; border-radius: 10px; padding: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                    <div style="font-size: 13px; font-weight: 800; color: #6b21a8; display: flex; align-items: center; gap: 6px;">
+                      <span>🔍 Selected Services & Vendor OTP Audit (चुनी गई सेवाएं व वेंडर स्टेटस)</span>
+                    </div>
+                    {% if b.verifications %}
+                      {% set verified_count = b.verifications | selectattr('status', 'equalto', 'Verified') | list | length %}
+                      {% set total_count = b.verifications | length %}
+                      <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px; background: {% if verified_count == total_count %}#dcfce7; color: #15803d;{% else %}#fef3c7; color: #b45309;{% endif %}">
+                        OTP Progress: {{ verified_count }} / {{ total_count }} Verified
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  {% if b.verifications %}
+                    <div class="verifications-grid">
+                      {% for v in b.verifications %}
+                        {% set vendor_wa_msg = "Hello " ~ v.vendor_name ~ " ji! Aapke paas Celebrato par Nayi Booking Request #" ~ b.id ~ " aayi hai. Service: " ~ (v.service_type.replace('_', ' ') | title) ~ ", Event Date: " ~ b.event_date ~ ". Kripya Shubhlo Owner se baat karein. - Shubhlo Owner" %}
+                        <div class="verification-chip {{ v.status | lower }}" style="border-radius: 8px; padding: 10px 12px; background: white; border: 1.5px solid {% if v.status == 'Verified' %}#86efac{% else %}#fde68a{% endif %}; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                          <div>
+                            <strong style="text-transform: uppercase; color: #4c1d95; display: block; font-size: 11px; letter-spacing: 0.5px;">
+                              🏷️ {{ v.service_type.replace('_', ' ') }}
+                            </strong>
+                            <span style="color: #1e293b; font-weight: 700; font-size: 13px; display: block; margin-top: 2px;">
+                              👤 {{ v.vendor_name }}
+                            </span>
+                            <a href="https://wa.me/{{ (v.vendor_phone or '9988776655') | clean_phone_indian }}?text={{ vendor_wa_msg | urlquote }}" target="_blank" style="background: #25D366; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; margin-top: 5px;">
+                              💬 WA Vendor
+                            </a>
+                          </div>
+                          <div style="text-align: right;">
+                            {% if v.status == 'Verified' %}
+                              <span class="status-badge-admin verified" style="background: #dcfce7; color: #166534; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 800;">
+                                ✅ Verified
+                              </span>
+                              {% if v.verified_at %}
+                                <span style="display: block; font-size: 10px; color: #64748b; margin-top: 3px;">
+                                  🕒 {{ v.verified_at }}
+                                </span>
+                              {% endif %}
+                            {% else %}
+                              <span class="status-badge-admin pending" style="background: #fef3c7; color: #92400e; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 800;">
+                                ⏳ Pending OTP
+                              </span>
+                              <span style="display: block; font-size: 10px; color: #6b21a8; font-weight: 700; margin-top: 3px; font-family: monospace;">
+                                OTP: {{ b.otp or 'N/A' }}
+                              </span>
+                            {% endif %}
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <div style="font-size: 13px; color: #95a5a6; font-style: italic; background: white; padding: 10px; border-radius: 6px; text-align: center;">
+                      No services selected or pending verification in this booking.
+                    </div>
+                  {% endif %}
+                </div>
+                <!-- 1-Click Manual Dispatch Hub (Free WhatsApp / Mobile SMS) -->
+                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed rgba(142, 68, 173, 0.2); background: #faf8fc; border-radius: 8px; padding: 12px 15px;">
+                  <div style="font-size: 12px; font-weight: 700; color: #8e44ad; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span>📲 1-Click Manual WhatsApp & SMS Hub</span>
+                    <span style="font-size: 10px; font-weight: 600; color: #27ae60; background: #e8f8f5; padding: 2px 6px; border-radius: 4px;">100% FREE</span>
+                  </div>
+
+                  {% set pending_msg = "Namaste " ~ b.name ~ "! Aapki Celebrato booking request #" ~ b.id ~ " mil gayi hai. Abhi yeh PENDING status me hai. Hum Vendor se baat karke jald hi aapko Confirm karenge. Date: " ~ b.event_date ~ ". Dhanyawad - Celebrato Team" %}
+                  {% set confirm_msg = "Badhai ho " ~ b.name ~ " ji! Aapki Celebrato booking #" ~ b.id ~ " CONFIRM ho gayi hai! 🎉 Event Date: " ~ b.event_date ~ ". Aapka Event Completion OTP hai: " ~ (b.otp or 'N/A') ~ ". Event ke baad yeh OTP vendor ko share karein. Dhanyawad - Celebrato Team" %}
+                  {% set reject_msg = "Namaste " ~ b.name ~ "! Aapki Celebrato booking #" ~ b.id ~ " kisi karan vash Cancel/Reject ho gayi hai. Adhik jankari ke liye Admin se sampark karein. Dhanyawad - Celebrato Team" %}
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                    <!-- Send Pending update to Customer -->
+                    <a href="https://wa.me/{{ b.phone | clean_phone_indian }}?text={{ pending_msg | urlquote }}" target="_blank" class="btn-wa-action" style="background: #25D366; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(37,211,102,0.25);">
+                      💬 WA Pending Alert
+                    </a>
+                    <a href="sms:+91{{ b.phone }}?body={{ pending_msg | urlquote }}" class="btn-sms-action" style="background: #3498db; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(52,152,219,0.25);">
+                      ✉️ SMS Pending
+                    </a>
+
+                    <!-- Send Confirmation & OTP update to Customer -->
+                    <a href="https://wa.me/{{ b.phone | clean_phone_indian }}?text={{ confirm_msg | urlquote }}" target="_blank" class="btn-wa-action" style="background: #128C7E; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(18,140,126,0.25);">
+                      🎉 WA Confirm + OTP
+                    </a>
+                    <a href="sms:+91{{ b.phone }}?body={{ confirm_msg | urlquote }}" class="btn-sms-action" style="background: #2980b9; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(41,128,185,0.25);">
+                      ✉️ SMS Confirm
+                    </a>
+
+                    <!-- Send Rejection Alert to Customer -->
+                    <a href="https://wa.me/{{ b.phone | clean_phone_indian }}?text={{ reject_msg | urlquote }}" target="_blank" class="btn-wa-action" style="background: #e74c3c; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(231,76,60,0.25);">
+                      🔴 WA Reject Alert
+                    </a>
+
+                    <!-- Copy Confirmation Msg to Clipboard -->
+                    <button type="button" onclick="copyNotificationText(`{{ confirm_msg }}`)" style="background: #e7ecfa; color: #3b5998; border: 1px solid #cbd6f0; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                      📋 Copy Text
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 40px 0; color: #95a5a6;">
+            <span style="font-size: 40px; display: block; margin-bottom: 10px;">📭</span>
+            <h4>No Bookings in System</h4>
+            <p>Make bookings as a customer to see verification logs here.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Right: SMS Logs -->
+      <div class="admin-card">
+        <h3>Simulated SMS Logs 📱</h3>
+        <div class="sms-log-list">
+          {% if sms_logs %}
+            {% for sms in sms_logs %}
+              <div class="sms-log-item {% if sms.recipient == 'Vendor' %}recipient-vendor{% endif %}">
+                <div class="sms-log-header">
+                  <span class="sms-log-recipient">To: {{ sms.recipient }}</span>
+                  <span class="sms-log-phone">{{ sms.phone }}</span>
+                </div>
+                <div class="sms-log-body">
+                  {{ sms.message }}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; border-top: 1px dashed rgba(0,0,0,0.05); padding-top: 4px;">
+                  <div style="display: flex; gap: 6px;">
+                    <a href="https://wa.me/{{ sms.phone | clean_phone_indian }}?text={{ sms.message | urlquote }}" target="_blank" style="background: #25D366; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-decoration: none;">
+                      💬 WA
+                    </a>
+                    <a href="sms:+91{{ sms.phone }}?body={{ sms.message | urlquote }}" style="background: #3498db; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-decoration: none;">
+                      ✉️ SMS
+                    </a>
+                  </div>
+                  <span style="font-size: 9px; color: #95a5a6;">{{ sms.created_at }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div style="text-align: center; padding: 30px 0; color: #95a5a6; font-style: italic;">
+              No SMS notifications sent yet.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Copy script -->
+  <script>
+    function copyNotificationText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          alert("Notification text copied to clipboard! You can paste it into WhatsApp or SMS.");
+        }).catch(function() {
+          fallbackCopyText(text);
+        });
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+    function fallbackCopyText(text) {
+      var textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      alert("Notification text copied to clipboard!");
+    }
+  </script>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container" style="text-align: center;">
+      <p>&copy; 2026 Shubhlo. All Rights Reserved.</p>
+    </div>
+    <div class="company-logo" style="text-align: center; margin-top: 15px;">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Shubhlo Brand Logo" style="max-height: 52px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign in with {{ provider|capitalize }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .oauth-container {
+      width: 100%;
+      max-width: 450px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .oauth-card {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 40px 30px;
+      text-align: center;
+      border: 1px solid #dadce0;
+    }
+
+    /* Google Brand Specific */
+    .google-theme {
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .google-logo {
+      display: inline-flex;
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+    }
+    .google-logo span:nth-child(1) { color: #4285F4; }
+    .google-logo span:nth-child(2) { color: #EA4335; }
+    .google-logo span:nth-child(3) { color: #FBBC05; }
+    .google-logo span:nth-child(4) { color: #4285F4; }
+    .google-logo span:nth-child(5) { color: #34A853; }
+    .google-logo span:nth-child(6) { color: #EA4335; }
+
+    /* Facebook Brand Specific */
+    .facebook-theme {
+      font-family: 'SF Pro Text', -apple-system, sans-serif;
+    }
+    
+    .facebook-logo {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 15px;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 400;
+      color: #202124;
+      margin: 0 0 10px 0;
+    }
+
+    .fb-h2 {
+      color: #1c1e21;
+      font-weight: 600;
+      font-size: 20px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #5f6368;
+      margin-bottom: 30px;
+    }
+
+    .account-list {
+      text-align: left;
+      margin-bottom: 25px;
+    }
+
+    .account-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      border-bottom: 1px solid #e8eaed;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      border-radius: 4px;
+    }
+
+    .account-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #e8f0fe;
+      color: #1a73e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      margin-right: 12px;
+    }
+
+    .fb-avatar {
+      background-color: #e7f3ff;
+      color: #1877f2;
+    }
+
+    .account-details {
+      flex: 1;
+    }
+
+    .account-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #3c4043;
+    }
+
+    .account-email {
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    /* Custom Form styling */
+    .custom-account-box {
+      border: 1px dashed #ccc;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .custom-account-box h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #3c4043;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #5f6368;
+      margin-bottom: 4px;
+    }
+
+    .form-group input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 10px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #1557b0;
+    }
+
+    .fb-btn-submit {
+      background-color: #1877f2;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .fb-btn-submit:hover {
+      background-color: #145dbf;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 30px;
+      line-height: 1.5;
+    }
+
+    .footer-text a {
+      color: #1a73e8;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="oauth-container">
+    <div class="oauth-card {% if provider == 'google' %}google-theme{% else %}facebook-theme{% endif %}">
+      
+      {% if provider == 'google' %}
+        <div class="google-logo">
+          <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+        </div>
+        <h2>Choose an account</h2>
+        <p class="subtitle">to continue to <strong>Shubhlo</strong></p>
+      {% else %}
+        <svg class="facebook-logo" viewBox="0 0 24 24">
+          <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+        <h2 class="fb-h2">Log in with Facebook</h2>
+        <p class="subtitle">Shubhlo is requesting access to your profile.</p>
+      {% endif %}
+
+      <div class="account-list">
+        <!-- Preloaded Mock User 1 -->
+        <div class="account-item" onclick="loginAs('Rahul Sharma', 'rahul.sharma@gmail.com')">
+          <div class="avatar {% if provider != 'google' %}fb-avatar{% endif %}">R</div>
+          <div class="account-details">
+            <div class="account-name">Rahul Sharma</div>
+            <div class="account-email">rahul.sharma@gmail.com</div>
+          </div>
+        </div>
+
+        <!-- Preloaded Mock User 2 -->
+        <div class="account-item" onclick="loginAs('Priya Verma', 'priya.verma@gmail.com')">
+          <div class="avatar {% if provider != 'google' %}fb-avatar{% endif %}">P</div>
+          <div class="account-details">
+            <div class="account-name">Priya Verma</div>
+            <div class="account-email">priya.verma@gmail.com</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="custom-account-box">
+        <h3>Or login with custom mock profile:</h3>
+        <form action="{{ url_for('oauth_callback', provider=provider) }}" method="POST" id="oauthForm">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" name="name" id="name" placeholder="e.g. John Doe" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" name="email" id="email" placeholder="e.g. john.doe@example.com" required>
+          </div>
+          <button type="submit" class="btn-submit {% if provider != 'google' %}fb-btn-submit{% endif %}">
+            Authorize & Sign In
+          </button>
+        </form>
+      </div>
+
+      <p class="footer-text">
+        To help you sign in safely, {{ provider|capitalize }} will share your name, email address, and profile picture with Shubhlo. See Shubhlo's <a href="#">Privacy Policy</a> and <a href="#">Terms of Service</a>.
+      </p>
+
+    </div>
+  </div>
+
+  <script>
+    function loginAs(name, email) {
+      document.getElementById('name').value = name;
+      document.getElementById('email').value = email;
+      document.getElementById('oauthForm').submit();
+    }
+  </script>
+</body>
+</html>

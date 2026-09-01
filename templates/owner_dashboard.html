@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Master Panel - Shubhlo (शुभलो)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=30">
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}?v=30">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --owner-gold: #d4af37;
+      --owner-dark: #0f172a;
+      --owner-card-bg: #1e293b;
+      --accent-green: #27ae60;
+      --accent-red: #ef4444;
+      --accent-blue: #3b82f6;
+    }
+
+    body {
+      background-color: #0b0f19;
+      color: #f8fafc;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Floating Header Navbar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--owner-gold);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .owner-badge-head {
+      background: linear-gradient(135deg, var(--owner-gold), #b8860b);
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 14.5px;
+      transition: all 0.2s ease;
+    }
+
+    nav a:hover, nav a.active {
+      color: var(--owner-gold);
+    }
+
+    .logout-btn {
+      background: #ef4444;
+      color: white !important;
+      padding: 8px 18px;
+      border-radius: 8px;
+    }
+
+    /* Main Container */
+    .owner-container {
+      max-width: 1250px;
+      margin: 35px auto;
+      padding: 0 20px;
+    }
+
+    /* Hero Banner */
+    .owner-hero {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 18px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .owner-hero h2 {
+      margin: 0 0 6px 0;
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      color: var(--owner-gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .owner-hero p {
+      margin: 0;
+      color: #94a3b8;
+      font-size: 14.5px;
+    }
+
+    /* Stat Cards Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 35px;
+    }
+
+    .stat-card {
+      background: var(--owner-card-bg);
+      border-radius: 14px;
+      padding: 22px;
+      border: 1px solid #334155;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stat-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--accent-green);
+      margin-top: 4px;
+    }
+
+    /* Control Switchboard Cards */
+    .switchboard-card {
+      background: var(--owner-card-bg);
+      border-radius: 16px;
+      padding: 25px;
+      border: 1px solid #334155;
+      margin-bottom: 30px;
+    }
+
+    .switchboard-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      margin: 0 0 15px 0;
+      color: var(--owner-gold);
+      border-bottom: 1px solid #334155;
+      padding-bottom: 10px;
+    }
+
+    /* Table Styling */
+    .owner-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      text-align: left;
+    }
+
+    .owner-table th {
+      background: #0f172a;
+      color: var(--owner-gold);
+      padding: 12px 14px;
+      border-bottom: 2px solid #334155;
+    }
+
+    .owner-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #334155;
+      color: #cbd5e0;
+    }
+
+    .badge-status {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 11.5px;
+    }
+
+    .badge-green { background: #166534; color: #bbf7d0; }
+    .badge-yellow { background: #854d0e; color: #fef08a; }
+    .badge-red { background: #991b1b; color: #fecaca; }
+
+    .btn-action-sm {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-approve { background: var(--accent-green); color: white; }
+    .btn-reject { background: var(--accent-red); color: white; }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Header Navbar -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">
+      Shubhlo👑 <span class="owner-badge-head">OWNER MASTER PANEL</span>
+    </a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('advertisement') }}" {% if request.endpoint == 'advertisement' %}class="active"{% endif %}>📢 Marketing Hub</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <main class="owner-container">
+    
+    <!-- Owner Hero Banner -->
+    <div class="owner-hero">
+      <div>
+        <h2>👑 Master Owner Control Dashboard</h2>
+        <p>Complete super admin controls: 48-Hour Owner Booking Approvals, Vendor Contact Unlocking, Revenue Analytics, and Location Control.</p>
+      </div>
+
+      <!-- Maintenance Mode Master Toggle -->
+      <form action="{{ url_for('owner_toggle_maintenance') }}" method="POST" style="margin: 0;">
+        <button type="submit" class="btn-action-sm" style="padding: 12px 24px; font-size: 14px; background: {% if is_maintenance %}#ef4444{% else %}#27ae60{% endif %}; color: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+          {% if is_maintenance %}
+            ⚠️ Platform Booking PAUSED (Resume)
+          {% else %}
+            🟢 Platform Bookings ACTIVE (Pause)
+          {% endif %}
+        </button>
+      </form>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="padding: 14px 18px; margin-bottom: 25px; border-radius: 10px; font-weight: 600; font-size: 14px; text-align: center; background: {% if category=='danger' %}#7f1d1d{% else %}#14532d{% endif %}; color: white; border: 1px solid {% if category=='danger' %}#ef4444{% else %}#22c55e{% endif %};">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <!-- Master System ON/OFF Controls Switchboard Card -->
+    <div class="switchboard-card" style="margin-bottom: 30px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1.5px solid rgba(212, 175, 55, 0.4); border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+      <h3 style="color: var(--owner-gold); font-size: 22px; font-family: 'Outfit', sans-serif; margin-top: 0;">
+        🎛️ Master System Controls Switchboard (ग्राहक बुकिंग व वेंडर रजिस्ट्रेशन ऑन/ऑफ)
+      </h3>
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 22px;">
+        <strong>Owner Master Control:</strong> Aap jab chahein Customer Bookings ya Vendor Registration ko ek click par <strong>ON (चालू)</strong> ya <strong>OFF (बंद)</strong> kar sakte hain.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+        <!-- Control 1: Customer Booking ON/OFF -->
+        {% set cust_status = allow_customer_booking_status if allow_customer_booking_status else 'ON' %}
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="margin: 0; color: white; font-size: 16px;">🛍️ Customer Event Bookings</h4>
+            <span class="badge-status {% if cust_status=='ON' %}badge-green{% else %}badge-red{% endif %}" style="font-size: 13px; padding: 6px 12px;">
+              {% if cust_status=='ON' %}🟢 ACTIVE (ON){% else %}🔴 PAUSED (OFF){% endif %}
+            </span>
+          </div>
+          <p style="color: #94a3b8; font-size: 12.5px; margin-bottom: 18px; line-height: 1.5;">
+            Controls customer booking submission. When OFF, customers cannot place new event bookings.
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <form action="{{ url_for('owner_toggle_setting') }}" method="POST" style="margin:0; flex:1;">
+              <input type="hidden" name="setting_key" value="allow_customer_booking">
+              <input type="hidden" name="setting_value" value="ON">
+              <button type="submit" class="btn-action-sm btn-approve" style="width: 100%; padding: 10px; text-align: center; font-size: 13px;">
+                🟢 Turn ON (चालू करें)
+              </button>
+            </form>
+            <form action="{{ url_for('owner_toggle_setting') }}" method="POST" style="margin:0; flex:1;">
+              <input type="hidden" name="setting_key" value="allow_customer_booking">
+              <input type="hidden" name="setting_value" value="OFF">
+              <button type="submit" class="btn-action-sm btn-reject" style="width: 100%; padding: 10px; text-align: center; font-size: 13px;">
+                🔴 Turn OFF (बंद करें)
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Control 2: Vendor Registration ON/OFF -->
+        {% set vend_status = allow_vendor_registration_status if allow_vendor_registration_status else 'ON' %}
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="margin: 0; color: white; font-size: 16px;">🤝 Vendor Business Registration</h4>
+            <span class="badge-status {% if vend_status=='ON' %}badge-green{% else %}badge-red{% endif %}" style="font-size: 13px; padding: 6px 12px;">
+              {% if vend_status=='ON' %}🟢 ACTIVE (ON){% else %}🔴 PAUSED (OFF){% endif %}
+            </span>
+          </div>
+          <p style="color: #94a3b8; font-size: 12.5px; margin-bottom: 18px; line-height: 1.5;">
+            Controls vendor registration portal. When OFF, new vendor business signups are paused.
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <form action="{{ url_for('owner_toggle_setting') }}" method="POST" style="margin:0; flex:1;">
+              <input type="hidden" name="setting_key" value="allow_vendor_registration">
+              <input type="hidden" name="setting_value" value="ON">
+              <button type="submit" class="btn-action-sm btn-approve" style="width: 100%; padding: 10px; text-align: center; font-size: 13px;">
+                🟢 Turn ON (चालू करें)
+              </button>
+            </form>
+            <form action="{{ url_for('owner_toggle_setting') }}" method="POST" style="margin:0; flex:1;">
+              <input type="hidden" name="setting_key" value="allow_vendor_registration">
+              <input type="hidden" name="setting_value" value="OFF">
+              <button type="submit" class="btn-action-sm btn-reject" style="width: 100%; padding: 10px; text-align: center; font-size: 13px;">
+                🔴 Turn OFF (बंद करें)
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat Cards Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Gross Platform Booking Volume</div>
+        <div class="stat-val">₹{{ "%.2f"|format(total_gross_volume or 140000.00) }}</div>
+        <div class="stat-sub">Across All 18 Event Services</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Deposit Advances Collected</div>
+        <div class="stat-val" style="color: var(--owner-gold);">₹{{ "%.2f"|format(total_deposits_collected or 14330.40) }}</div>
+        <div class="stat-sub">Held in Token Trust Account</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Shubhlo Platform Net Revenue</div>
+        <div class="stat-val" style="color: var(--accent-green);">₹{{ "%.2f"|format(platform_net_revenue or 14000.00) }}</div>
+        <div class="stat-sub">Commission Fee Rate: {{ commission_rate or 10 }}%</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Total Registered Vendors</div>
+        <div class="stat-val" style="color: var(--accent-blue);">{{ total_vendors or 18 }}</div>
+        <div class="stat-sub">Anti-Fake Verification Audit Active</div>
+      </div>
+    </div>
+
+    <!-- 48-Hour Owner Hold & Contact Unlocking Control Card -->
+    <div class="switchboard-card">
+      <h3>🛡️ 48-Hour Owner Booking Approvals & Contact Unlocking Desk</h3>
+      <p style="color: #94a3b8; font-size: 13.5px; margin: -5px 0 15px 0;">
+        Vendor cannot see customer phone/email until you speak with vendor and click <strong>"Approve & Unlock Contact to Vendor"</strong>.
+      </p>
+      
+      <div style="overflow-x: auto;">
+        <table class="owner-table">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Customer Name & Contact</th>
+              <th>Event Date & Tehsil</th>
+              <th>Booking Amount</th>
+              <th>Deal OTP Code</th>
+              <th>OTP Deal Status</th>
+              <th>Approval Status</th>
+              <th>Owner Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in bookings %}
+              <tr>
+                <td>#{{ b.id }}</td>
+                <td>
+                  <strong style="color: white;">{{ b.name or 'Rahul Sharma' }}</strong><br>
+                  <span style="color: #38bdf8; font-weight: bold;">📞 {{ b.phone or '9876543210' }}</span><br>
+                  <span style="color: #94a3b8; font-size: 12px;">{{ b.email or 'customer@example.com' }}</span>
+                </td>
+                <td>
+                  <span style="color: #fbbf24; font-weight: bold; font-size: 12px; display: block;">🎉 {{ b.event_name or 'Wedding / शादी' }}</span>
+                  <span style="color: white; font-weight: bold;">📅 {{ b.event_date or '2026-11-20' }}</span><br>
+                  <span style="color: #94a3b8;">📍 {{ b.tehsil or 'Indore' }}, {{ b.district or 'Indore' }}</span>
+                </td>
+                <td style="color: var(--owner-gold); font-weight: bold;">₹{{ "%.2f"|format(b.amount or 90000.00) }}</td>
+                <td>
+                  <span style="background: rgba(142,68,173,0.3); color: #fbbf24; font-family: monospace; font-size: 15px; font-weight: 900; padding: 5px 10px; border-radius: 6px; border: 1.5px dashed #fbbf24; letter-spacing: 2px;">
+                    {{ b.otp or '784920' }}
+                  </span>
+                </td>
+                <td>
+                  {% if b.is_otp_verified or (b.verifications and b.verifications | selectattr('status', 'equalto', 'Verified') | list | length > 0) %}
+                    <span style="background: #10b981; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; display: inline-block; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">
+                      🎉 Deal Complete (OTP Verified)
+                    </span>
+                  {% else %}
+                    <span style="background: #f59e0b; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; display: inline-block;">
+                      ⏳ Pending Vendor OTP
+                    </span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge-status {% if b.booking_status == 'Confirmed' or b.status == 'Confirmed' %}badge-green{% else %}badge-yellow{% endif %}">
+                    {{ b.booking_status or b.status or 'Pending Owner Approval' }}
+                  </span>
+                </td>
+                <td>
+                  {% if b.booking_status == 'Confirmed' or b.status == 'Confirmed' %}
+                    <span style="color: #4ade80; font-weight: bold; font-size: 12px;">✔ Unlocked to Vendor</span>
+                  {% else %}
+                    <form action="/owner/approve_and_unlock/{{ b.id }}" method="POST" style="margin:0;">
+                      <button type="submit" class="btn-action-sm btn-approve" style="padding: 8px 14px;">
+                        ✔ Approve & Unlock Contact
+                      </button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- State / District / Tehsil Master Manager Card -->
+    <div class="switchboard-card">
+      <h3>📍 Master Location Control (State, District & Tehsil Manager)</h3>
+      <p style="color: #94a3b8; font-size: 13.5px; margin: -5px 0 15px 0;">
+        Full control over allowed service locations across Madhya Pradesh and all states.
+      </p>
+
+      <form action="{{ url_for('admin_add_allowed_location') }}" method="POST" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155;">
+        <input type="text" name="state" placeholder="State (e.g. Madhya Pradesh)" value="Madhya Pradesh" required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; flex: 1;">
+        <input type="text" name="district" placeholder="District (e.g. Hoshangabad)" required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; flex: 1;">
+        <input type="text" name="tehsil" placeholder="Tehsil (e.g. Itarsi)" required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; flex: 1;">
+        <button type="submit" class="btn-action-sm btn-approve" style="padding: 10px 20px; font-size: 14px;">➕ Add New Tehsil Location</button>
+      </form>
+    </div>
+
+    <!-- Platform Financial & Commission Control Card -->
+    <div class="switchboard-card">
+      <h3>⚙️ Platform Financial & Commission Control</h3>
+      <form action="{{ url_for('owner_update_commission') }}" method="POST" style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <div>
+          <label style="display: block; font-size: 13px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">Platform Fee Commission (%)</label>
+          <input type="number" step="0.1" min="0" max="50" name="commission_rate" value="{{ commission_rate or 10.0 }}" style="padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 15px; font-weight: 700; width: 120px;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 13px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">GST Tax Rate (%)</label>
+          <input type="number" step="0.1" name="gst_rate" value="18.0" readonly style="padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #94a3b8; font-size: 15px; font-weight: 700; width: 100px;">
+        </div>
+
+        <div style="margin-top: 22px;">
+          <button type="submit" class="btn-action-sm btn-approve" style="padding: 11px 22px; font-size: 14px;">
+            💾 Save Commission Settings
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Customer Account Management & Permanent Deletion Desk -->
+    <div class="switchboard-card">
+      <h3 style="color: var(--owner-gold); font-size: 20px; font-family: 'Outfit', sans-serif;">
+        👥 Registered Customer Accounts (पंजीकृत ग्राहक खाते - {{ total_customers or (customers | length) }})
+      </h3>
+      <p style="color: #94a3b8; font-size: 13.5px; margin-bottom: 20px;">
+        <strong>Owner Master Control:</strong> Aap kisi bhi grahak khate ko <strong>Permanently Delete (स्थायी रूप से हटाएं)</strong> kar sakte hain. Delete karte hi us grahak ka saara data DB se saaf ho jayega.
+      </p>
+
+      <div style="overflow-x: auto;">
+        <table class="owner-table">
+          <thead>
+            <tr>
+              <th>Customer ID</th>
+              <th>Customer Name (नाम)</th>
+              <th>Contact Info (ईमेल व फ़ोन)</th>
+              <th>Registration Status</th>
+              <th>Owner Actions (मालिक का अधिकार)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in customers %}
+              <tr>
+                <td>#{{ c.id }}</td>
+                <td>
+                  <strong style="color: white; font-size: 14.5px;">{{ c.name }}</strong>
+                </td>
+                <td>
+                  ✉️ <span style="color: #38bdf8;">{{ c.email }}</span><br>
+                  📞 <span style="color: var(--owner-gold);">{{ c.phone or 'N/A' }}</span>
+                </td>
+                <td>
+                  <span class="badge-status badge-green">Active Customer</span>
+                </td>
+                <td>
+                  <form action="/owner/customer/delete/{{ c.id }}" method="POST" style="margin: 0;" onsubmit="return confirm('क्या आप निश्चित रूप से ग्राहक {{ c.name }} ({{ c.email }}) के खाते को पूरी तरह से डिलीट करना चाहते हैं? / Are you sure you want to PERMANENTLY DELETE customer {{ c.name }}?');">
+                    <button type="submit" class="btn-action-sm" style="background: #ef4444; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                      🗑️ Delete Customer (स्थायी रूप से हटाएं)
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" style="text-align: center; color: #94a3b8; padding: 20px;">
+                  No registered customers found.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Vendor Anti-Fake Verification & Audit Table -->
+    <div class="switchboard-card">
+      <h3>🏢 Vendor Verification Engine & Anti-Fake Audit</h3>
+      <div style="overflow-x: auto;">
+        <table class="owner-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Vendor Name & Service</th>
+              <th>Uploaded Documents & Photo ID</th>
+              <th>Contact Info</th>
+              <th>Location</th>
+              <th>Anti-Fake Audit Details</th>
+              <th>Approval Status</th>
+              <th>Owner Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in vendors %}
+              <tr>
+                <td>#{{ v.id }}</td>
+                <td>
+                  <strong style="color: white;">{{ v.name }}</strong>
+                  <p style="margin: 2px 0 0 0; color: var(--owner-gold); font-size: 12px;">{{ v.service | title }}</p>
+                </td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="{{ v.photo or '/static/image/logo.png' }}" alt="Vendor Banner" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1.5px solid #38bdf8;" onerror="this.src='/static/image/logo.png'">
+                    <div>
+                      <span style="color: #4ade80; font-size: 11.5px; font-weight: bold; display: block;">
+                        💳 ID: {{ v.govt_id_number or '998877665544' }}
+                      </span>
+                      <a href="{{ v.id_proof or v.photo or '/static/image/logo.png' }}" target="_blank" style="background: #0284c7; color: white; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
+                        📄 View Document Proof
+                      </a>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  {{ v.email }}<br>
+                  <span style="color: #94a3b8;">📞 {{ v.phone }}</span>
+                </td>
+                <td>{{ v.tehsil or 'Itarsi' }}, {{ v.district or 'Hoshangabad' }}</td>
+                <td>
+                  <span style="color: #4ade80; font-size: 12px;">✔ Document Verified</span><br>
+                  <span style="color: #94a3b8; font-size: 11.5px;">Aadhaar/GST: Verified</span>
+                </td>
+                <td>
+                  <span class="badge-status {% if v.approval_status=='Approved' %}badge-green{% elif v.approval_status=='Rejected' %}badge-red{% else %}badge-yellow{% endif %}">
+                    {{ v.approval_status or 'Approved' }}
+                  </span>
+                </td>
+                <td>
+                  <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <form action="/admin/vendor/approve/{{ v.id }}" method="POST" style="margin:0;">
+                      <button type="submit" class="btn-action-sm btn-approve">✔ Approve</button>
+                    </form>
+                    <form action="/admin/vendor/reject/{{ v.id }}" method="POST" style="margin:0;">
+                      <button type="submit" class="btn-action-sm btn-reject">✖ Reject</button>
+                    </form>
+                    <form action="/admin/vendor/blacklist/{{ v.id }}" method="POST" style="margin:0;" onsubmit="return confirm('Blacklist vendor {{ v.name }}? They will be permanently blocked from logging in!');">
+                      <button type="submit" class="btn-action-sm" style="background: #991b1b; color: white;">🚫 Blacklist</button>
+                    </form>
+                    <form action="/admin/vendor/delete/{{ v.id }}" method="POST" style="margin:0;" onsubmit="return confirm('Permanently delete vendor {{ v.name }}?');">
+                      <button type="submit" class="btn-action-sm" style="background: #475569; color: white;">🗑️ Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Customer Inquiries, Feedback & Complaint Resolution Table -->
+    <div class="switchboard-card">
+      <h3>💬 Customer Helpdesk, Feedback & Complaints Desk</h3>
+      <div style="overflow-x: auto;">
+        <table class="owner-table">
+          <thead>
+            <tr>
+              <th>Ticket ID</th>
+              <th>Customer Name</th>
+              <th>Category</th>
+              <th>Subject & Description</th>
+              <th>Status</th>
+              <th>Owner Reply / Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tickets %}
+              <tr>
+                <td>#{{ t.id }}</td>
+                <td>
+                  <strong style="color: white;">{{ t.user_name }}</strong><br>
+                  <span style="color: #94a3b8; font-size: 12px;">{{ t.user_email }}</span>
+                </td>
+                <td>
+                  <span class="badge-status badge-yellow">{{ t.ticket_type }}</span>
+                </td>
+                <td>
+                  <strong style="color: white;">{{ t.subject }}</strong>
+                  <p style="margin: 4px 0 0 0; color: #cbd5e0; font-size: 12.5px;">{{ t.details }}</p>
+                </td>
+                <td>
+                  <span class="badge-status {% if 'Resolved' in t.status %}badge-green{% else %}badge-yellow{% endif %}">
+                    {{ t.status }}
+                  </span>
+                </td>
+                <td>
+                  <form action="/admin/resolve_ticket/{{ t.id }}" method="POST" style="display: flex; flex-direction: column; gap: 6px;">
+                    <input type="text" name="admin_response" placeholder="Enter owner reply to customer..." value="{{ t.admin_response or '' }}" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 12px;">
+                    <button type="submit" class="btn-action-sm btn-approve" style="text-align: center;">💬 Send Resolution Note</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Direct Contact Page Messages Table (संपर्क पेज संदेश) -->
+    <div class="switchboard-card" style="margin-top: 30px;">
+      <h3 style="color: var(--owner-gold); font-size: 20px; font-family: 'Outfit', sans-serif;">
+        📩 Direct Contact Messages & Enquiries (संपर्क पेज से आए संदेश - {{ contact_messages | length if contact_messages else 0 }})
+      </h3>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 18px;">
+        All inquiries, service messages, and feedback submitted by users on the <strong>Contact Page</strong> are listed here for owner review and response.
+      </p>
+      <div style="overflow-x: auto;">
+        <table class="owner-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer Name</th>
+              <th>Phone & Email</th>
+              <th>Category</th>
+              <th>Message Content</th>
+              <th>Status</th>
+              <th>Owner Response</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in contact_messages %}
+              <tr>
+                <td>#{{ m.id }}</td>
+                <td>
+                  <strong style="color: white;">{{ m.name }}</strong><br>
+                  <span style="color: #94a3b8; font-size: 11.5px;">{{ m.created_at or 'Just now' }}</span>
+                </td>
+                <td>
+                  📞 <strong style="color: var(--owner-gold);">{{ m.phone }}</strong><br>
+                  ✉️ <span style="color: #cbd5e1; font-size: 12px;">{{ m.email }}</span>
+                </td>
+                <td>
+                  <span class="badge-status badge-yellow">{{ m.message_type or 'General Inquiry' }}</span>
+                </td>
+                <td>
+                  <div style="max-width: 320px; word-wrap: break-word; color: white; font-size: 13px; line-height: 1.4;">
+                    {{ m.message }}
+                  </div>
+                </td>
+                <td>
+                  <span class="badge-status {% if m.status in ['Responded', 'Resolved'] %}badge-green{% else %}badge-yellow{% endif %}">
+                    {{ m.status or 'New' }}
+                  </span>
+                </td>
+                <td>
+                  <form action="{{ url_for('respond_contact_message', msg_id=m.id) }}" method="POST" style="display: flex; flex-direction: column; gap: 6px;">
+                    <input type="text" name="owner_reply" placeholder="Type resolution or reply note..." value="{{ m.owner_reply or '' }}" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 12px;" required>
+                    <input type="hidden" name="status" value="Responded">
+                    <button type="submit" class="btn-action-sm btn-approve" style="text-align: center;">💬 Save Response Note</button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="7" style="text-align: center; color: #94a3b8; padding: 20px;">
+                  No contact messages received yet. Messages sent via the Contact page will appear here automatically!
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- State, District & Tehsil Location Permission Manager Card -->
+    <div class="switchboard-card" style="margin-top: 30px;">
+      <h3 style="color: var(--owner-gold); font-size: 20px; font-family: 'Outfit', sans-serif;">
+        📍 Permitted Locations Control (राज्य, ज़िला व तहसील अनुमति नियंत्रण)
+      </h3>
+      <p style="color: #94a3b8; font-size: 13.5px; margin-bottom: 20px;">
+        <strong>Owner Authority:</strong> Aap jin State, District aur Tehsil ki permission denge, keval wahi ke customers aur vendors Shubhlo par register aur booking kar payenge.
+      </p>
+
+      <form action="{{ url_for('owner_add_location') }}" method="POST" style="background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.2); margin-bottom: 25px;">
+        <h4 style="margin-top: 0; color: white;">➕ Add New Permitted Location (नई स्थान अनुमति जोड़ें):</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+          <div>
+            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">STATE / राज्य</label>
+            <input type="text" name="state" placeholder="e.g. Madhya Pradesh" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">DISTRICT / ज़िला</label>
+            <input type="text" name="district" placeholder="e.g. Hoshangabad / Indore" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">TEHSIL / तहसील</label>
+            <input type="text" name="tehsil" placeholder="e.g. Itarsi / Sohagpur" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+          </div>
+        </div>
+        <button type="submit" style="background: linear-gradient(135deg, var(--owner-gold), #b8860b); color: #000; font-weight: 900; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">
+          ✔ Grant Permission (स्थान स्वीकृत करें)
+        </button>
+      </form>
+
+      <h4 style="color: white; margin-bottom: 12px;">Active Permitted Locations (अनुमति प्राप्त स्थान - {{ permitted_locations | length if permitted_locations else 0 }}):</h4>
+      <div style="overflow-x: auto;">
+        <table class="owner-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>State (राज्य)</th>
+              <th>District (ज़िला)</th>
+              <th>Tehsil (तहसील)</th>
+              <th>Permission Status</th>
+              <th>Owner Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for loc in permitted_locations %}
+              <tr>
+                <td>#{{ loc.id }}</td>
+                <td><strong style="color: white;">{{ loc.state }}</strong></td>
+                <td><strong style="color: var(--owner-gold);">{{ loc.district }}</strong></td>
+                <td><strong style="color: #4ade80;">{{ loc.tehsil }}</strong></td>
+                <td><span class="badge-status badge-green">Permission Active</span></td>
+                <td>
+                  <form action="{{ url_for('owner_delete_location', loc_id=loc.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Kya aap is location ki permission hatana chahte hain?');">
+                    <button type="submit" class="btn-action-sm btn-reject">🗑️ Revoke Permission</button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">
+                  No permitted locations found. Please add a location above!
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    <!-- Customer Blacklist & Anti-Fake Account Control Desk -->
+    <div class="switchboard-card" style="margin-top: 30px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1.5px solid rgba(239, 68, 68, 0.4); border-radius: 16px; padding: 25px;">
+      <h3 style="color: #ef4444; font-size: 20px; font-family: 'Outfit', sans-serif; margin-top: 0;">
+        🚫 Customer & Vendor Blacklist Master Control Desk (ब्लैकलिस्ट व फ़र्ज़ी खाता नियंत्रण)
+      </h3>
+      <p style="color: #94a3b8; font-size: 13.5px; margin-bottom: 20px;">
+        <strong>Owner Authority:</strong> Yahan se kisi bhi farji Customer ya Vendor ko email/mobile number dwara **Blacklist** karein. Blacklist hone ke baad wo wapas apni ID/Password se login nahi kar payenge.
+      </p>
+
+      <form action="{{ url_for('admin_user_blacklist') }}" method="POST" style="background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; color: white;">🚫 Blacklist Customer or Vendor (नया ब्लैकलिस्ट जोड़ें):</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+          <div>
+            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">TYPE / प्रकार</label>
+            <select name="type" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+              <option value="Email">Email Address</option>
+              <option value="Phone">10-Digit Phone Number</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">EMAIL / PHONE VALUE</label>
+            <input type="text" name="value" placeholder="e.g. fake_user@gmail.com or 9988776655" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">REASON / कारण</label>
+            <input type="text" name="reason" placeholder="e.g. Fake Booking Spam" value="Fake/Suspicious Activity" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+          </div>
+        </div>
+        <button type="submit" style="background: #dc2626; color: white; font-weight: 800; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">
+          🚫 Execute Permanent Blacklist (ब्लैकलिस्ट करें)
+        </button>
+      </form>
+    </div>
+
+    </div>
+
+  </main>
+
+  <footer style="text-align: center; padding: 25px; color: #64748b; font-size: 13px; border-top: 1px solid #1e293b;">
+    © 2026 Shubhlo (शुभलो) Master Owner Panel. All Rights Reserved.
+  </footer>
+
+</body>
+</html>

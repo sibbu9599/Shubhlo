@@ -1,0 +1,11 @@
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE booking_verification;
+TRUNCATE TABLE selected_services;
+TRUNCATE TABLE simulated_sms;
+TRUNCATE TABLE vendor_availability;
+TRUNCATE TABLE booking;
+TRUNCATE TABLE rating;
+TRUNCATE TABLE contact_messages;
+TRUNCATE TABLE vendor;
+TRUNCATE TABLE users;
+SET FOREIGN_KEY_CHECKS = 1;

@@ -1,0 +1,107 @@
+/* Payment Page - Form Styles */
+
+.payment-box {
+  background: var(--white);
+  padding: 40px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 550px;
+  width: 90%;
+  margin: 50px auto;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.payment-box h2 {
+  text-align: center;
+  color: var(--dark-slate);
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-weight: 700;
+  font-size: 26px;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  letter-spacing: 0.5px;
+}
+
+.payment-box h2::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 45px;
+  height: 3.5px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+label {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--dark-slate);
+  display: block;
+  margin-top: 18px;
+  letter-spacing: 0.5px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-md);
+  background-color: #fafbfc;
+  color: var(--text-dark);
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  transition: var(--transition);
+}
+
+input[readonly] {
+  background-color: #f1f3f5;
+  color: #495057;
+  cursor: not-allowed;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+input:focus:not([readonly]), select:focus {
+  border-color: #8e44ad;
+  box-shadow: 0 0 10px rgba(142, 68, 173, 0.2);
+  background-color: var(--white);
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 30px;
+  background: var(--btn-gradient);
+  color: #2c3e50;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.35);
+  transition: var(--transition);
+}
+
+button:hover {
+  background: var(--btn-gradient-hover);
+  color: #1a252f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.45);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard - Shubhlo (शुभलो)</title>
+    <link rel="stylesheet" href="/static/master.css?v=30">
+    <link rel="stylesheet" href="/static/dashboard.css?v=30">
+</head>
+<body class="watermark-bg">
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+    <main class="container" style="max-width: 1100px; margin: 30px auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #8e44ad, #3498db); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(142,68,173,0.3);">
+            <h2 style="margin: 0;">Welcome, {{ vendor.name }}! 👋</h2>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">Manage your vendor profile, pricing, date availability, and customer bookings.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}" style="padding: 12px; margin-bottom: 20px; border-radius: 8px; font-weight: bold; background: {% if category=='danger' %}#f8d7da{% else %}#d4edda{% endif %}; color: {% if category=='danger' %}#721c24{% else %}#155724{% endif %};">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- OWNER VERIFICATION STATUS BANNER (Pending vs Approved) -->
+        {% if vendor.approval_status != 'Approved' %}
+            <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="font-size: 38px;">⏳</div>
+                    <div>
+                        <h3 style="margin: 0 0 6px 0; color: #b45309; font-size: 18px;">
+                            Account Status: Pending Owner Verification / ऑनर सत्यापन लंबित है
+                        </h3>
+                        <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.5;">
+                            आपका वेंडर खाता और अपलोड किए गए दस्तावेज़ वर्तमान में ऑनर द्वारा जांच के अधीन हैं। ऑनर्स द्वारा आपकी प्रोफ़ाइल <strong>Approve</strong> किए जाने तक आपका स्टेटस <strong>⏳ Pending</strong> रहेगा और आपका व्यवसाय ग्राहकों की लिस्ट में एक्टिव नहीं होगा। ऑनर्स द्वारा अप्रूव होते ही आपका व्यवसाय ग्राहकों की लिस्टिंग में तुरंत लाइव हो जाएगा।
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); border: 2px solid #10b981; border-radius: 12px; padding: 18px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 32px;">✅</div>
+                    <div>
+                        <h3 style="margin: 0 0 4px 0; color: #047857; font-size: 16.5px;">
+                            Account Verified & Active! / खाता ऑनर द्वारा स्वीकृत और एक्टिव है
+                        </h3>
+                        <p style="margin: 0; color: #065f46; font-size: 13.5px;">
+                            आपका व्यवसाय ग्राहकों की बुकिंग लिस्ट में एक्टिव है और बुकिंग स्वीकार करने के लिए तैयार है।
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- VENDOR FINANCIAL & TOKEN MONEY RULES CARD -->
+        <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #f59e0b; border-radius: 14px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.18); color: #78350f;">
+          <h4 style="margin: 0 0 8px 0; color: #b45309; font-size: 16.5px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+            📢 VENDOR TOKEN MONEY & BILL DEDUCTION RULES / वेंडर बिल व टोकन कटौती निर्देश
+          </h4>
+          <div style="font-size: 13.5px; line-height: 1.6; color: #92400e;">
+            • <strong>Customer Invoice Deduction (बिल में कटौती):</strong> ग्राहक द्वारा ₹5,118 एडवांस जमा किया जाता है। वेंडर को ग्राहक के फाइनल बिल में से <strong>₹5,000 कम (Deduct)</strong> करने होंगे।<br>
+            • <strong>Shubhlo Platform Commission Fee:</strong> शुभलो द्वारा ₹500 प्लेटफ़ॉर्म कमीशन फीस लागू की जाती है।<br>
+            • <strong>Vendor Net Bank Payout (बैंक भुगतान):</strong> शुभलो ₹5,000 डिपॉज़िट में से ₹500 प्लेटफ़ॉर्म फीस काटकर <strong>₹4,500 Net Payout</strong> सीधे वेंडर के बैंक खाते में ट्रांसफर करता है।<br>
+            • <strong>OTP Deal Verification (ओटीपी सत्यापन):</strong> कार्यक्रम संपन्न होने पर ग्राहक से 6-अंकीय डीलिंग ओटीपी लेकर यहां दर्ज करते ही बैंक भुगतान जारी कर दिया जाता है।
+          </div>
+        </div>
+
+        <!-- Registered Services Selector & Dynamic Manager -->
+        <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1.5px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
+              <div>
+                <h3 style="margin: 0; color: #8e44ad; font-family: 'Outfit', sans-serif; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+                  🛠️ My Active Service Categories / मेरी सेवा श्रेणियां
+                </h3>
+                <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #64748b;">
+                  💡 <strong>DYNAMIC SERVICE MANAGER:</strong> Yahan se aap nayi seva <strong>ADD</strong> ya purani seva <strong>REMOVE</strong> kar sakte hain. Aapka badlaav instant <strong>Customer Booking Selection me live update</strong> hoga!
+                </p>
+              </div>
+              {% if vendor.approval_status == 'Approved' %}
+                <button onclick="toggleAddServiceForm()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+                  ➕ Add New Service / नई सेवा जोड़ें
+                </button>
+              {% else %}
+                <button disabled style="background: #94a3b8; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 13.5px; cursor: not-allowed; display: flex; align-items: center; gap: 6px;" title="🔒 Account Verification Pending Owner Approval">
+                  🔒 Add Service (Pending Owner Approval)
+                </button>
+              {% endif %}
+            </div>
+
+            <!-- Active Services Pill List with Remove Action -->
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px;">
+                {% for s in all_services %}
+                    {% set s_name = s.service if (s.service is defined and s.service) else (s['service'] if (s is mapping and 'service' in s and s['service']) else (s if (s is string and s) else 'venue')) %}
+                    <div style="display: inline-flex; align-items: center; border-radius: 8px; overflow: hidden; border: 1.5px solid {% if s_name == vendor.service %}#8e44ad{% else %}#cbd5e1{% endif %}; background: {% if s_name == vendor.service %}#8e44ad{% else %}#f8fafc{% endif %}; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                        <a href="{{ url_for('vendor_switch_service', service_name=s_name) }}" style="padding: 10px 16px; text-decoration: none; font-weight: 800; font-size: 14px; color: {% if s_name == vendor.service %}white{% else %}#334155{% endif %}; display: flex; align-items: center; gap: 6px;">
+                            <span>{% if s_name == vendor.service %}🟢{% endif %} {{ s_name | replace('_', ' ') | title }}</span>
+                        </a>
+                        {% if all_services|length > 1 %}
+                        <form action="{{ url_for('vendor_remove_service', service_name=s_name) }}" method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('Are you sure you want to remove {{ s_name | upper }} service from customer bookings? / क्या आप वाकई {{ s_name | upper }} सेवा हटाना चाहते हैं?');">
+                            <input type="hidden" name="service_name" value="{{ s_name }}">
+                            <button type="submit" title="Remove {{ s_name | title }} Service" style="background: rgba(239, 68, 68, 0.15); color: #dc2626; border: none; border-left: 1px solid rgba(203, 213, 225, 0.6); padding: 10px 12px; cursor: pointer; font-size: 13px; font-weight: bold; transition: all 0.2s;">
+                              🗑️
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Collapsible Form to Add New Service -->
+            <div id="add-service-form-card" style="display: none; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 20px; margin-top: 20px; animation: fadeIn 0.3s ease;">
+              <h4 style="margin: 0 0 14px 0; color: #0f172a; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                ➕ Select & Register Extra Service Category / अतिरिक्त सेवा जोड़ें
+              </h4>
+              <form action="{{ url_for('vendor_add_service') }}" method="POST" enctype="multipart/form-data">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                  <div>
+                    <label style="display: block; font-weight: 700; font-size: 12.5px; color: #334155; margin-bottom: 5px;">Service Category / सेवा चुनें *</label>
+                    <select name="service" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13.5px; font-weight: 600;">
+                      <option value="">-- Choose Category --</option>
+                      <option value="venue">🏰 मैरिज गार्डन / हॉल (Venue)</option>
+                      <option value="catering">🍲 केटरिंग & भोजन (Catering)</option>
+                      <option value="dj">🎵 डीजे & साउंड सिस्टम (DJ)</option>
+                      <option value="decoration">🌸 डेकोरेशन & मंडप (Decoration)</option>
+                      <option value="photography">📸 फोटोग्राफी & वीडियो (Photography)</option>
+                      <option value="transport">🚗 ट्रांसपोर्ट & गाड़ियां (Transport)</option>
+                      <option value="shahi_sawari">🐎 शाही सवारी & घोड़ी (Shahi Sawari)</option>
+                      <option value="invitation_card">✉️ निमंत्रण पत्र (Invitation Cards)</option>
+                      <option value="makeup">💄 मेकअप आर्टिस्ट (Makeup Artist)</option>
+                      <option value="mehendi">🌿 मेहंदी आर्टिस्ट (Mehendi Artist)</option>
+                      <option value="dhol">🥁 ढोल & ताशा (Dhol/Band)</option>
+                      <option value="generator">⚡ जनरेटर & लाइट (Generator)</option>
+                      <option value="anchor">🎤 एंकर & होस्ट (Anchor/Host)</option>
+                      <option value="waiter">👔 वेटर & स्टाफ (Waiter Staff)</option>
+                      <option value="fireworks">🎆 आतिशबाजी & पायरो (Fireworks)</option>
+                      <option value="magic_show">🎩 मैजिक शो (Magic Show)</option>
+                      <option value="baggi">🛺 बग्गी & बारात (Baggi)</option>
+                      <option value="valet_parking">🅿️ वैले पार्किंग (Valet Parking)</option>
+                      <option value="security">🛡️ सिक्योरिटी गार्ड्स (Security Guards)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-weight: 700; font-size: 12.5px; color: #334155; margin-bottom: 5px;">Starting Price (₹) *</label>
+                    <input type="number" step="0.01" name="price" required placeholder="e.g. 15000" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13.5px;">
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-weight: 700; font-size: 12.5px; color: #334155; margin-bottom: 5px;">Service Photo (Optional)</label>
+                    <input type="file" name="photo" accept="image/*" style="width: 100%; padding: 8px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 12.5px; background: white;">
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                  <label style="display: block; font-weight: 700; font-size: 12.5px; color: #334155; margin-bottom: 5px;">Service Description / सेवा का विवरण *</label>
+                  <input type="text" name="description" required placeholder="High quality service details, equipment, staff etc." style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13.5px;">
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                  <button type="button" onclick="toggleAddServiceForm()" style="background: #e2e8f0; color: #334155; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">Cancel / रद्द करें</button>
+                  <button type="submit" style="background: linear-gradient(135deg, #8e44ad, #732d91); color: white; border: none; padding: 10px 22px; border-radius: 8px; font-weight: bold; cursor: pointer;">Save & Publish Service 🚀</button>
+                </div>
+              </form>
+            </div>
+        </div>
+
+        <script>
+          function toggleAddServiceForm() {
+            var f = document.getElementById('add-service-form-card');
+            if (f.style.display === 'none' || f.style.display === '') {
+              f.style.display = 'block';
+            } else {
+              f.style.display = 'none';
+            }
+          }
+        </script>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 25px;">
+            <!-- Left Side: Profile & Date Availability -->
+            <div>
+                <!-- Profile Settings Card -->
+                <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px;">
+                    <h3 style="margin-top: 0; color: #8e44ad;">👤 Profile & Pricing Settings</h3>
+                    <p style="margin: 8px 0;"><strong>Name:</strong> {{ vendor.name }}</p>
+                    <p style="margin: 8px 0;"><strong>Service:</strong> {{ vendor.service | title }}</p>
+                    <p style="margin: 8px 0;"><strong>Email:</strong> {{ vendor.email }}</p>
+                    <p style="margin: 8px 0;"><strong>Phone:</strong> {{ vendor.phone }}</p>
+                    <p style="margin: 8px 0;"><strong>Location:</strong> {{ vendor.tehsil }}, {{ vendor.district }}</p>
+
+                    <form action="{{ url_for('vendor_update_pricing') }}" method="POST" style="margin-top: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-weight: 600; font-size: 13px; color: #555; margin-bottom: 5px;">Starting Rate (₹)</label>
+                            <input type="number" step="0.01" name="price" value="{{ vendor.price or 0 }}" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-weight: 600; font-size: 13px; color: #555; margin-bottom: 5px;">Minimum Order Limit (₹)</label>
+                            <input type="number" step="0.01" name="min_order_value" value="{{ vendor.min_order_value or 0 }}" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+                        </div>
+                        <button type="submit" style="width: 100%; background: #8e44ad; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Save Pricing & Min Order</button>
+                    </form>
+                </div>
+
+                <!-- Date Availability Management Card -->
+                <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                    <h3 style="margin-top: 0; color: #8e44ad; font-family: 'Outfit', sans-serif; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                      📅 Date Availability & Lock for <span style="background: #8e44ad; color: white; padding: 2px 10px; border-radius: 6px; font-weight: 800;">{{ (vendor.service or 'venue') | title }}</span> Service
+                    </h3>
+                    <p style="font-size: 12.5px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                      💡 <strong>SERVICE-SPECIFIC LOCKING (अलग-अलग सेवा अनुसार तिथि ब्लॉक):</strong> Jis date par aap <strong>{{ (vendor.service or 'venue') | upper }}</strong> ke liye busy hain, usey niche se block karein. Aapki baki sabhi services us date par <strong>100% BOOKING KE LIYE KHULI RAHENGI</strong>!
+                    </p>
+
+                    <form action="{{ url_for('vendor_toggle_date_availability') }}" method="POST" style="margin-bottom: 20px;">
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 6px;">Select Event Date to Block / Unblock</label>
+                            <input type="date" name="event_date" required style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 6px;">Reason / Note (Optional)</label>
+                            <input type="text" name="reason" placeholder="Marriage Booking / Personal Work / व्यस्त" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" name="action" value="block" style="flex: 1; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s;">🔒 Block Date</button>
+                            <button type="submit" name="action" value="unblock" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s;">🔓 Unblock Date</button>
+                        </div>
+                    </form>
+
+                    <h4 style="font-size: 14px; font-weight: 800; color: #1e293b; margin: 15px 0 10px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                      Currently Blocked Dates ({{ blocked_dates | length if blocked_dates else 0 }}):
+                    </h4>
+
+                    {% if blocked_dates %}
+                      <div style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for bd in blocked_dates %}
+                          <div style="background: #fff1f2; border: 1.5px solid #fecdd3; color: #9f1239; padding: 12px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                            <div>
+                              <strong style="font-size: 14px;">📅 {{ bd.event_date }}</strong>
+                              <div style="font-size: 12px; color: #be123c;">Note: {{ bd.reason or 'Busy / Blocked' }}</div>
+                            </div>
+                            <form action="{{ url_for('vendor_toggle_date_availability') }}" method="POST" style="margin: 0;">
+                              <input type="hidden" name="event_date" value="{{ bd.event_date }}">
+                              <button type="submit" name="action" value="unblock" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">
+                                🔓 Unblock
+                              </button>
+                            </form>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% else %}
+                      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center;">
+                        ✅ Sabhi dates filhal OPEN hain! Aapne koi bhi date block nahi ki hai.
+                      </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Side: Customer Bookings & Masked Privacy Protection -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <h3 style="margin-top: 0; color: #8e44ad;">📋 Customer Bookings (Privacy Protection Enabled)</h3>
+                
+                <div style="background: #e0f2fe; border: 1px solid #38bdf8; color: #0369a1; padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
+                    🛡️ <strong>Anti-Bypass Protection Active:</strong> Customer contact details (Phone & Email) remain <code>🔒 Masked by Owner</code> until Shubhlo Owner speaks with you and confirms booking within 48 Hours.
+                </div>
+
+                {% for b in bookings %}
+                    {% set is_unlocked = (b.status == 'Confirmed' or b.booking_status == 'Confirmed' or b.unlocked_by_owner) %}
+                    <div style="background: #faf6fc; border: 1.5px solid rgba(142,68,173,0.2); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                            <h4 style="margin: 0; color: #2c3e50;">
+                                Booking #{{ b.id }} - 
+                                {% if is_unlocked %}
+                                    <span style="color: #1e1b4b; font-weight: bold;">👤 {{ b.name or 'Customer' }}</span>
+                                {% else %}
+                                    <span style="color: #94a3b8; font-style: italic;">🔒 Customer Name Masked (Pending Owner Call)</span>
+                                {% endif %}
+                            </h4>
+                            
+                            {% if is_unlocked %}
+                                <span style="background: #e8f8f5; color: #27ae60; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold;">📞 Phone: {{ b.phone or '9876543210' }}</span>
+                            {% else %}
+                                <span style="background: #fff3cd; color: #856404; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">🔒 Phone: Masked by Owner (Pending Owner Confirmation)</span>
+                            {% endif %}
+                        </div>
+
+                        {% if not is_unlocked %}
+                            <div style="background: #fffbeb; border: 1.5px solid #fde68a; color: #92400e; padding: 12px 16px; border-radius: 8px; font-size: 12.5px; margin-bottom: 12px; line-height: 1.5;">
+                                🔒 <strong>Strict Owner Anti-Bypass Protection (सुरक्षा नियम):</strong><br>
+                                Customer Contact details (Name, Phone, Email & Address) remain <strong>🔒 Masked by Owner</strong> until Shubhlo Owner calls you and approves the booking.<br>
+                                <em>केवल बुकिंग आईडी (#{{ b.id }}), कार्यक्रम का नाम, और तिथि दिखाई दे रही है।</em>
+                            </div>
+                        {% else %}
+                            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;">
+                                🟢 <strong>Booking Approved by Owner:</strong> Customer Contact & OTP Unlocked!<br>
+                                <strong>👤 Name:</strong> {{ b.name or 'Customer' }} | <strong>📞 Phone:</strong> {{ b.phone }} | <strong>✉️ Email:</strong> {{ b.email }}<br>
+                                <strong>🏠 Address:</strong> {{ b.address or 'N/A' }}
+                                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                                  <a href="https://wa.me/{{ b.phone | clean_phone_indian }}?text={{ ('Namaste ' ~ (b.name or 'Customer') ~ ' ji! Main Celebrato Vendor hoon. Aapki booking #' ~ b.id ~ ' ke silsile me baat karni hai.') | urlquote }}" target="_blank" style="background: #25D366; color: white; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                    💬 WA Customer
+                                  </a>
+                                  <a href="sms:+91{{ b.phone }}?body={{ ('Namaste! Main Celebrato Vendor hoon. Booking #' ~ b.id ~ ' ke silsile me sampark kar raha hoon.') | urlquote }}" style="background: #3498db; color: white; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                    ✉️ SMS Customer
+                                  </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <p style="margin: 6px 0; font-size: 14px; color: #8e44ad;"><strong>🎉 Event Name & Type / कार्यक्रम:</strong> {{ b.event_name or 'Wedding / शादी विवाह' }}</p>
+                        <p style="margin: 6px 0; font-size: 14px;"><strong>📅 Event Date:</strong> {{ b.event_date or '25/12/2026' }}</p>
+                        <p style="margin: 6px 0; font-size: 14px;"><strong>📍 Location / District:</strong> {{ b.district or 'Hoshangabad' }}, {{ b.tehsil or 'Itarsi' }}</p>
+
+                        <!-- Token Deposit & Bank Payout Declaration Box -->
+                        <div style="background: #fdf4ff; border: 1.5px solid #f0abfc; padding: 14px; border-radius: 10px; margin: 12px 0;">
+                            <h5 style="margin: 0 0 8px 0; color: #86198f; font-size: 14px; font-weight: 800;">
+                                💰 OFFICIAL DECLARATION: Token Deposit & Net Bank Payout Breakdown
+                            </h5>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; font-size: 12.5px;">
+                                <div style="background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e9d5ff;">
+                                    <span style="color: #6b21a8; font-size: 11px; display: block; font-weight: 600;">Customer Bill Deduction</span>
+                                    <strong style="color: #15803d; font-size: 15px;">- ₹5,000</strong>
+                                    <span style="font-size: 10px; color: #475569; display: block;">(Deduct ₹5,000 from customer final invoice)</span>
+                                </div>
+                                <div style="background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e9d5ff;">
+                                    <span style="color: #6b21a8; font-size: 11px; display: block; font-weight: 600;">Shubhlo Platform Fee</span>
+                                    <strong style="color: #b91c1c; font-size: 15px;">₹500</strong>
+                                    <span style="font-size: 10px; color: #475569; display: block;">(Vendor platform commission fee)</span>
+                                </div>
+                                <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; border: 1px solid #6ee7b7;">
+                                    <span style="color: #065f46; font-size: 11px; display: block; font-weight: 600;">Vendor Net Bank Payout</span>
+                                    <strong style="color: #047857; font-size: 15px;">₹4,500</strong>
+                                    <span style="font-size: 10px; color: #047857; display: block;">(Transferred directly to vendor bank account)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Counter Offer Form -->
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc;">
+                            {% if b.counter_offer_amount %}
+                                <div style="background: #e8f8f5; border: 1px solid #2ecc71; padding: 12px; border-radius: 8px;">
+                                    <p style="margin: 0; font-weight: bold; color: #27ae60; font-size: 15px;">
+                                        Counter Offer Sent: ₹{{ "{:,.0f}".format(b.counter_offer_amount) }}
+                                    </p>
+                                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #555;">
+                                        Note: {{ b.counter_offer_note or 'Special discount offered' }} | Status: {{ b.counter_offer_status or 'Pending' }}
+                                    </p>
+                                </div>
+                            {% else %}
+                                <h5 style="margin: 0 0 10px 0; color: #333;">Submit Custom Counter Offer / काउंटर ऑफर भेजें:</h5>
+                                <form action="{{ url_for('vendor_counter_offer', booking_id=b.id) }}" method="POST" style="display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="number" step="0.01" name="counter_amount" placeholder="48000" value="48000" required style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                                        <input type="text" name="counter_note" placeholder="Special discount offered" value="Special discount offered" style="flex: 2; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                                    </div>
+                                    <button type="submit" style="background: #8e44ad; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Send Counter Offer to Customer</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        <!-- Customer Deal Verification OTP Form for Vendor -->
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; background: #f0fdf4; border: 1.5px solid #86efac; padding: 15px; border-radius: 8px;">
+                            <h5 style="margin: 0 0 6px 0; color: #166534; font-size: 13.5px; font-weight: 800;">
+                                🔑 Verify Customer Deal OTP / ग्राहक ओटीपी दर्ज कर डील सफल करें:
+                            </h5>
+                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #15803d; line-height: 1.4;">
+                                ग्राहक द्वारा सर्विस/कार्यक्रम संपन्न होने पर मिला 6-अंकीय ओटीपी कोड यहां दर्ज करें। ओटीपी वेरीफाई होते ही डील 100% सफल मानी जाएगी।
+                            </p>
+                            <form action="{{ url_for('vendor_verify_otp') }}" method="POST" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                <input type="text" name="otp" placeholder="e.g. 784920" required style="flex: 1; min-width: 140px; padding: 9px 12px; border: 1.5px solid #86efac; border-radius: 6px; font-family: monospace; font-size: 15px; font-weight: bold; letter-spacing: 2px;">
+                                <button type="submit" style="background: #16a34a; color: white; border: none; padding: 9px 18px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 3px 10px rgba(22, 163, 74, 0.25);">
+                                    ✔ Verify OTP & Complete Deal
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="background: #f8fafc; border: 1.5px dashed #cbd5e1; padding: 25px; border-radius: 10px; text-align: center; color: #64748b;">
+                        <div style="font-size: 36px; margin-bottom: 8px;">📭</div>
+                        <h4 style="margin: 0 0 4px 0; color: #334155;">No Customer Bookings Yet / कोई बुकिंग प्राप्त नहीं हुई</h4>
+                        <p style="margin: 0; font-size: 13px; color: #64748b;">When customers book your service, their bookings will appear here automatically!</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Customer Ratings & Review Feedback Section -->
+        <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="margin: 0; color: #8e44ad; display: flex; align-items: center; gap: 8px;">
+                    ⭐ Customer Ratings & Feedback / ग्राहकों की रेटिंग व फीडबैक
+                </h3>
+                <span style="background: #fef3c7; color: #b45309; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                    Avg Rating: {{ vendor.avg_rating if vendor.avg_rating is defined and vendor.avg_rating > 0 else '0.0' }} / 5.0 ⭐ ({{ vendor.rate_count or 0 }} Ratings)
+                </span>
+            </div>
+
+            {% if reviews %}
+                {% for r in reviews %}
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 18px; border-radius: 10px; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-weight: 700; color: #f59e0b; font-size: 15px;">
+                                {% for i in range(r.stars) %}⭐{% endfor %} ({{ r.stars }}/5)
+                            </span>
+                            <span style="font-size: 12px; color: #94a3b8;">{{ r.created_at }}</span>
+                        </div>
+                        <p style="margin: 0; font-size: 13.5px; color: #334155; line-height: 1.4;">
+                            "{{ r.feedback }}"
+                        </p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; text-align: center; color: #64748b; font-size: 13.5px;">
+                    No customer ratings submitted yet. Ratings will appear here automatically when customers rate your service!
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Customer Complaints & Support Tickets (Synced with Owner Panel) -->
+        <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 25px;">
+            <h3 style="margin-top: 0; color: #c0392b; display: flex; align-items: center; gap: 8px;">
+                💬 Customer Complaints & Inquiries / ग्राहकों की शिकायतें व पूछताछ (Owner Synced)
+            </h3>
+            <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b;">
+                ग्राहकों द्वारा ऑनर एवं वेंडर को भेजी गई सभी पूछताछ व शिकायतें यहाँ ऑनर्स पैनल के साथ सिंक होकर दिखेंगी:
+            </p>
+
+            {% if tickets %}
+                {% for t in tickets %}
+                    <div style="background: #fff5f5; border: 1.5px solid #fca5a5; padding: 18px; border-radius: 10px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; color: #991b1b; font-size: 15px;">
+                                Ticket #{{ t.id }} - {{ t.ticket_type or 'Customer Inquiry' }}
+                            </h4>
+                            <span style="background: {% if 'Resolved' in t.status %}#dcfce7{% else %}#fef3c7{% endif %}; color: {% if 'Resolved' in t.status %}#15803d{% else %}#b45309{% endif %}; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                                {{ t.status or 'Pending Owner Review' }}
+                            </span>
+                        </div>
+                        <p style="margin: 4px 0; font-size: 13.5px;"><strong>Customer Name:</strong> {{ t.user_name or 'Customer' }} ({{ t.user_email }})</p>
+                        <p style="margin: 4px 0; font-size: 13.5px;"><strong>Subject:</strong> {{ t.subject }}</p>
+                        <p style="margin: 6px 0; font-size: 13px; color: #4b5563; background: white; padding: 10px; border-radius: 6px; border: 1px solid #fecaca;">
+                            💬 <em>"{{ t.details }}"</em>
+                        </p>
+                        {% if t.admin_response %}
+                            <div style="margin-top: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 6px; font-size: 13px; color: #166534;">
+                                👑 <strong>Owner Resolution Note:</strong> {{ t.admin_response }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; text-align: center; color: #64748b; font-size: 13.5px;">
+                    No active complaints or support tickets for your business. Clean record! 🎉
+                </div>
+            {% endif %}
+        </div>
+
+    </main>
+</body>
+</html>

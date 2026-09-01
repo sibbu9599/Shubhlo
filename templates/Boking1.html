@@ -1,0 +1,88 @@
+<!DOCTYPE html>\r
+<html lang="en">\r
+<head>\r
+<meta charset="UTF-8">\r
+<title>Our Services - Shubhlo</title>\r
+<!-- External CSS files -->\r
+<link rel="बिलकुल 👍 अब मैं तुम्हारे **Services page** को भी उसी तरह बना रहा हूँ जैसे Signup और Login pages — यानी HTML और CSS अलग‑अलग, और design consistent रहेगा।  \r
+\r
+---\r
+\r
+## 📄 services.html\r
+```html\r
+<!DOCTYPE html>\r
+<html lang="en">\r
+<head>\r
+<meta charset="UTF-8">\r
+<title>Our Services - Shubhlo</title>\r
+<!-- External CSS -->\r
+<link rel="stylesheet" href="/static/services.css">\r
+<link rel="stylesheet" href="/static/master.css">\r
+</head>\r
+<body>\r
+<!-- Header / Navbar -->\r
+<header>\r
+<h1 class="logo">Shubhlo<span class="halo">👑</span></h1>\r
+<nav>\r
+<ul>\r
+<li><a href="{{ url_for('home') }}">Home</a></li>
+<li><a href="{{ url_for('services') }}">Services</a></li>
+<li><a href="{{ url_for('booking1') }}">Book Now</a></li>
+<li><a href="{{ url_for('contact') }}">Contact</a></li>
+<li><a href="{{ url_for('vendor_register') }}">Vendor</a></li>
+<li><a href="{{ url_for('about') }}">About</a></li>
+<li><a href="{{ url_for('login') }}">Login</a></li>\r
+</ul>\r
+</nav>\r
+</header>\r
+\r
+<!-- Services Section -->\r
+<section class="services-section">\r
+<h2>What We Offer</h2>\r
+<div class="services-grid">\r
+<div class="service-card">\r
+<h3>VENUE</h3>\r
+<p>Spacious and beautifully decorated gardens for weddings and grand events.</p>\r
+</div>\r
+<div class="service-card">\r
+<h3>CATERING</h3>\r
+<p>Delicious multi‑cuisine catering services to make your event memorable.</p>\r
+</div>\r
+<div class="service-card">\r
+<h3>DJ</h3>\r
+<p>Professional DJs with sound and lighting setup for rocking parties.</p>\r
+</div>\r
+<div class="service-card">\r
+<h3>PHOTOGRAPHY</h3>\r
+<p>Capture every moment with our expert wedding and event photographers.</p>\r
+</div>\r
+<div class="service-card">\r
+<h3>MAKEUP</h3>\r
+<p>Bridal and party makeup services by experienced professionals.</p>\r
+</div>\r
+<div class="service-card">\r
+<h3>TRANSPORT</h3>\r
+<p>Comfortable and reliable transport arrangements for guests and family.</p>\r
+</div>\r
+<div class="service-card">\r
+<h3>DECORATION</h3>\r
+<p>Traditional arrangements and rituals handled with care and respect.</p>\r
+</div>\r
+<div class="service-card">\r
+<h3>ANY PARTY AT HOME</h3>\r
+<p>Specialized services for cultural and community‑specific event needs.</p>\r
+</div>\r
+</div>\r
+</section>\r
+\r
+<!-- Footer -->\r
+<footer>\r
+<div class="footer-container">\r
+<p>&copy; 2026 Shubhlo. All Rights Reserved.</p>\r
+</div>\r
+<div class="company-logo">\r
+<img src="/static/logo.png" alt="Setu Infotech Pvt Ltd Logo">\r
+</div>\r
+</footer>\r
+</body>\r
+</html>

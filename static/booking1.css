@@ -1,0 +1,122 @@
+/* Booking Step 1 - Glassmorphism Form Styles */
+
+.form-container {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 45px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-shadow);
+  max-width: 580px;
+  width: 90%;
+  margin: 40px auto;
+  border: 1.5px solid var(--glass-border);
+  animation: fadeInUp 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.form-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--primary-gradient);
+}
+
+.form-container h2 {
+  text-align: center;
+  color: #0F172A;
+  font-family: 'Outfit', sans-serif;
+  margin-top: 0;
+  margin-bottom: 28px;
+  font-weight: 800;
+  font-size: 28px;
+  letter-spacing: -0.5px;
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.form-container h2::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55px;
+  height: 4px;
+  background: var(--primary-gradient);
+  border-radius: 4px;
+}
+
+label {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #1E293B;
+  display: block;
+  margin-top: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 14px 16px;
+  margin-top: 8px;
+  border: 1.5px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  background-color: #F8FAFC;
+  color: #1E293B;
+  font-size: 14.5px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  outline: none;
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18);
+  background-color: #FFFFFF;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-top: 32px;
+  background: var(--btn-gradient);
+  color: #0F172A;
+  font-size: 16px;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 8px 25px var(--gold-glow);
+  transition: var(--transition);
+}
+
+.btn:hover {
+  background: var(--btn-gradient-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.5);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

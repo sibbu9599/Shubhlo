@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose Your Services - Step 2 - Shubhlo</title>
+  <meta name="description" content="Select verified venues, caterers, DJs, photographers, and decorators for your event on Shubhlo.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link rel="stylesheet" href="{{ url_for('static', filename='booking2.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .stepper-container {
+      width: 100%;
+      max-width: 780px;
+      margin: 25px auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 2;
+    }
+    .step-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 17px;
+    }
+    .step-item.completed .step-badge {
+      background: #10b981;
+      color: white;
+    }
+    .step-item.active .step-badge {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.45);
+    }
+    .step-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .step-item.active .step-label {
+      color: #10b981;
+      font-weight: 800;
+    }
+    .step-line {
+      flex: 1;
+      height: 4px;
+      background: #e2e8f0;
+      margin: 0 14px 22px;
+      border-radius: 4px;
+    }
+    .step-line.active {
+      background: linear-gradient(90deg, #10b981, #8b5cf6);
+    }
+
+    .blocked-vendor-card {
+      opacity: 0.6;
+      pointer-events: none;
+      filter: grayscale(0.5);
+      border: 2px solid #ef4444 !important;
+      position: relative;
+    }
+
+    .blocked-badge {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 800;
+      display: inline-block;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glassmorphic Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
+        <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
+        {% if session.get('admin') %}
+          <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
+        {% elif session.get('user') %}
+          <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+        {% elif session.get('vendor') %}
+          <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
+        <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
+        {% if session.get('admin') or session.get('user') or session.get('vendor') %}
+          <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Progress Bar Stepper -->
+  <div class="stepper-container">
+    <div class="step-item completed">
+      <div class="step-badge">✓</div>
+      <span class="step-label">Details</span>
+    </div>
+    <div class="step-line active"></div>
+    <div class="step-item active">
+      <div class="step-badge">2</div>
+      <span class="step-label">Select Vendors</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <div class="step-badge">3</div>
+      <span class="step-label">Confirmation</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <div class="step-badge">4</div>
+      <span class="step-label">Payment</span>
+    </div>
+  </div>
+
+  <div class="main-booking-container">
+    
+    <!-- Left Column: Vendors Grid -->
+    <div class="booking-left-col">
+      
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div style="padding: 14px 18px; margin-bottom: 22px; border-radius: 12px; font-weight: 700; font-size: 14px; text-align: center; background: {% if category=='danger' %}#fee2e2{% else %}#ecfdf5{% endif %}; color: {% if category=='danger' %}#991b1b{% else %}#065f46{% endif %}; border: 1px solid {% if category=='danger' %}#fca5a5{% else %}#a7f3d0{% endif %};">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="header-section">
+        <h2 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; color: #0f172a; margin: 0 0 10px;">
+          ✨ Select Available Vendors for <span class="tehsil-highlight">{{ tehsil or 'MP' }}</span> ✨
+        </h2>
+        <p style="color: #64748b; font-size: 14.5px; margin: 0 0 20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+          <span>🎉 Event Type: <strong style="color: #8b5cf6;">{{ session.get('booking_info', {}).get('event_name', 'Wedding / शादी विवाह') }}</strong></span>
+          <span>📅 Date: <strong style="color: #059669;">{{ session.get('booking_info', {}).get('event_date', 'Selected Date') }}</strong></span>
+        </p>
+
+        <div class="search-wrapper">
+          <input type="text" id="vendorSearch" placeholder="🔍 Search vendor by name, service, or keyword..." onkeyup="filterVendors()">
+        </div>
+
+        <!-- 🧮 Interactive Event Budget Estimator & Guest Calculator Widget -->
+        <div style="background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 18px; padding: 22px 25px; margin-top: 20px; color: white; box-shadow: 0 10px 30px rgba(30,27,75,0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+            <div>
+              <h3 style="font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; color: #fbbf24; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
+                🧮 Smart Event Budget Estimator (बजट व अतिथि कैलकुलेटर)
+              </h3>
+              <p style="font-size: 13px; color: #cbd5e1; margin: 0;">
+                Enter expected guest count to calculate approximate food catering and venue package cost!
+              </p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
+              <label style="font-size: 13px; font-weight: 700; color: #f59e0b;">👥 Expected Guests:</label>
+              <input type="number" id="guestCountInput" value="300" min="50" max="5000" step="50" oninput="calculateEstimatedBudget()" style="width: 90px; padding: 6px 10px; border-radius: 8px; border: none; font-weight: bold; text-align: center; font-size: 15px;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: rgba(0,0,0,0.25); padding: 15px; border-radius: 12px;">
+            <div>
+              <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Est. Catering Cost (₹350/plate)</div>
+              <div style="font-size: 18px; font-weight: 800; color: #4ade80;" id="estCateringVal">₹1,05,000</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Est. Venue & Decor Base</div>
+              <div style="font-size: 18px; font-weight: 800; color: #38bdf8;" id="estVenueVal">₹75,000</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Est. Grand Total Event Budget</div>
+              <div style="font-size: 20px; font-weight: 900; color: #fbbf24;" id="estTotalVal">₹1,80,000</div>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          function calculateEstimatedBudget() {
+            const countInput = document.getElementById('guestCountInput');
+            const guests = parseInt(countInput ? countInput.value : 300) || 300;
+            const catering = guests * 350;
+            const venue = 75000;
+            const total = catering + venue;
+
+            const cEl = document.getElementById('estCateringVal');
+            const vEl = document.getElementById('estVenueVal');
+            const tEl = document.getElementById('estTotalVal');
+
+            if (cEl) cEl.textContent = '₹' + catering.toLocaleString('en-IN');
+            if (vEl) vEl.textContent = '₹' + venue.toLocaleString('en-IN');
+            if (tEl) tEl.textContent = '₹' + total.toLocaleString('en-IN');
+          }
+        </script>
+      </div>
+
+      <form action="{{ url_for('confirm_booking') }}" method="post" id="serviceForm" onsubmit="return (function(){ const cats=['venue','catering','dj','decoration','transport','photography','shahi_sawari','invitation_card','security_guard','makeup','mehendi','dhol_band','pandit','choreographer','wedding_planner','anchor','fireworks','mocktail','safa']; for(let c of cats){ const el=document.getElementById(c); if(el && el.value && el.value.trim()!=='') return true; } alert('❌ आगे बढ़ने के लिए कृपया कम से कम एक सेवा या वेंडर अवश्य चुनें! / Please select AT LEAST 1 service or vendor to proceed!'); window.scrollTo({top: 250, behavior: 'smooth'}); return false; })()">
+        <input type="hidden" id="venue" name="venue">
+        <input type="hidden" id="catering" name="catering">
+        <input type="hidden" id="dj" name="dj">
+        <input type="hidden" id="decoration" name="decoration">
+        <input type="hidden" id="transport" name="transport">
+        <input type="hidden" id="photography" name="photography">
+        <input type="hidden" id="shahi_sawari" name="shahi_sawari">
+        <input type="hidden" id="invitation_card" name="invitation_card">
+        <input type="hidden" id="security_guard" name="security_guard">
+        <input type="hidden" id="makeup" name="makeup">
+        <input type="hidden" id="mehendi" name="mehendi">
+        <input type="hidden" id="dhol_band" name="dhol_band">
+        <input type="hidden" id="pandit" name="pandit">
+        <input type="hidden" id="choreographer" name="choreographer">
+        <input type="hidden" id="wedding_planner" name="wedding_planner">
+        <input type="hidden" id="anchor" name="anchor">
+        <input type="hidden" id="fireworks" name="fireworks">
+        <input type="hidden" id="mocktail" name="mocktail">
+        <input type="hidden" id="safa" name="safa">
+
+        <!-- 1. VENUE CATEGORY -->
+        <div class="category-block" id="category-venue-section">
+          <h3>🏰 Select a Venue / मैरिज गार्डन (Required)</h3>
+          <div class="cards-grid">
+            {% for v in venues %}
+              {% if v.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="venue" data-name="{{ v.name }}">
+                  <div class="card-img" style="background-image: url('{{ v.photo or url_for('static', filename='vanue.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ v.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ v.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(v.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="venue" data-name="{{ v.name }}" data-description="{{ v.description }}" data-price="{{ v.price }}" onclick="selectVendor('venue', '{{ v.name }}', {{ v.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ v.photo or url_for('static', filename='vanue.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ v.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ v.tehsil or tehsil }}{% if v.district %}, {{ v.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ v.avg_rating or '4.9' }} ({{ v.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ v.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(v.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 2. CATERING CATEGORY -->
+        <div class="category-block" id="category-catering-section">
+          <h3>🍽️ Select Catering / कैटरिंग</h3>
+          <div class="cards-grid">
+            {% for c in caterings %}
+              {% if c.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="catering" data-name="{{ c.name }}">
+                  <div class="card-img" style="background-image: url('{{ c.photo or url_for('static', filename='catering.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ c.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ c.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(c.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="catering" data-name="{{ c.name }}" data-description="{{ c.description }}" data-price="{{ c.price }}" onclick="selectVendor('catering', '{{ c.name }}', {{ c.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ c.photo or url_for('static', filename='catering.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ c.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ c.tehsil or tehsil }}{% if c.district %}, {{ c.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ c.avg_rating or '4.9' }} ({{ c.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ c.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(c.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 3. DJ CATEGORY -->
+        <div class="category-block" id="category-dj-section">
+          <h3>🎵 Select DJ & Music / डीजे व म्यूजिक</h3>
+          <div class="cards-grid">
+            {% for d in djs %}
+              {% if d.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="dj" data-name="{{ d.name }}">
+                  <div class="card-img" style="background-image: url('{{ d.photo or url_for('static', filename='DJ.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ d.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ d.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(d.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="dj" data-name="{{ d.name }}" data-description="{{ d.description }}" data-price="{{ d.price }}" onclick="selectVendor('dj', '{{ d.name }}', {{ d.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ d.photo or url_for('static', filename='DJ.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ d.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ d.tehsil or tehsil }}{% if d.district %}, {{ d.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ d.avg_rating or '4.9' }} ({{ d.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ d.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(d.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 4. DECORATION CATEGORY -->
+        <div class="category-block" id="category-decoration-section">
+          <h3>🌸 Select Decoration Style / सजावट</h3>
+          <div class="cards-grid">
+            {% for deco in decorations %}
+              {% if deco.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="decoration" data-name="{{ deco.name }}">
+                  <div class="card-img" style="background-image: url('{{ deco.photo or url_for('static', filename='Decoration.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ deco.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ deco.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(deco.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="decoration" data-name="{{ deco.name }}" data-description="{{ deco.description }}" data-price="{{ deco.price }}" onclick="selectVendor('decoration', '{{ deco.name }}', {{ deco.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ deco.photo or url_for('static', filename='Decoration.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ deco.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ deco.tehsil or tehsil }}{% if deco.district %}, {{ deco.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ deco.avg_rating or '4.9' }} ({{ deco.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ deco.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(deco.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 5. TRANSPORT CATEGORY -->
+        <div class="category-block" id="category-transport-section">
+          <h3>🚗 Select Transport & Cars / यातायात</h3>
+          <div class="cards-grid">
+            {% for t in transports %}
+              {% if t.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="transport" data-name="{{ t.name }}">
+                  <div class="card-img" style="background-image: url('{{ t.photo or url_for('static', filename='transport.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ t.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ t.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(t.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="transport" data-name="{{ t.name }}" data-description="{{ t.description }}" data-price="{{ t.price }}" onclick="selectVendor('transport', '{{ t.name }}', {{ t.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ t.photo or url_for('static', filename='transport.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ t.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ t.tehsil or tehsil }}{% if t.district %}, {{ t.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ t.avg_rating or '4.9' }} ({{ t.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ t.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(t.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 6. PHOTOGRAPHY CATEGORY -->
+        <div class="category-block" id="category-photography-section">
+          <h3>📸 Select Photography & Films / फोटोग्राफी व वीडियोग्राफी</h3>
+          <div class="cards-grid">
+            {% for p in photography %}
+              {% if p.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="photography" data-name="{{ p.name }}">
+                  <div class="card-img" style="background-image: url('{{ p.photo or url_for('static', filename='photog.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ p.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ p.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(p.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="photography" data-name="{{ p.name }}" data-description="{{ p.description }}" data-price="{{ p.price }}" onclick="selectVendor('photography', '{{ p.name }}', {{ p.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ p.photo or url_for('static', filename='photog.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ p.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ p.tehsil or tehsil }}{% if p.district %}, {{ p.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ p.avg_rating or '4.9' }} ({{ p.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ p.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(p.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 7. SHAHI SAWARI CATEGORY -->
+        <div class="category-block" id="category-shahi_sawari-section">
+          <h3>🐎 Select Shahi Sawari & Entry / शाही सवारी व बग्गी</h3>
+          <div class="cards-grid">
+            {% for s in shahi_sawari %}
+              {% if s.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="shahi_sawari" data-name="{{ s.name }}">
+                  <div class="card-img" style="background-image: url('{{ s.photo or url_for('static', filename='image/HOURES.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ s.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ s.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(s.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="shahi_sawari" data-name="{{ s.name }}" data-description="{{ s.description }}" data-price="{{ s.price }}" onclick="selectVendor('shahi_sawari', '{{ s.name }}', {{ s.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ s.photo or url_for('static', filename='image/HOURES.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ s.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ s.tehsil or tehsil }}{% if s.district %}, {{ s.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ s.avg_rating or '4.9' }} ({{ s.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ s.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(s.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 8. INVITATION CARD CATEGORY -->
+        <div class="category-block" id="category-invitation_card-section">
+          <h3>💌 Select Invitation Card & Video / निमंत्रण पत्र व डिजिटल न्योता</h3>
+          <div class="cards-grid">
+            {% for inv in invitation_card %}
+              {% if inv.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="invitation_card" data-name="{{ inv.name }}">
+                  <div class="card-img" style="background-image: url('{{ inv.photo or url_for('static', filename='image/invitation.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ inv.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ inv.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(inv.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="invitation_card" data-name="{{ inv.name }}" data-description="{{ inv.description }}" data-price="{{ inv.price }}" onclick="selectVendor('invitation_card', '{{ inv.name }}', {{ inv.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ inv.photo or url_for('static', filename='image/invitation.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ inv.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ inv.tehsil or tehsil }}{% if inv.district %}, {{ inv.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ inv.avg_rating or '4.9' }} ({{ inv.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ inv.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(inv.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 9. SECURITY GUARD CATEGORY -->
+        <div class="category-block" id="category-security_guard-section">
+          <h3>🛡️ Select Security Guard & Bouncers / सुरक्षा गार्ड व बाउंसर्स</h3>
+          <div class="cards-grid">
+            {% for sec in security_guards %}
+              {% if sec.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="security_guard" data-name="{{ sec.name }}">
+                  <div class="card-img" style="background-image: url('{{ sec.photo or url_for('static', filename='security.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ sec.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ sec.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(sec.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="security_guard" data-name="{{ sec.name }}" data-description="{{ sec.description }}" data-price="{{ sec.price }}" onclick="selectVendor('security_guard', '{{ sec.name }}', {{ sec.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ sec.photo or url_for('static', filename='security.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ sec.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ sec.tehsil or tehsil }}{% if sec.district %}, {{ sec.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ sec.avg_rating or '4.9' }} ({{ sec.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ sec.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(sec.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 10. MAKEUP CATEGORY -->
+        <div class="category-block" id="category-makeup-section">
+          <h3>💄 Select Bridal Makeup & Parlor / मेक-अप व ब्यूटी पार्लर</h3>
+          <div class="cards-grid">
+            {% for m in makeups %}
+              {% if m.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="makeup" data-name="{{ m.name }}">
+                  <div class="card-img" style="background-image: url('{{ m.photo or url_for('static', filename='makeup.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ m.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ m.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(m.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="makeup" data-name="{{ m.name }}" data-description="{{ m.description }}" data-price="{{ m.price }}" onclick="selectVendor('makeup', '{{ m.name }}', {{ m.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ m.photo or url_for('static', filename='makeup.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ m.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ m.tehsil or tehsil }}{% if m.district %}, {{ m.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ m.avg_rating or '4.9' }} ({{ m.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ m.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(m.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 11. MEHENDI CATEGORY -->
+        <div class="category-block" id="category-mehendi-section">
+          <h3>🌿 Select Mehendi Artist / मेहंदी आर्टिस्ट</h3>
+          <div class="cards-grid">
+            {% for meh in mehendis %}
+              {% if meh.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="mehendi" data-name="{{ meh.name }}">
+                  <div class="card-img" style="background-image: url('{{ meh.photo or url_for('static', filename='image/mehendi.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ meh.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ meh.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(meh.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="mehendi" data-name="{{ meh.name }}" data-description="{{ meh.description }}" data-price="{{ meh.price }}" onclick="selectVendor('mehendi', '{{ meh.name }}', {{ meh.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ meh.photo or url_for('static', filename='image/mehendi.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ meh.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ meh.tehsil or tehsil }}{% if meh.district %}, {{ meh.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ meh.avg_rating or '4.9' }} ({{ meh.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ meh.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(meh.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 12. DHOL BAND CATEGORY -->
+        <div class="category-block" id="category-dhol_band-section">
+          <h3>🥁 Select Dhol & Wedding Band / ढोल व वेडिंग बैंड</h3>
+          <div class="cards-grid">
+            {% for db in dhol_bands %}
+              {% if db.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="dhol_band" data-name="{{ db.name }}">
+                  <div class="card-img" style="background-image: url('{{ db.photo or url_for('static', filename='image/dhol_band.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ db.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ db.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(db.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="dhol_band" data-name="{{ db.name }}" data-description="{{ db.description }}" data-price="{{ db.price }}" onclick="selectVendor('dhol_band', '{{ db.name }}', {{ db.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ db.photo or url_for('static', filename='image/dhol_band.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ db.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ db.tehsil or tehsil }}{% if db.district %}, {{ db.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ db.avg_rating or '4.9' }} ({{ db.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ db.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(db.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 13. PANDIT CATEGORY -->
+        <div class="category-block" id="category-pandit-section">
+          <h3>🕉️ Select Pandit Ji & Puja Services / पंडित जी व पूजा सेवा</h3>
+          <div class="cards-grid">
+            {% for pan in pandits %}
+              {% if pan.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="pandit" data-name="{{ pan.name }}">
+                  <div class="card-img" style="background-image: url('{{ pan.photo or url_for('static', filename='image/pandit.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ pan.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ pan.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(pan.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="pandit" data-name="{{ pan.name }}" data-description="{{ pan.description }}" data-price="{{ pan.price }}" onclick="selectVendor('pandit', '{{ pan.name }}', {{ pan.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ pan.photo or url_for('static', filename='image/pandit.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ pan.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ pan.tehsil or tehsil }}{% if pan.district %}, {{ pan.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ pan.avg_rating or '4.9' }} ({{ pan.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ pan.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(pan.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 14. CHOREOGRAPHER CATEGORY -->
+        <div class="category-block" id="category-choreographer-section">
+          <h3>💃 Select Choreographer & Sangeet Dance / कोरियोग्राफर व डांस</h3>
+          <div class="cards-grid">
+            {% for cho in choreographers %}
+              {% if cho.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="choreographer" data-name="{{ cho.name }}">
+                  <div class="card-img" style="background-image: url('{{ cho.photo or url_for('static', filename='image/choreographer.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ cho.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ cho.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(cho.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="choreographer" data-name="{{ cho.name }}" data-description="{{ cho.description }}" data-price="{{ cho.price }}" onclick="selectVendor('choreographer', '{{ cho.name }}', {{ cho.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ cho.photo or url_for('static', filename='image/choreographer.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ cho.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ cho.tehsil or tehsil }}{% if cho.district %}, {{ cho.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ cho.avg_rating or '4.9' }} ({{ cho.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ cho.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(cho.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 15. WEDDING PLANNER CATEGORY -->
+        <div class="category-block" id="category-wedding_planner-section">
+          <h3>📋 Select Wedding Planner / वेडिंग प्लानर व मैनेजमेंट</h3>
+          <div class="cards-grid">
+            {% for wp in wedding_planners %}
+              {% if wp.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="wedding_planner" data-name="{{ wp.name }}">
+                  <div class="card-img" style="background-image: url('{{ wp.photo or url_for('static', filename='image/wedding_planner.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ wp.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ wp.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(wp.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="wedding_planner" data-name="{{ wp.name }}" data-description="{{ wp.description }}" data-price="{{ wp.price }}" onclick="selectVendor('wedding_planner', '{{ wp.name }}', {{ wp.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ wp.photo or url_for('static', filename='image/wedding_planner.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ wp.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ wp.tehsil or tehsil }}{% if wp.district %}, {{ wp.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ wp.avg_rating or '4.9' }} ({{ wp.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ wp.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(wp.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 16. ANCHOR CATEGORY -->
+        <div class="category-block" id="category-anchor-section">
+          <h3>🎙️ Select Anchor & Stage Host / एंकर व स्टेज होस्ट</h3>
+          <div class="cards-grid">
+            {% for anc in anchors %}
+              {% if anc.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="anchor" data-name="{{ anc.name }}">
+                  <div class="card-img" style="background-image: url('{{ anc.photo or url_for('static', filename='image/anchor.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ anc.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ anc.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(anc.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="anchor" data-name="{{ anc.name }}" data-description="{{ anc.description }}" data-price="{{ anc.price }}" onclick="selectVendor('anchor', '{{ anc.name }}', {{ anc.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ anc.photo or url_for('static', filename='image/anchor.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ anc.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ anc.tehsil or tehsil }}{% if anc.district %}, {{ anc.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ anc.avg_rating or '4.9' }} ({{ anc.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ anc.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(anc.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 17. FIREWORKS CATEGORY -->
+        <div class="category-block" id="category-fireworks-section">
+          <h3>🎆 Select Fireworks & Cold Pyro FX / आतिशबाजी व कोल्ड पायरो</h3>
+          <div class="cards-grid">
+            {% for fw in fireworks_list %}
+              {% if fw.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="fireworks" data-name="{{ fw.name }}">
+                  <div class="card-img" style="background-image: url('{{ fw.photo or url_for('static', filename='image/fireworks.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ fw.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ fw.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(fw.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="fireworks" data-name="{{ fw.name }}" data-description="{{ fw.description }}" data-price="{{ fw.price }}" onclick="selectVendor('fireworks', '{{ fw.name }}', {{ fw.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ fw.photo or url_for('static', filename='image/fireworks.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ fw.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ fw.tehsil or tehsil }}{% if fw.district %}, {{ fw.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ fw.avg_rating or '4.9' }} ({{ fw.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ fw.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(fw.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 18. MOCKTAIL CATEGORY -->
+        <div class="category-block" id="category-mocktail-section">
+          <h3>🍹 Select Mocktails & Drink Counter / मॉकटेल्स व ड्रिंक्स</h3>
+          <div class="cards-grid">
+            {% for mock in mocktails %}
+              {% if mock.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="mocktail" data-name="{{ mock.name }}">
+                  <div class="card-img" style="background-image: url('{{ mock.photo or url_for('static', filename='image/mocktail.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ mock.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ mock.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(mock.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="mocktail" data-name="{{ mock.name }}" data-description="{{ mock.description }}" data-price="{{ mock.price }}" onclick="selectVendor('mocktail', '{{ mock.name }}', {{ mock.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ mock.photo or url_for('static', filename='image/mocktail.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ mock.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ mock.tehsil or tehsil }}{% if mock.district %}, {{ mock.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ mock.avg_rating or '4.9' }} ({{ mock.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ mock.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(mock.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- 19. SAFA CATEGORY -->
+        <div class="category-block" id="category-safa-section">
+          <h3>👑 Select Royal Safa & Pagdi / शाही साफ़ा व पगड़ी</h3>
+          <div class="cards-grid">
+            {% for saf in safas %}
+              {% if saf.is_blocked %}
+                <div class="vendor-card blocked-vendor-card" data-category="safa" data-name="{{ saf.name }}">
+                  <div class="card-img" style="background-image: url('{{ saf.photo or url_for('static', filename='image/safa.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ saf.name }}</h4>
+                    <span class="blocked-badge">🚫 Date Blocked / अनुपलब्ध</span>
+                    <p class="desc">{{ saf.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(saf.price) }}</span>
+                      <span class="badge" style="background: #94a3b8; color: white;">Blocked</span>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="vendor-card" data-category="safa" data-name="{{ saf.name }}" data-description="{{ saf.description }}" data-price="{{ saf.price }}" onclick="selectVendor('safa', '{{ saf.name }}', {{ saf.price }}, this)">
+                  <div class="card-img" style="background-image: url('{{ saf.photo or url_for('static', filename='image/safa.png') }}');"></div>
+                  <div class="card-content">
+                    <h4>{{ saf.name }}</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 11.5px; color: #10b981; font-weight: 700;">📍 {{ saf.tehsil or tehsil }}{% if saf.district %}, {{ saf.district }}{% endif %}</span>
+                      <span style="font-size: 11px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 12px; font-weight: 800;" title="Customer Rating">⭐ {{ saf.avg_rating or '4.9' }} ({{ saf.review_count or 15 }})</span>
+                    </div>
+                    <p class="desc">{{ saf.description }}</p>
+                    <div class="card-footer">
+                      <span class="price">₹{{ "{:,.0f}".format(saf.price) }}</span>
+                      <span class="badge">Select</span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn next-step-btn">Confirm Selections & Pay ➝</button>
+      </form>
+    </div>
+
+    <!-- Right Column: Sticky Summary Panel -->
+    <div class="booking-right-col">
+      <div class="summary-card">
+        <h3>📋 Booking Summary</h3>
+        <div class="summary-list">
+          <div class="summary-item" id="summary-venue">
+            <span class="item-label">Venue:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-catering">
+            <span class="item-label">Catering:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-dj">
+            <span class="item-label">DJ & Music:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-decoration">
+            <span class="item-label">Decoration:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-transport">
+            <span class="item-label">Transport:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-photography">
+            <span class="item-label">Photography:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-shahi_sawari">
+            <span class="item-label">Shahi Sawari:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-invitation_card">
+            <span class="item-label">Invitation:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-security_guard">
+            <span class="item-label">Security Guard:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-makeup">
+            <span class="item-label">Makeup & Parlor:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-mehendi">
+            <span class="item-label">Mehendi Artist:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-dhol_band">
+            <span class="item-label">Dhol & Band:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-pandit">
+            <span class="item-label">Pandit Ji:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-choreographer">
+            <span class="item-label">Choreographer:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-wedding_planner">
+            <span class="item-label">Wedding Planner:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-anchor">
+            <span class="item-label">Anchor / Emcee:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-fireworks">
+            <span class="item-label">Fireworks & Pyro:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-mocktail">
+            <span class="item-label">Mocktail Bar:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+          <div class="summary-item" id="summary-safa">
+            <span class="item-label">Royal Safa:</span>
+            <span class="item-value">Not Selected</span>
+          </div>
+        </div>
+        <hr class="summary-divider">
+        <div class="summary-total">
+          <span>Estimated Total:</span>
+          <span id="total-price-display">₹0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='booking2.js') }}"></script>
+</body>
+</html>
