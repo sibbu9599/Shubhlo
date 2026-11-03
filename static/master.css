@@ -91,6 +91,7 @@ header .logo {
   text-decoration: none;
   display: flex;
   align-items: center;
+  gap: 6px;
   letter-spacing: -0.5px;
   margin: 0;
   background: linear-gradient(135deg, #FFFFFF 30%, #FBBF24 100%);
@@ -99,10 +100,28 @@ header .logo {
 }
 
 header .logo .halo {
-  margin-left: 6px;
+  margin-left: 2px;
   font-size: 22px;
   animation: floatHalo 3s ease-in-out infinite;
   -webkit-text-fill-color: initial;
+}
+
+header .brand-byline {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fbbf24 !important;
+  -webkit-text-fill-color: #fbbf24 !important;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  padding: 3px 8px;
+  border-radius: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 @keyframes floatHalo {

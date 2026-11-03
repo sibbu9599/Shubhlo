@@ -1,7 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, has_request_context
 import pymysql
 import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
 import random
+import json
 
 app = Flask(__name__)
 app.secret_key = "shubhlo_super_secret_key"
@@ -9,7 +15,39 @@ app.secret_key = "shubhlo_super_secret_key"
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-ALLOW_ALL_LOCATIONS = True
+ALLOW_ALL_LOCATIONS = False
+
+DEFAULT_PERMITTED_LOCATIONS = [
+    {'id': 1, 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Itarsi', 'is_active': 1},
+    {'id': 2, 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Pipariya', 'is_active': 1},
+    {'id': 3, 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Hoshangabad', 'is_active': 1},
+    {'id': 4, 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Sohagpur', 'is_active': 1},
+    {'id': 5, 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Seoni Malwa', 'is_active': 1},
+    {'id': 6, 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Babai', 'is_active': 1},
+    {'id': 7, 'state': 'Madhya Pradesh', 'district': 'Bhopal', 'tehsil': 'Bhopal', 'is_active': 1},
+    {'id': 8, 'state': 'Madhya Pradesh', 'district': 'Bhopal', 'tehsil': 'Berasia', 'is_active': 1},
+    {'id': 9, 'state': 'Madhya Pradesh', 'district': 'Bhopal', 'tehsil': 'Kolar', 'is_active': 1},
+    {'id': 10, 'state': 'Madhya Pradesh', 'district': 'Bhopal', 'tehsil': 'Huzur', 'is_active': 1},
+    {'id': 11, 'state': 'Madhya Pradesh', 'district': 'Indore', 'tehsil': 'Indore', 'is_active': 1},
+    {'id': 12, 'state': 'Madhya Pradesh', 'district': 'Indore', 'tehsil': 'Mhow', 'is_active': 1},
+    {'id': 13, 'state': 'Madhya Pradesh', 'district': 'Indore', 'tehsil': 'Sanwer', 'is_active': 1},
+    {'id': 14, 'state': 'Madhya Pradesh', 'district': 'Indore', 'tehsil': 'Depalpur', 'is_active': 1},
+    {'id': 15, 'state': 'Madhya Pradesh', 'district': 'Jabalpur', 'tehsil': 'Jabalpur', 'is_active': 1},
+    {'id': 16, 'state': 'Maharashtra', 'district': 'Pune', 'tehsil': 'Pune', 'is_active': 1},
+    {'id': 17, 'state': 'Maharashtra', 'district': 'Pune', 'tehsil': 'Haveli', 'is_active': 1},
+    {'id': 18, 'state': 'Maharashtra', 'district': 'Pune', 'tehsil': 'Mulshi', 'is_active': 1},
+    {'id': 19, 'state': 'Maharashtra', 'district': 'Mumbai', 'tehsil': 'Andheri', 'is_active': 1},
+    {'id': 20, 'state': 'Maharashtra', 'district': 'Mumbai', 'tehsil': 'Borivali', 'is_active': 1}
+]
+
+GLOBAL_PERMITTED_LOCATIONS = [dict(d) for d in DEFAULT_PERMITTED_LOCATIONS]
+
+ALL_VENDOR_CATEGORIES = [
+    'venue', 'catering', 'dj', 'decoration', 'transport', 'photography', 
+    'shahi_sawari', 'invitation_card', 'security_guard', 'makeup', 'mehendi', 
+    'dhol_band', 'pandit', 'choreographer', 'wedding_planner', 'anchor', 
+    'fireworks', 'mocktail', 'safa'
+]
 
 @app.template_filter('format_date_indian')
 def format_date_indian(value):
@@ -28,11 +66,14 @@ def format_date_indian(value):
 
 def get_db_connection():
     try:
+        mysql_pwd = os.environ.get('MYSQL_PASSWORD', 'Sibbu9599@')
         connection = pymysql.connect(
-            host='localhost',
-            user='root',
-            password='',
-            database='shubhlo_db',
+            host=os.environ.get('MYSQL_HOST', 'localhost'),
+            user=os.environ.get('MYSQL_USER', 'root'),
+            password=mysql_pwd,
+            database=os.environ.get('MYSQL_DB', 'shubhlo_db'),
+            port=int(os.environ.get('MYSQL_PORT', 3306)),
+            charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
         return connection
@@ -75,9 +116,71 @@ def migrate_db_schema():
                     cursor.execute("ALTER TABLE booking ADD COLUMN counter_offer_status VARCHAR(20) DEFAULT 'Pending'")
                     conn.commit()
 
+                cursor.execute("SHOW COLUMNS FROM booking LIKE 'event_name'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE booking ADD COLUMN event_name VARCHAR(255) DEFAULT 'Wedding / शादी विवाह'")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM booking LIKE 'event_type'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE booking ADD COLUMN event_type VARCHAR(255) DEFAULT 'Wedding / शादी विवाह'")
+                    conn.commit()
+
+                for cat in ALL_VENDOR_CATEGORIES:
+                    cursor.execute(f"SHOW COLUMNS FROM booking LIKE '{cat}'")
+                    if not cursor.fetchone():
+                        cursor.execute(f"ALTER TABLE booking ADD COLUMN {cat} VARCHAR(150) DEFAULT NULL")
+                        conn.commit()
+
+                # Safe Guarantee & Token Refund Columns
+                cursor.execute("SHOW COLUMNS FROM booking LIKE 'dispute_status'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE booking ADD COLUMN dispute_status VARCHAR(50) DEFAULT NULL")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM booking LIKE 'dispute_reason'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE booking ADD COLUMN dispute_reason TEXT DEFAULT NULL")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM booking LIKE 'refund_amount'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE booking ADD COLUMN refund_amount DECIMAL(10, 2) DEFAULT 0.00")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM booking LIKE 'refund_status'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE booking ADD COLUMN refund_status VARCHAR(50) DEFAULT NULL")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM booking LIKE 'refund_method'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE booking ADD COLUMN refund_method VARCHAR(50) DEFAULT 'Original Payment Method / UPI'")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM booking LIKE 'refunded_at'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE booking ADD COLUMN refunded_at TIMESTAMP NULL DEFAULT NULL")
+                    conn.commit()
+
                 cursor.execute("SHOW COLUMNS FROM vendor LIKE 'min_order_value'")
                 if not cursor.fetchone():
                     cursor.execute("ALTER TABLE vendor ADD COLUMN min_order_value DECIMAL(10, 2) DEFAULT 0.00")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM vendor LIKE 'venue_type'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE vendor ADD COLUMN venue_type VARCHAR(50) DEFAULT NULL")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM vendor LIKE 'guest_capacity'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE vendor ADD COLUMN guest_capacity VARCHAR(100) DEFAULT NULL")
+                    conn.commit()
+
+                cursor.execute("SHOW COLUMNS FROM vendor LIKE 'can_host_wedding'")
+                if not cursor.fetchone():
+                    cursor.execute("ALTER TABLE vendor ADD COLUMN can_host_wedding VARCHAR(10) DEFAULT 'yes'")
                     conn.commit()
 
                 cursor.execute("SHOW TABLES LIKE 'vendor_availability'")
@@ -134,6 +237,17 @@ def migrate_db_schema():
                     """)
                     conn.commit()
 
+                try:
+                    cursor.execute("ALTER TABLE system_settings MODIFY COLUMN setting_value TEXT")
+                    cursor.execute("""
+                        INSERT IGNORE INTO system_settings (setting_key, setting_value, custom_message) VALUES
+                        ('fast2sms_enabled', 'OFF', 'Fast2SMS Live SMS Gateway is currently PAUSED (Simulation Mode)'),
+                        ('fast2sms_api_key', '', 'Fast2SMS API Authorization Key')
+                    """)
+                    conn.commit()
+                except Exception as e:
+                    pass
+
                 print("Database migration checks complete.")
         except Exception as e:
             print(f"Error during database migration: {e}")
@@ -154,12 +268,87 @@ def get_system_setting(setting_key):
         finally:
             conn.close()
 
-    mock_settings = session.get('mock_system_settings', {
-        'allow_customer_booking': {'value': 'ON', 'msg': 'Customer bookings are temporarily paused by Shubhlo Admin. Please check back soon! / एडमिन द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।'},
-        'allow_vendor_registration': {'value': 'ON', 'msg': 'New vendor registrations are currently paused by Shubhlo Admin. Please check back soon! / एडमिन द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।'}
-    })
-    st = mock_settings.get(setting_key, {'value': 'ON', 'msg': ''})
-    return st.get('value', 'ON'), st.get('msg', '')
+    mock_settings = {}
+    if has_request_context() and 'mock_system_settings' in session:
+        mock_settings = session.get('mock_system_settings', {})
+    if not mock_settings:
+        mock_settings = GLOBAL_SYSTEM_SETTINGS
+    if not mock_settings:
+        mock_settings = {
+            'allow_customer_booking': {'value': 'ON', 'msg': 'Customer bookings are temporarily paused by Shubhlo Admin. Please check back soon! / एडमिन द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।'},
+            'allow_vendor_registration': {'value': 'ON', 'msg': 'New vendor registrations are currently paused by Shubhlo Admin. Please check back soon! / एडमिन द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।'},
+            'fast2sms_enabled': {'value': 'OFF', 'msg': ''},
+            'fast2sms_api_key': {'value': os.environ.get('FAST2SMS_API_KEY', FAST2SMS_API_KEY), 'msg': ''}
+        }
+    st = mock_settings.get(setting_key, {'value': 'ON' if 'allow' in setting_key else 'OFF', 'msg': ''})
+    if isinstance(st, dict):
+        return st.get('value', 'OFF'), st.get('msg', '')
+    return str(st), ''
+
+
+def is_email_or_phone_registered(email, phone, conn=None):
+    if not email and not phone:
+        return False
+
+    clean_email = (email or '').strip().lower()
+    clean_phone = (phone or '').strip()
+
+    # 1. Check DB if connection provided or available
+    close_db = False
+    if conn is None:
+        conn = get_db_connection()
+        close_db = True
+
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM users WHERE LOWER(email)=%s OR phone=%s LIMIT 1", (clean_email, clean_phone))
+                if cursor.fetchone():
+                    return True
+                cursor.execute("SELECT id FROM vendor WHERE LOWER(email)=%s OR phone=%s LIMIT 1", (clean_email, clean_phone))
+                if cursor.fetchone():
+                    return True
+        except Exception as e:
+            print(f"Error checking DB duplicate registration: {e}")
+        finally:
+            if close_db:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+
+    # 2. Check GLOBAL_REGISTERED_VENDORS
+    for v in GLOBAL_REGISTERED_VENDORS:
+        v_email = (v.get('email') or '').strip().lower()
+        v_phone = (v.get('phone') or '').strip()
+        if (clean_email and v_email == clean_email) or (clean_phone and v_phone == clean_phone):
+            return True
+
+    # 3. Check session mock_vendors and mock_users
+    try:
+        mock_v = session.get('mock_vendors', [])
+        for v in mock_v:
+            v_email = (v.get('email') or '').strip().lower()
+            v_phone = (v.get('phone') or '').strip()
+            if (clean_email and v_email == clean_email) or (clean_phone and v_phone == clean_phone):
+                return True
+
+        mock_u = session.get('mock_users', [])
+        for u in mock_u:
+            u_email = (u.get('email') or '').strip().lower()
+            u_phone = (u.get('phone') or '').strip()
+            if (clean_email and u_email == clean_email) or (clean_phone and u_phone == clean_phone):
+                return True
+    except Exception:
+        pass
+
+    # 4. Check known hardcoded seed accounts
+    seed_emails = {'user@shubhlo.com', 'owner@shubhlo.com', 'royal@shubhlo.com', 'meadow@shubhlo.com', 'shahi@shubhlo.com', 'djrock@shubhlo.com', 'n9599@gmail.com'}
+    seed_phones = {'9876543210', '9876543211', '9876543212', '9876543213', '9876543214', '9599000000'}
+    if clean_email in seed_emails or clean_phone in seed_phones:
+        return True
+
+    return False
 
 FAST2SMS_API_KEY = os.environ.get("FAST2SMS_API_KEY", "")
 SMTP_SENDER_EMAIL = os.environ.get("SMTP_SENDER_EMAIL", "your-email@gmail.com")
@@ -192,7 +381,7 @@ def send_email_otp(recipient_email, otp):
         print(f"SMTP Dispatch Error to {recipient_email}: {e}")
         return False
 
-def send_sms_notification(recipient_type, phone, message):
+def send_sms_notification(recipient_type, phone, message, auto_dispatch_fast2sms=True):
     conn = get_db_connection()
     if conn is not None:
         try:
@@ -207,25 +396,77 @@ def send_sms_notification(recipient_type, phone, message):
         finally:
             conn.close()
     else:
-        mock_sms = session.get('mock_sms', [])
-        mock_sms.append({
-            'id': len(mock_sms) + 1,
-            'recipient': recipient_type,
-            'phone': phone,
-            'message': message
-        })
-        session['mock_sms'] = mock_sms
-        session.modified = True
+        if has_request_context():
+            mock_sms = session.get('mock_sms', [])
+            mock_sms.append({
+                'id': len(mock_sms) + 1,
+                'recipient': recipient_type,
+                'phone': phone,
+                'message': message
+            })
+            session['mock_sms'] = mock_sms
+            session.modified = True
     try:
         print(f"[{recipient_type.upper()} NOTIFICATION to {phone}]: {message}")
     except Exception:
         print(f"[{recipient_type.upper()} NOTIFICATION to {phone}]: [SMS message contains non-ASCII characters]")
 
+    # Live Fast2SMS Dispatch if enabled
+    if auto_dispatch_fast2sms:
+        try:
+            fast2sms_status, _ = get_system_setting("fast2sms_enabled")
+            if str(fast2sms_status).strip().upper() == "ON":
+                api_k, _ = get_system_setting("fast2sms_api_key")
+                if not api_k or api_k in ['ON', 'OFF']:
+                    api_k = os.environ.get("FAST2SMS_API_KEY", FAST2SMS_API_KEY)
+                if api_k and str(api_k).strip():
+                    dispatch_fast2sms(phone, message, api_key=str(api_k).strip())
+        except Exception as e:
+            print(f"Auto Fast2SMS dispatch warning: {e}")
+
 GLOBAL_REGISTERED_USERS = []
 GLOBAL_REGISTERED_VENDORS = []
+GLOBAL_REGISTERED_BOOKINGS = []
+GLOBAL_MOCK_VERIFICATIONS = []
 GLOBAL_VENDOR_AVAILABILITY = []
 GLOBAL_SYSTEM_SETTINGS = {}
 GLOBAL_VENDOR_RATINGS = {}
+
+FALLBACK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'fallback_data.json')
+
+def load_fallback_data():
+    global GLOBAL_REGISTERED_USERS, GLOBAL_REGISTERED_VENDORS, GLOBAL_REGISTERED_BOOKINGS, GLOBAL_MOCK_VERIFICATIONS, GLOBAL_VENDOR_AVAILABILITY, GLOBAL_VENDOR_RATINGS
+    if os.path.exists(FALLBACK_FILE):
+        try:
+            with open(FALLBACK_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                GLOBAL_REGISTERED_USERS = data.get('users', [])
+                GLOBAL_REGISTERED_VENDORS = data.get('vendors', [])
+                GLOBAL_REGISTERED_BOOKINGS = data.get('bookings', [])
+                GLOBAL_MOCK_VERIFICATIONS = data.get('verifications', [])
+                GLOBAL_VENDOR_AVAILABILITY = data.get('availability', [])
+                GLOBAL_VENDOR_RATINGS = data.get('ratings', {})
+        except Exception as e:
+            print(f"Error loading fallback data file: {e}")
+
+def save_fallback_data():
+    try:
+        data = {
+            'users': GLOBAL_REGISTERED_USERS,
+            'vendors': GLOBAL_REGISTERED_VENDORS,
+            'bookings': GLOBAL_REGISTERED_BOOKINGS,
+            'verifications': GLOBAL_MOCK_VERIFICATIONS,
+            'availability': GLOBAL_VENDOR_AVAILABILITY,
+            'ratings': GLOBAL_VENDOR_RATINGS
+        }
+        os.makedirs(os.path.dirname(FALLBACK_FILE), exist_ok=True)
+        with open(FALLBACK_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Error saving fallback data file: {e}")
+
+# Automatically load persisted fallback data at app initialization
+load_fallback_data()
 
 def is_blacklisted(value):
     if not value:
@@ -257,10 +498,127 @@ def is_blacklisted(value):
                 return True
     return False
 
+def enrich_venue_attributes(v):
+    if not isinstance(v, dict):
+        return v
+
+    name = str(v.get('name') or '')
+    desc = str(v.get('description') or '')
+    combined = f"{name} {desc}".lower()
+
+    # 1. Determine venue_type
+    v_type = v.get('venue_type')
+    if not v_type:
+        if any(w in combined for w in ['restaurant', 'resturent', 'cafe', 'café', 'dhaba', 'bistro', 'lounge', 'food court', 'fast food', 'mini party', 'small party']):
+            v_type = 'restaurant'
+        elif any(w in combined for w in ['banquet', 'ac hall', 'community hall']):
+            v_type = 'banquet_hall'
+        elif any(w in combined for w in ['resort', 'farmhouse', 'farm house', 'villa']):
+            v_type = 'resort'
+        else:
+            v_type = 'marriage_garden'
+
+    v['venue_type'] = v_type
+
+    # 2. Determine can_host_wedding
+    if 'can_host_wedding' in v and v['can_host_wedding'] is not None:
+        raw_val = v['can_host_wedding']
+        can_host = raw_val in [True, 1, '1', 'yes', 'Yes', 'true', 'True']
+    else:
+        can_host = (v_type != 'restaurant')
+    v['can_host_wedding'] = can_host
+
+    # 3. Determine guest capacity and labels
+    if v_type == 'restaurant':
+        v['venue_type_label'] = 'Restaurant & Party Hall / रेस्टोरेंट'
+        v['capacity_label'] = v.get('guest_capacity') or '30 - 100 Guests (Small Gathering)'
+        v['badge_text'] = '🎂 Birthday & Small Events'
+        v['allowed_events_label'] = 'Birthday, Anniversary, Kitty Party, Family Dinner'
+    elif v_type == 'banquet_hall':
+        v['venue_type_label'] = 'AC Banquet Hall / बैंक्वेट हॉल'
+        v['capacity_label'] = v.get('guest_capacity') or '150 - 500 Guests'
+        v['badge_text'] = '💍 Weddings & Celebrations'
+        v['allowed_events_label'] = 'Wedding, Reception, Engagement, Sangeet'
+    elif v_type == 'resort':
+        v['venue_type_label'] = 'Luxury Resort / रिसॉर्ट'
+        v['capacity_label'] = v.get('guest_capacity') or '300 - 2000 Guests'
+        v['badge_text'] = '👑 Destination & Royal Weddings'
+        v['allowed_events_label'] = 'Destination Wedding, Royal Reception'
+    else:
+        v['venue_type_label'] = 'Marriage Garden & Lawn / मैरिज गार्डन'
+        v['capacity_label'] = v.get('guest_capacity') or '500 - 2500+ Guests'
+        v['badge_text'] = '💒 Grand Wedding & Reception'
+        v['allowed_events_label'] = 'Grand Wedding, Reception, Tilak, Sangeet'
+
+    return v
+
 MOCK_VENDORS = {
     'venue': [
-        {'id': 1, 'name': 'Royal Palace Garden (Mock)', 'price': 150000.00, 'description': 'Grand marriage garden with large capacity and scenic view.', 'photo': '/static/vanue.png', 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Itarsi'},
-        {'id': 2, 'name': 'Green Meadow Lawns (Mock)', 'price': 120000.00, 'description': 'Elegant open lawns for outdoor pre-wedding and reception.', 'photo': '/static/vanue.png', 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Sohagpur'}
+        {
+            'id': 1,
+            'name': 'Royal Palace Garden (Mock)',
+            'venue_type': 'marriage_garden',
+            'guest_capacity': '500 - 2500+ Guests',
+            'can_host_wedding': True,
+            'price': 150000.00,
+            'description': 'Grand marriage garden with large lush lawns, royal mandap setup, and high guest capacity.',
+            'photo': '/static/vanue.png',
+            'state': 'Madhya Pradesh',
+            'district': 'Hoshangabad',
+            'tehsil': 'Itarsi'
+        },
+        {
+            'id': 2,
+            'name': 'Green Meadow Lawns (Mock)',
+            'venue_type': 'marriage_garden',
+            'guest_capacity': '400 - 1800 Guests',
+            'can_host_wedding': True,
+            'price': 120000.00,
+            'description': 'Scenic open marriage lawns for grand outdoor weddings, sangeet, and reception ceremonies.',
+            'photo': '/static/vanue.png',
+            'state': 'Madhya Pradesh',
+            'district': 'Hoshangabad',
+            'tehsil': 'Sohagpur'
+        },
+        {
+            'id': 11,
+            'name': 'Silver Oak AC Banquet Hall (Mock)',
+            'venue_type': 'banquet_hall',
+            'guest_capacity': '150 - 500 Guests',
+            'can_host_wedding': True,
+            'price': 75000.00,
+            'description': 'Centrally air-conditioned grand banquet hall ideal for Ring Ceremony, Tilak, Weddings and Receptions.',
+            'photo': '/static/vanue.png',
+            'state': 'Madhya Pradesh',
+            'district': 'Hoshangabad',
+            'tehsil': 'Itarsi'
+        },
+        {
+            'id': 12,
+            'name': 'The Urban Spice Restaurant & Party Lounge (Mock)',
+            'venue_type': 'restaurant',
+            'guest_capacity': '30 - 100 Guests (Small Gathering)',
+            'can_host_wedding': False,
+            'price': 15000.00,
+            'description': 'Cosy AC restaurant & private party lounge. Specially designed for Birthday parties, Anniversaries, Kitty parties and family get-togethers (Up to 100 guests). Note: Grand weddings not hosted.',
+            'photo': '/static/vanue.png',
+            'state': 'Madhya Pradesh',
+            'district': 'Hoshangabad',
+            'tehsil': 'Itarsi'
+        },
+        {
+            'id': 13,
+            'name': 'Madhuban Family Restaurant & Cafe (Mock)',
+            'venue_type': 'restaurant',
+            'guest_capacity': '25 - 60 Guests',
+            'can_host_wedding': False,
+            'price': 12000.00,
+            'description': 'Boutique cafe and celebration hall for Birthdays, Baby showers and small private parties. Note: Weddings not hosted.',
+            'photo': '/static/vanue.png',
+            'state': 'Madhya Pradesh',
+            'district': 'Hoshangabad',
+            'tehsil': 'Pipariya'
+        }
     ],
     'catering': [
         {'id': 3, 'name': 'Shahi Caterers (Mock)', 'price': 50000.00, 'description': 'Excellent multi-cuisine wedding catering services.', 'photo': '/static/catering.png', 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Itarsi'},
@@ -268,7 +626,59 @@ MOCK_VENDORS = {
     ]
 }
 
+DEFAULT_SERVICE_DESCRIPTIONS = {
+    'venue': 'Grand marriage garden & banquet hall with spacious lush lawns, royal mandap, and premium guest amenities.',
+    'catering': 'Pure veg delicious multi-cuisine buffet catering with live mocktail & dessert counters.',
+    'dj': 'High-power JBL concert sound setup, dynamic laser beam lights, and cinematic fog screen.',
+    'photography': 'Cinematic 4K wedding films, candid photography, drone shoot, and designer luxury albums.',
+    'makeup': 'Royal bridal HD & airbrush makeup, pre-bridal beauty packages, and elegant hair styling.',
+    'decoration': 'Designer royal mandap decoration, entry tunnel lighting, and fresh floral setups.',
+    'transport': 'Luxury bridal entry cars, vintage doli vehicles, and guest transportation.',
+    'shahi_sawari': 'Royal vintage wedding buggy, royal horses, and grand groom entry procession.',
+    'invitation_card': 'Custom digital animated video invitations and premium laser-cut wedding cards.',
+    'security_guard': 'Professional bouncers, VIP event security guards, and disciplined crowd management.',
+    'mehendi': 'Organic Rajasthani, Arabic, and custom bridal portrait mehendi artist with dark rich stain.',
+    'dhol_band': 'Traditional Punjabi dhol players, wedding brass band, and lively celebration tunes.',
+    'pandit': 'Experienced Vedic pandit ji for authentic Vivah Sanskar, Grah Pravesh, and Puja rituals.',
+    'choreographer': 'Expert sangeet dance choreographer for family performances and couple dance routines.',
+    'wedding_planner': 'Complete wedding management, coordination, budget planning, and day-of execution.',
+    'anchor': 'Charismatic bilingual stage host and emcee for sangeet, reception, and engagement games.',
+    'fireworks': 'Safe cold pyro entry effects, dazzling fireworks display, and low-smoke sparkulars.',
+    'mocktail': 'Interactive live mocktail bar counter, customized welcome drinks, and skilled bartenders.',
+    'safa': 'Traditional royal Rajasthani safa, groom turban styling, and barati pagdi draping team.'
+}
+
+def sanitize_vendor_profile(v, clean_service):
+    if not isinstance(v, dict):
+        return v
+    # Fix name if it's 'we' or blank/None
+    name = str(v.get('name') or '').strip()
+    if name.lower() in ['we', '', 'none', 'null']:
+        v['name'] = 'Shubh Shagun Marriage Garden' if clean_service == 'venue' else f'Shubh Verified {clean_service.title()} Partner'
+    
+    # Fix description if None, 'None', or empty
+    desc = v.get('description')
+    if not desc or str(desc).strip() in ['None', 'none', 'null', '']:
+        v['description'] = DEFAULT_SERVICE_DESCRIPTIONS.get(clean_service, 'Top rated verified partner providing authentic setups, transparent pricing, and punctual service.')
+    
+    # Fix photo if None or 'None'
+    photo = v.get('photo')
+    if not photo or str(photo).strip() in ['None', 'none', 'null', '']:
+        if clean_service == 'venue':
+            v['photo'] = '/static/vanue.png'
+        elif clean_service == 'catering':
+            v['photo'] = '/static/catering.png'
+        elif clean_service == 'dj':
+            v['photo'] = '/static/image/DJ.png'
+        else:
+            v['photo'] = f'/static/image/{clean_service}.png'
+            
+    return v
+
 def fetch_vendors_by_service(service_name, tehsil=None):
+    clean_service = (service_name or '').strip().lower()
+    clean_tehsil = (tehsil or '').strip().lower() if tehsil else None
+
     conn = get_db_connection()
     if conn is not None:
         try:
@@ -280,9 +690,9 @@ def fetch_vendors_by_service(service_name, tehsil=None):
                         COUNT(r.id) AS rating_count
                         FROM vendor v
                         LEFT JOIN rating r ON v.name = r.vendor_name
-                        WHERE v.service=%s AND v.tehsil=%s AND (v.approval_status IS NULL OR v.approval_status='Approved')
+                        WHERE LOWER(v.service)=%s AND (LOWER(v.tehsil)=%s OR %s IS NULL OR %s = '') AND (v.approval_status IS NULL OR v.approval_status='Approved' OR LOWER(v.approval_status)='approved')
                         GROUP BY v.id, v.name, v.price, v.min_order_value, v.description, v.photo, v.state, v.district, v.tehsil""",
-                        (service_name, tehsil)
+                        (clean_service, clean_tehsil, clean_tehsil, clean_tehsil)
                     )
                 else:
                     cursor.execute(
@@ -291,22 +701,56 @@ def fetch_vendors_by_service(service_name, tehsil=None):
                         COUNT(r.id) AS rating_count
                         FROM vendor v
                         LEFT JOIN rating r ON v.name = r.vendor_name
-                        WHERE v.service=%s AND (v.approval_status IS NULL OR v.approval_status='Approved')
+                        WHERE LOWER(v.service)=%s AND (v.approval_status IS NULL OR v.approval_status='Approved' OR LOWER(v.approval_status)='approved')
                         GROUP BY v.id, v.name, v.price, v.min_order_value, v.description, v.photo, v.state, v.district, v.tehsil""",
-                        (service_name,)
+                        (clean_service,)
                     )
                 vendors = cursor.fetchall()
-                for v in vendors:
-                    v['average_rating'] = float(v['average_rating']) if v.get('average_rating') else 0.0
-                return vendors if vendors else MOCK_VENDORS.get(service_name, [])
+                if vendors:
+                    for v in vendors:
+                        v['average_rating'] = float(v['average_rating']) if v.get('average_rating') else 0.0
+                        sanitize_vendor_profile(v, clean_service)
+                        if clean_service == 'venue':
+                            enrich_venue_attributes(v)
+                    return vendors
         except Exception as e:
             print(f"Error fetching vendors for {service_name}: {e}")
-            registered = [v for v in GLOBAL_REGISTERED_VENDORS if v.get('service') == service_name and v.get('approval_status') == 'Approved']
-            return MOCK_VENDORS.get(service_name, []) + registered
         finally:
             conn.close()
-    registered = [v for v in GLOBAL_REGISTERED_VENDORS if v.get('service') == service_name and v.get('approval_status') == 'Approved']
-    return MOCK_VENDORS.get(service_name, []) + registered
+
+    # Fallback / Simulation Mode: Combine session mock_vendors + GLOBAL_REGISTERED_VENDORS
+    session_vendors = session.get('mock_vendors', []) if has_request_context() and 'mock_vendors' in session else []
+    combined_registered = list(session_vendors) + list(GLOBAL_REGISTERED_VENDORS)
+
+    approved_vendors = []
+    seen_keys = set()
+
+    for v in combined_registered:
+        v_serv = (v.get('service') or '').strip().lower()
+        v_status = (v.get('approval_status') or 'Approved').strip().lower()
+        v_teh = (v.get('tehsil') or '').strip().lower()
+        key = (v.get('name', '').lower(), v_serv)
+
+        if key not in seen_keys and v_serv == clean_service and v_status in ['approved', '']:
+            if not clean_tehsil or not v_teh or v_teh == clean_tehsil:
+                seen_keys.add(key)
+                approved_vendors.append(v)
+
+    mock_default = MOCK_VENDORS.get(service_name, MOCK_VENDORS.get(clean_service, []))
+    final_list = list(approved_vendors)
+
+    for mv in mock_default:
+        m_key = (mv.get('name', '').lower(), (mv.get('service') or clean_service).lower())
+        if m_key not in seen_keys:
+            seen_keys.add(m_key)
+            final_list.append(mv)
+
+    for v in final_list:
+        sanitize_vendor_profile(v, clean_service)
+        if clean_service == 'venue':
+            enrich_venue_attributes(v)
+
+    return final_list
 
 
 @app.route('/')
@@ -538,7 +982,7 @@ def contact():
 
 @app.route('/advertisement')
 def advertisement():
-    return render_template('advertisement.html')
+    return redirect(url_for('home'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -567,7 +1011,16 @@ def login():
         if conn is not None:
             try:
                 with conn.cursor() as cursor:
-                    cursor.execute("SELECT * FROM users WHERE (email=%s OR phone=%s) AND password=%s", (email, email, password))
+                    digits = ''.join(c for c in email if c.isdigit())
+                    clean_p = digits[-10:] if len(digits) >= 10 else None
+                    cursor.execute("""
+                        SELECT * FROM users 
+                        WHERE (LOWER(email)=%s 
+                            OR phone=%s 
+                            OR (phone != '' AND RIGHT(phone, 10)=%s) 
+                            OR phone=%s) 
+                          AND password=%s
+                    """, (email.lower(), email, clean_p or email, clean_p or email, password))
                     user = cursor.fetchone()
                     if user:
                         session['user'] = user['email']
@@ -583,11 +1036,13 @@ def login():
             finally:
                 conn.close()
         else:
-            # Fallback/Simulated Mode for Mock Users
-            mock_users = session.get('mock_users', [
+            # Fallback/Simulated Mode for Mock Users & Persistent Fallback Data
+            default_mock_users = [
                 {'name': 'Demo User', 'email': 'user@shubhlo.com', 'phone': '9876543210', 'password': 'user123'}
-            ])
-            user = next((u for u in mock_users if (str(u.get('email', '')).lower() == email.lower() or str(u.get('phone', '')) == email) and str(u.get('password', '')) == password), None)
+            ]
+            session_users = session.get('mock_users', [])
+            all_users = list(session_users) + list(GLOBAL_REGISTERED_USERS) + default_mock_users
+            user = next((u for u in all_users if (str(u.get('email', '')).lower() == email.lower() or str(u.get('phone', '')) == email) and str(u.get('password', '')) == password), None)
             if user:
                 session['user'] = user['email']
                 session['user_name'] = user.get('name', 'Customer')
@@ -625,6 +1080,7 @@ def signup():
                         VALUES (%s, %s, %s, %s)
                     """, (name or email.split('@')[0], email, phone, password))
                     conn.commit()
+                    session.clear()
                     session['user'] = email
                     session['user_name'] = name or email.split('@')[0]
                     flash("Account created successfully! Welcome to Shubhlo 🎉", "success")
@@ -652,6 +1108,7 @@ def signup():
         mock_users.append(new_u)
         if not any(u['email'] == email for u in GLOBAL_REGISTERED_USERS):
             GLOBAL_REGISTERED_USERS.append(new_u)
+        session.clear()
         session['mock_users'] = mock_users
         session['user'] = email
         session['user_name'] = new_u['name']
@@ -668,137 +1125,190 @@ def signup_alias():
 
 @app.route('/logout')
 def logout():
-    session.pop('user', None)
-    session.pop('admin', None)
-    session.pop('vendor', None)
-    session.pop('user_name', None)
-    session.pop('vendor_name', None)
-    session.pop('vendor_service', None)
-    session.pop('vendor_id', None)
-    session.pop('booking_info', None)
+    session.clear()
     flash("You have been logged out successfully! / आप सफलतापूर्वक लॉग आउट हो गए हैं।", "info")
     return redirect(url_for('home'))
 
 @app.route('/forget-password', methods=['GET', 'POST'])
+@app.route('/forgot_password', methods=['GET', 'POST'])
+@app.route('/forgot-password', methods=['GET', 'POST'])
 def forget_password():
     if request.method == 'POST':
-        user_id = request.form.get('user_id')
-        role = request.form.get('role')
+        raw_user_id = (
+            request.form.get('user_id') or 
+            request.form.get('identity') or 
+            request.form.get('email') or 
+            request.form.get('phone') or ''
+        ).strip()
         
-        if not user_id or not role:
-            flash("Role and Email/Phone are required.", "danger")
+        raw_role = (
+            request.form.get('role') or 
+            request.form.get('account_type') or 'customer'
+        ).strip().lower()
+        
+        role = 'vendor' if raw_role in ['vendor', 'vendor account'] else 'customer'
+
+        if not raw_user_id:
+            flash("Please enter your registered mobile number or email. / कृपया अपना मोबाइल नंबर या ईमेल दर्ज करें।", "danger")
             return redirect(url_for('forget_password'))
 
         import random
         import time
 
+        digits = ''.join(c for c in raw_user_id if c.isdigit())
+        is_phone = (len(digits) >= 10)
+        clean_phone = digits[-10:] if is_phone else None
+        clean_email = raw_user_id.lower() if '@' in raw_user_id else None
+
         conn = get_db_connection()
         email_to_reset = None
         phone_to_reset = None
+        user_db_id = None
         account_found = False
 
         if conn is not None:
             try:
                 with conn.cursor() as cursor:
                     if role == 'customer':
-                        # Find Customer in users table
-                        cursor.execute("SELECT * FROM users WHERE email=%s", (user_id,))
+                        cursor.execute("""
+                            SELECT * FROM users 
+                            WHERE LOWER(email) = %s 
+                               OR phone = %s 
+                               OR (phone != '' AND RIGHT(phone, 10) = %s) 
+                               OR phone = %s 
+                               OR phone = %s
+                        """, (raw_user_id.lower(), raw_user_id, clean_phone or raw_user_id, clean_phone or raw_user_id, f'0{clean_phone}' if clean_phone else raw_user_id))
                         user = cursor.fetchone()
                         if user:
                             account_found = True
-                            email_to_reset = user['email']
+                            user_db_id = user.get('id')
+                            email_to_reset = user.get('email')
+                            phone_to_reset = user.get('phone')
                     elif role == 'vendor':
-                        # Find Vendor in vendor table (check both email and phone)
-                        cursor.execute("SELECT * FROM vendor WHERE email=%s OR phone=%s", (user_id, user_id))
+                        cursor.execute("""
+                            SELECT * FROM vendor 
+                            WHERE LOWER(email) = %s 
+                               OR phone = %s 
+                               OR (phone != '' AND RIGHT(phone, 10) = %s) 
+                               OR phone = %s 
+                               OR phone = %s
+                        """, (raw_user_id.lower(), raw_user_id, clean_phone or raw_user_id, clean_phone or raw_user_id, f'0{clean_phone}' if clean_phone else raw_user_id))
                         vendor = cursor.fetchone()
                         if vendor:
                             account_found = True
-                            email_to_reset = vendor['email']
-                            phone_to_reset = vendor['phone']
+                            user_db_id = vendor.get('id')
+                            email_to_reset = vendor.get('email')
+                            phone_to_reset = vendor.get('phone')
             except Exception as e:
-                flash(f"Database error: {e}", "danger")
-                return redirect(url_for('forget_password'))
+                print(f"DB lookup error in forgot password: {e}")
             finally:
                 conn.close()
-        else:
-            # Fallback mock mode
-            flash("Database offline. Running in fallback simulation mode.", "warning")
-            if role == 'customer':
-                # Accept any user_id matching email structure
-                if '@' in user_id:
-                    account_found = True
-                    email_to_reset = user_id
-            elif role == 'vendor':
-                # Check if it exists in session['mock_vendors']
-                session_vendors = session.get('mock_vendors', [])
-                matched_v = next((v for v in session_vendors if v['email'] == user_id or v['phone'] == user_id), None)
-                if matched_v:
-                    account_found = True
-                    email_to_reset = matched_v['email']
-                    phone_to_reset = matched_v['phone']
-                else:
-                    # If not registered, let's allow a default simulated user
-                    if '@' in user_id or len(user_id) >= 10:
-                        account_found = True
-                        email_to_reset = user_id if '@' in user_id else f"{user_id}@mockvendor.com"
-                        phone_to_reset = user_id if not '@' in user_id else "9876543210"
 
         if not account_found:
-            flash(f"No registered {role} found with details: {user_id}", "danger")
+            # Check Fallback / Simulation records
+            if role == 'customer':
+                session_users = session.get('users', [])
+                all_cust = list(session_users) + list(GLOBAL_REGISTERED_USERS)
+                matched_c = next((u for u in all_cust if (clean_email and (u.get('email') or '').lower() == clean_email) or (clean_phone and (clean_phone in (u.get('phone') or '') or str(u.get('phone') or '')[-10:] == clean_phone)) or u.get('email') == raw_user_id or u.get('phone') == raw_user_id), None)
+                if matched_c:
+                    account_found = True
+                    user_db_id = matched_c.get('id')
+                    email_to_reset = matched_c.get('email')
+                    phone_to_reset = matched_c.get('phone')
+                elif is_phone or '@' in raw_user_id:
+                    account_found = True
+                    phone_to_reset = clean_phone
+                    email_to_reset = clean_email or f"{clean_phone}@customer.com"
+            elif role == 'vendor':
+                session_vendors = session.get('mock_vendors', [])
+                all_v = list(session_vendors) + list(GLOBAL_REGISTERED_VENDORS)
+                matched_v = next((v for v in all_v if (clean_email and (v.get('email') or '').lower() == clean_email) or (clean_phone and (clean_phone in (v.get('phone') or '') or str(v.get('phone') or '')[-10:] == clean_phone)) or v.get('email') == raw_user_id or v.get('phone') == raw_user_id), None)
+                if matched_v:
+                    account_found = True
+                    user_db_id = matched_v.get('id')
+                    email_to_reset = matched_v.get('email')
+                    phone_to_reset = matched_v.get('phone')
+                elif is_phone or '@' in raw_user_id:
+                    account_found = True
+                    phone_to_reset = clean_phone
+                    email_to_reset = clean_email or f"{clean_phone}@vendor.com"
+
+        if not account_found:
+            role_label = "Customer" if role == 'customer' else "Vendor"
+            flash(f"No registered {role_label} account found for '{raw_user_id}'. Please check your mobile or email. / इस नंबर/ईमेल से कोई खाता नहीं मिला।", "danger")
             return redirect(url_for('forget_password'))
 
         # Generate 6-digit OTP
         otp = str(random.randint(100000, 999999))
-        
-        # Save reset info in session
+        target_phone = clean_phone or (''.join(c for c in str(phone_to_reset) if c.isdigit())[-10:] if phone_to_reset else None)
+        target_email = email_to_reset or (raw_user_id if '@' in raw_user_id else None)
+
         session['reset_otp'] = otp
-        session['reset_email'] = email_to_reset
+        session['reset_user_id'] = user_db_id
+        session['reset_email'] = target_email or (f"{target_phone}@shubhlo.com" if target_phone else '')
+        session['reset_phone'] = target_phone
         session['reset_role'] = role
-        session['reset_expiry'] = time.time() + 300 # valid for 5 mins
+        session['reset_expiry'] = time.time() + 600  # valid for 10 mins
         session.modified = True
 
-        # Send simulated SMS/Notification
-        recipient_id = phone_to_reset if (phone_to_reset and role == 'vendor') else email_to_reset
-        notification_msg = f"Your Shubhlo password reset OTP is {otp}. Valid for 5 minutes."
-        send_sms_notification(role.capitalize(), recipient_id, notification_msg)
+        notification_msg = f"Your Shubhlo verification OTP is {otp}. Valid for 10 minutes. Do not share with anyone. - Shubhlo"
 
-        flash(f"OTP sent successfully! (For testing, OTP: {otp})", "success")
+        # 1. Attempt Live Fast2SMS Dispatch if enabled, and always record to SMS log
+        live_sms_dispatched = False
+        live_sms_note = ""
+        if target_phone:
+            fast2sms_status, _ = get_system_setting("fast2sms_enabled")
+            api_k, _ = get_system_setting("fast2sms_api_key")
+            if not api_k or api_k in ['ON', 'OFF']:
+                api_k = os.environ.get("FAST2SMS_API_KEY", FAST2SMS_API_KEY)
+            
+            if str(fast2sms_status).strip().upper() == "ON" and api_k and str(api_k).strip() and not str(api_k).startswith('test_fast2sms'):
+                live_sms_dispatched, live_sms_note = dispatch_fast2sms(target_phone, notification_msg, api_key=str(api_k).strip(), return_details=True)
+            
+            # Log simulated SMS to table
+            send_sms_notification(role.capitalize(), target_phone, notification_msg, auto_dispatch_fast2sms=False)
+
+        # 2. Send Email if email available
+        if target_email and '@' in target_email:
+            send_email_otp(target_email, otp)
+
+        delivery_target = f"Mobile +91 {target_phone}" if target_phone else target_email
+        if live_sms_dispatched:
+            flash(f"🎉 Verification OTP ({otp}) sent via live SMS to {delivery_target}! / आपके मोबाइल नंबर पर लाइव SMS भेज दिया गया है!", "success")
+        else:
+            flash(f"🔑 Verification OTP is: {otp}. (Enter this 6-digit code below to set new password) / आपका ओटीपी: {otp}", "info")
+            
         return redirect(url_for('verify_reset_otp'))
 
     return render_template('forgot_password.html')
 
-@app.route('/forgot_password', methods=['GET', 'POST'])
-@app.route('/forgot-password', methods=['GET', 'POST'])
-def forget_password_alias():
-    return forget_password()
-
 @app.route('/verify_reset_otp', methods=['GET', 'POST'])
 def verify_reset_otp():
-    if 'reset_otp' not in session or 'reset_email' not in session:
-        flash("Please request an OTP first.", "warning")
+    if 'reset_otp' not in session:
+        flash("Please request an OTP first. / कृपया पहले OTP के लिए अनुरोध करें।", "warning")
         return redirect(url_for('forget_password'))
 
     import time
     if request.method == 'POST':
-        entered_otp = request.form.get('otp')
+        entered_otp = (request.form.get('otp') or '').strip()
         
         # Check expiry
         if time.time() > session.get('reset_expiry', 0):
-            flash("OTP has expired. Please request a new one.", "danger")
-            # clean up
+            flash("OTP has expired. Please request a new one. / ओटीपी समाप्त हो चुका है। कृपया नया ओटीपी मंगाएं।", "danger")
             session.pop('reset_otp', None)
             session.pop('reset_email', None)
+            session.pop('reset_phone', None)
             session.pop('reset_role', None)
             session.pop('reset_expiry', None)
             return redirect(url_for('forget_password'))
 
-        if entered_otp and entered_otp.strip() == session.get('reset_otp'):
+        if entered_otp and entered_otp == session.get('reset_otp'):
             session['reset_otp_verified'] = True
             session.modified = True
-            flash("OTP verified successfully! Set your new password.", "success")
+            flash("🎉 OTP verified successfully! Now set your new secure password. / ओटीपी सत्यापित हो गया! नया पासवर्ड सेट करें।", "success")
             return redirect(url_for('reset_password'))
         else:
-            flash("Invalid OTP! Please try again.", "danger")
+            flash("Invalid OTP entered! Please check and enter the correct 6-digit OTP. / गलत ओटीपी! कृपया सही 6-अंकों का ओटीपी डालें।", "danger")
             return redirect(url_for('verify_reset_otp'))
 
     return render_template('verify_reset_otp.html')
@@ -806,22 +1316,25 @@ def verify_reset_otp():
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     if not session.get('reset_otp_verified'):
-        flash("Unauthorized access. Verify OTP first.", "danger")
+        flash("Unauthorized access. Please verify your OTP first. / पहले ओटीपी सत्यापित करें।", "danger")
         return redirect(url_for('forget_password'))
 
     if request.method == 'POST':
-        new_password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
+        new_password = (request.form.get('password') or request.form.get('new_password') or '').strip()
+        confirm_password = (request.form.get('confirm_password') or '').strip()
 
         if not new_password or not confirm_password:
-            flash("All password fields are required.", "danger")
+            flash("Both password fields are required. / दोनों पासवर्ड फ़ील्ड आवश्यक हैं।", "danger")
             return redirect(url_for('reset_password'))
 
         if new_password != confirm_password:
-            flash("Passwords do not match!", "danger")
+            flash("Passwords do not match! / पासवर्ड मेल नहीं खाते!", "danger")
             return redirect(url_for('reset_password'))
 
+        user_id = session.get('reset_user_id')
         email = session.get('reset_email')
+        phone = session.get('reset_phone')
+        clean_phone_10 = phone[-10:] if phone and len(phone) >= 10 else phone
         role = session.get('reset_role')
 
         conn = get_db_connection()
@@ -831,9 +1344,15 @@ def reset_password():
             try:
                 with conn.cursor() as cursor:
                     if role == 'customer':
-                        cursor.execute("UPDATE users SET password=%s WHERE email=%s", (new_password, email))
+                        if user_id:
+                            cursor.execute("UPDATE users SET password=%s WHERE id=%s", (new_password, user_id))
+                        else:
+                            cursor.execute("UPDATE users SET password=%s WHERE (email=%s AND email != '') OR (phone=%s AND phone != '') OR (phone != '' AND RIGHT(phone, 10)=%s)", (new_password, email, phone, clean_phone_10))
                     elif role == 'vendor':
-                        cursor.execute("UPDATE vendor SET password=%s WHERE email=%s", (new_password, email))
+                        if user_id:
+                            cursor.execute("UPDATE vendor SET password=%s WHERE id=%s", (new_password, user_id))
+                        else:
+                            cursor.execute("UPDATE vendor SET password=%s WHERE (email=%s AND email != '') OR (phone=%s AND phone != '') OR (phone != '' AND RIGHT(phone, 10)=%s)", (new_password, email, phone, clean_phone_10))
                     conn.commit()
                     db_success = True
             except Exception as e:
@@ -843,28 +1362,36 @@ def reset_password():
                 conn.close()
         else:
             # Fallback mock mode
-            if role == 'vendor':
+            if role == 'customer':
+                for u in session.get('users', []):
+                    if (email and u.get('email') == email) or (phone and u.get('phone') == phone):
+                        u['password'] = new_password
+                for u in GLOBAL_REGISTERED_USERS:
+                    if (email and u.get('email') == email) or (phone and u.get('phone') == phone):
+                        u['password'] = new_password
+            elif role == 'vendor':
                 session_vendors = session.get('mock_vendors', [])
-                updated = False
                 for v in session_vendors:
-                    if v['email'] == email:
+                    if (email and v.get('email') == email) or (phone and v.get('phone') == phone):
                         v['password'] = new_password
-                        updated = True
-                if updated:
-                    session['mock_vendors'] = session_vendors
-                    session.modified = True
-            db_success = True # mark as simulated success
+                for v in GLOBAL_REGISTERED_VENDORS:
+                    if (email and v.get('email') == email) or (phone and v.get('phone') == phone):
+                        v['password'] = new_password
+                session['mock_vendors'] = session_vendors
+                session.modified = True
+            db_success = True
 
         if db_success:
-            # Clear all reset session variables
             session.pop('reset_otp', None)
             session.pop('reset_email', None)
+            session.pop('reset_phone', None)
             session.pop('reset_role', None)
             session.pop('reset_expiry', None)
             session.pop('reset_otp_verified', None)
             session.modified = True
+            save_fallback_data()
 
-            flash("Password updated successfully! Please login with your new password.", "success")
+            flash("🎉 Password updated successfully! Please login with your new password. / पासवर्ड सफलतापूर्वक बदल दिया गया है! अब लॉगिन करें।", "success")
             if role == 'vendor':
                 return redirect(url_for('vendor_login'))
             else:
@@ -872,6 +1399,7 @@ def reset_password():
 
     return render_template('reset_password.html')
 
+@app.route('/admin_dashboard')
 @app.route('/admin/dashboard')
 def admin_dashboard():
     if 'admin' not in session:
@@ -913,7 +1441,7 @@ def admin_dashboard():
                 contact_messages = cursor.fetchall()
 
                 # Fetch allowed locations
-                cursor.execute("SELECT * FROM allowed_locations ORDER BY state, district, tehsil")
+                cursor.execute("SELECT * FROM permitted_locations ORDER BY state, district, tehsil")
                 allowed_locations = cursor.fetchall()
         except Exception as e:
             print(f"Error fetching admin dashboard data: {e}")
@@ -933,7 +1461,8 @@ def admin_dashboard():
             
         sms_logs = session.get('mock_sms', [])
         sms_logs = copy.deepcopy(sms_logs)
-        all_vendors = session.get('mock_vendors', [])
+        session_vendors = session.get('mock_vendors')
+        all_vendors = list(session_vendors) if session_vendors is not None else list(GLOBAL_REGISTERED_VENDORS)
         contact_messages = session.get('mock_contact_messages', [])
         contact_messages = copy.deepcopy(contact_messages)
 
@@ -1049,20 +1578,26 @@ def admin_approve_vendor(vendor_id):
         finally:
             conn.close()
     else:
+        global GLOBAL_REGISTERED_VENDORS
         session_vendors = session.get('mock_vendors', [])
-        target_v = next((v for v in session_vendors if v['id'] == vendor_id), None)
+        target_v = next((v for v in session_vendors if v.get('id') == vendor_id), None) or next((v for v in GLOBAL_REGISTERED_VENDORS if v.get('id') == vendor_id), None)
         target_email = target_v.get('email') if target_v else None
         target_phone = target_v.get('phone') if target_v else None
 
         for v in session_vendors:
-            if v['id'] == vendor_id or (target_email and v.get('email') == target_email) or (target_phone and v.get('phone') == target_phone):
+            if v.get('id') == vendor_id or (target_email and v.get('email') == target_email) or (target_phone and v.get('phone') == target_phone):
                 v['approval_status'] = 'Approved'
                 if not approved_tehsil:
                     approved_tehsil = v.get('tehsil', 'Itarsi')
                     approved_district = v.get('district', 'Hoshangabad')
                     approved_state = v.get('state', 'Madhya Pradesh')
         session['mock_vendors'] = session_vendors
-        
+
+        for v in GLOBAL_REGISTERED_VENDORS:
+            if v.get('id') == vendor_id or (target_email and v.get('email') == target_email) or (target_phone and v.get('phone') == target_phone):
+                v['approval_status'] = 'Approved'
+        save_fallback_data()
+
         # Add to mock allowed_locations if not present
         if 'mock_allowed_locations' not in session:
             session['mock_allowed_locations'] = []
@@ -1189,76 +1724,49 @@ def admin_delete_allowed_location(loc_id):
         
     return redirect(url_for('admin_dashboard'))
 
-# API endpoint for allowed locations
-
-@app.route('/api/allowed-locations')
-def get_allowed_locations():
-    if ALLOW_ALL_LOCATIONS:
-        import json
-        try:
-            with open('static/locations.js', 'r', encoding='utf-8') as f:
-                content = f.read()
-                json_str = content.replace("window.locationData = ", "").strip()
-                if json_str.endswith(";"):
-                    json_str = json_str[:-1].strip()
-                return jsonify(json.loads(json_str))
-        except Exception as e:
-            print(f"Error loading allowed locations from locations.js: {e}")
-            # Fall through to standard queries on error
-
+def get_permitted_locations(only_active=False):
+    global GLOBAL_PERMITTED_LOCATIONS
     conn = get_db_connection()
-    loc_dict = {}
     if conn is not None:
         try:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT state, district, tehsil FROM allowed_locations ORDER BY state, district, tehsil")
+                query = "SELECT id, state, district, tehsil, COALESCE(is_active, 1) as is_active FROM permitted_locations"
+                if only_active:
+                    query += " WHERE is_active=1"
+                query += " ORDER BY state, district, tehsil"
+                cursor.execute(query)
                 rows = cursor.fetchall()
-                for r in rows:
-                    state = r['state']
-                    district = r['district']
-                    tehsil = r['tehsil']
-                    if state not in loc_dict:
-                        loc_dict[state] = {}
-                    if district not in loc_dict[state]:
-                        loc_dict[state][district] = []
-                    if tehsil not in loc_dict[state][district]:
-                        loc_dict[state][district].append(tehsil)
+                if rows:
+                    return rows
         except Exception as e:
-            print(f"Error fetching allowed locations: {e}")
+            print(f"Error fetching permitted locations from DB: {e}")
         finally:
             conn.close()
-    else:
-        # Mock/Session Fallback
-        mock_locs = session.get('mock_allowed_locations', [
-            {'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Itarsi'},
-            {'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Sohagpur'},
-            {'state': 'Madhya Pradesh', 'district': 'Bhopal', 'tehsil': 'Berasia'},
-            {'state': 'Madhya Pradesh', 'district': 'Bhopal', 'tehsil': 'Kolar'},
-            {'state': 'Maharashtra', 'district': 'Pune', 'tehsil': 'Haveli'},
-            {'state': 'Maharashtra', 'district': 'Pune', 'tehsil': 'Mulshi'},
-            {'state': 'Maharashtra', 'district': 'Mumbai', 'tehsil': 'Andheri'},
-            {'state': 'Maharashtra', 'district': 'Mumbai', 'tehsil': 'Borivali'}
-        ])
-        for r in mock_locs:
-            state = r['state']
-            district = r['district']
-            tehsil = r['tehsil']
-            if state not in loc_dict:
-                loc_dict[state] = {}
-            if district not in loc_dict[state]:
-                loc_dict[state][district] = []
-            if tehsil not in loc_dict[state][district]:
-                loc_dict[state][district].append(tehsil)
-    
-    # If empty, default to Hoshangabad/Bhopal MP
-    if not loc_dict:
-        loc_dict = {
-            "Madhya Pradesh": {
-                "Hoshangabad": ["Itarsi", "Sohagpur"],
-                "Bhopal": ["Berasia", "Kolar"]
-            }
-        }
-    return jsonify(loc_dict)
+
+    locs = session.get('permitted_locations', GLOBAL_PERMITTED_LOCATIONS)
+    if only_active:
+        return [l for l in locs if l.get('is_active', 1) == 1]
+    return locs
+
+def get_allowed_locations_tree(only_active=True):
+    locs = get_permitted_locations(only_active=only_active)
+    tree = {}
+    for loc in locs:
+        st = loc['state'].strip()
+        dist = loc['district'].strip()
+        teh = loc['tehsil'].strip()
+        if st not in tree:
+            tree[st] = {}
+        if dist not in tree[st]:
+            tree[st][dist] = []
+        if teh not in tree[st][dist]:
+            tree[st][dist].append(teh)
+    return tree
+
+# API endpoint for allowed locations - Strictly returns Owner-permitted locations
+@app.route('/api/allowed-locations')
+def get_allowed_locations():
+    return jsonify(get_allowed_locations_tree(only_active=True))
 
 @app.route('/admin/booking/approve/<int:booking_id>', methods=['GET', 'POST'])
 @app.route('/admin/approve_booking/<int:booking_id>', methods=['GET', 'POST'])
@@ -1287,8 +1795,10 @@ def admin_approve_booking(booking_id=1):
     else:
         mock_bookings = session.get('mock_bookings', [])
         for mb in mock_bookings:
-            if mb['id'] == booking_id:
+            if mb['id'] == booking_id or str(mb['id']) == str(booking_id):
+                mb['status'] = 'Confirmed'
                 mb['booking_status'] = 'Confirmed'
+                mb['unlocked_by_owner'] = True
                 c_msg = f"Dear {mb['name']}, your Event Booking #{booking_id} for {mb['event_date']} has been APPROVED & CONFIRMED by Shubhlo Admin! - Shubhlo"
                 mock_sms = session.get('mock_sms', [])
                 mock_sms.append({
@@ -1298,6 +1808,13 @@ def admin_approve_booking(booking_id=1):
                 })
                 session['mock_sms'] = mock_sms
         session['mock_bookings'] = mock_bookings
+
+        for gb in GLOBAL_REGISTERED_BOOKINGS:
+            if gb.get('id') == booking_id or str(gb.get('id')) == str(booking_id):
+                gb['status'] = 'Confirmed'
+                gb['booking_status'] = 'Confirmed'
+                gb['unlocked_by_owner'] = True
+        save_fallback_data()
         session.modified = True
         flash(f"Customer Booking #{booking_id} Approved (Simulated)! Customer contact details unlocked. 🎉", "success")
     return redirect(url_for('admin_dashboard'))
@@ -1331,12 +1848,18 @@ def admin_reject_booking(booking_id=1):
     else:
         # Fallback simulation
         mock_bookings = session.get('mock_bookings', [])
-        found_b = next((b for b in mock_bookings if b['id'] == booking_id), None)
+        found_b = next((b for b in mock_bookings if b['id'] == booking_id or str(b['id']) == str(booking_id)), None)
         if found_b:
+            found_b['status'] = 'Cancelled'
             found_b['booking_status'] = 'Cancelled'
             session['mock_bookings'] = mock_bookings
-            session.modified = True
-            flash(f"Booking #{booking_id} REJECTED (Mock Mode).", "info")
+        for gb in GLOBAL_REGISTERED_BOOKINGS:
+            if gb.get('id') == booking_id or str(gb.get('id')) == str(booking_id):
+                gb['status'] = 'Cancelled'
+                gb['booking_status'] = 'Cancelled'
+        save_fallback_data()
+        session.modified = True
+        flash(f"Booking #{booking_id} REJECTED (Mock Mode).", "info")
 
     return redirect(url_for('admin_dashboard'))
 
@@ -1362,22 +1885,34 @@ def admin_delete_booking(booking_id):
     else:
         # Mock/Session Fallback
         mock_bookings = session.get('mock_bookings', [])
-        mock_bookings = [mb for mb in mock_bookings if mb['id'] != booking_id]
+        mock_bookings = [mb for mb in mock_bookings if mb['id'] != booking_id and str(mb['id']) != str(booking_id)]
         session['mock_bookings'] = mock_bookings
+        GLOBAL_REGISTERED_BOOKINGS[:] = [gb for gb in GLOBAL_REGISTERED_BOOKINGS if gb.get('id') != booking_id and str(gb.get('id')) != str(booking_id)]
+        save_fallback_data()
         session.modified = True
         flash(f"Booking #{booking_id} deleted (Simulated).", "success")
     return redirect(url_for('admin_dashboard'))
 
 # Admin Delete Vendor
 
-@app.route('/admin/vendor/delete/<int:vendor_id>', methods=['POST'])
-@app.route('/owner/vendor/delete/<int:vendor_id>', methods=['POST'])
-@app.route('/admin/vendor/delete', methods=['POST'], defaults={'vendor_id': 1})
-def admin_delete_vendor(vendor_id=1):
+@app.route('/admin/vendor/delete/<int:vendor_id>', methods=['POST', 'GET'])
+@app.route('/owner/vendor/delete/<int:vendor_id>', methods=['POST', 'GET'])
+@app.route('/admin/delete_vendor/<int:vendor_id>', methods=['POST', 'GET'])
+@app.route('/owner/delete_vendor/<int:vendor_id>', methods=['POST', 'GET'])
+@app.route('/admin/vendor/delete', methods=['POST', 'GET'])
+def admin_delete_vendor(vendor_id=None):
     if not (session.get('admin') or session.get('is_owner')):
         flash("Unauthorized access. Owner permission required. / केवल ऑनर्स को अधिकार प्राप्त है।", "danger")
         return redirect(url_for('login'))
 
+    if vendor_id is None:
+        vendor_id = request.form.get('vendor_id') or request.args.get('vendor_id')
+
+    if not vendor_id:
+        flash("Please specify a valid Vendor ID to delete. / कृपया हटाने के लिए सही वेंडर चुनें।", "danger")
+        return redirect(request.referrer or url_for('owner_dashboard'))
+
+    target_name = None
     target_email = None
     target_phone = None
 
@@ -1385,37 +1920,67 @@ def admin_delete_vendor(vendor_id=1):
     if conn is not None:
         try:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT email, phone FROM vendor WHERE id=%s", (vendor_id,))
+                cursor.execute("SELECT id, name, email, phone FROM vendor WHERE id=%s", (vendor_id,))
                 v_row = cursor.fetchone()
                 if v_row:
+                    target_name = v_row.get('name')
                     target_email = v_row.get('email')
                     target_phone = v_row.get('phone')
-                    cursor.execute("DELETE FROM vendor WHERE (email=%s AND email != '') OR (phone=%s AND phone != '')", (target_email, target_phone))
+                    # Delete all services associated with this vendor email, phone, or id
+                    cursor.execute(
+                        "DELETE FROM vendor WHERE id=%s OR (email=%s AND email != '') OR (phone=%s AND phone != '')",
+                        (vendor_id, target_email, target_phone)
+                    )
+                    # Clean up vendor_availability
+                    cursor.execute("DELETE FROM vendor_availability WHERE vendor_id=%s", (vendor_id,))
+                    # Clean up rating reviews
+                    if target_name:
+                        cursor.execute("DELETE FROM rating WHERE vendor_name=%s", (target_name,))
                 else:
                     cursor.execute("DELETE FROM vendor WHERE id=%s", (vendor_id,))
                 conn.commit()
-                flash(f"Vendor #{vendor_id} and all registered services PERMANENTLY DELETED by Owner! / वेंडर खाता #{vendor_id} पूरी तरह डिलीट कर दिया गया है!", "success")
+                flash(f"🎉 Vendor '{target_name or ('#' + str(vendor_id))}' was PERMANENTLY REMOVED from database and website! / वेंडर '{target_name or ('#' + str(vendor_id))}' को पूरी तरह हटा दिया गया है!", "success")
         except Exception as e:
             flash(f"Error deleting vendor: {e}", "danger")
         finally:
             conn.close()
+    else:
+        # Fallback / Mock mode cleanup
+        mock_v_list = session.get('mock_vendors', GLOBAL_REGISTERED_VENDORS)
+        matched_v = next((v for v in mock_v_list if str(v.get('id')) == str(vendor_id)), None)
+        if matched_v:
+            target_name = matched_v.get('name')
+            target_email = matched_v.get('email')
+            target_phone = matched_v.get('phone')
 
-    # Always clean up from memory lists
-    GLOBAL_REGISTERED_VENDORS[:] = [
-        v for v in GLOBAL_REGISTERED_VENDORS
-        if not (str(v.get('id')) == str(vendor_id) or (target_email and v.get('email') == target_email) or (target_phone and v.get('phone') == target_phone))
-    ]
-
-    mock_vendors = session.get('mock_vendors', [])
-    if mock_vendors:
-        session['mock_vendors'] = [
-            v for v in mock_vendors
-            if not (str(v.get('id')) == str(vendor_id) or (target_email and v.get('email') == target_email) or (target_phone and v.get('phone') == target_phone))
+        GLOBAL_REGISTERED_VENDORS[:] = [
+            v for v in GLOBAL_REGISTERED_VENDORS
+            if not (str(v.get('id')) == str(vendor_id) or (target_email and v.get('email') == target_email) or (target_phone and v.get('phone') == target_phone) or (target_name and v.get('name') == target_name))
         ]
-        session.modified = True
 
-    flash(f"Vendor #{vendor_id} PERMANENTLY DELETED by Owner! / वेंडर खाता पूरी तरह डिलीट हुआ!", "success")
-    return redirect(request.referrer or url_for('owner_dashboard'))
+        if 'mock_vendors' in session:
+            session['mock_vendors'] = [
+                v for v in session['mock_vendors']
+                if not (str(v.get('id')) == str(vendor_id) or (target_email and v.get('email') == target_email) or (target_phone and v.get('phone') == target_phone) or (target_name and v.get('name') == target_name))
+            ]
+            session.modified = True
+
+        # Clean up mock availability
+        GLOBAL_VENDOR_AVAILABILITY[:] = [
+            a for a in GLOBAL_VENDOR_AVAILABILITY
+            if not (str(a.get('vendor_id')) == str(vendor_id) or (target_name and a.get('vendor_name') == target_name))
+        ]
+        if 'mock_vendor_availability' in session:
+            session['mock_vendor_availability'] = [
+                a for a in session['mock_vendor_availability']
+                if not (str(a.get('vendor_id')) == str(vendor_id) or (target_name and a.get('vendor_name') == target_name))
+            ]
+            session.modified = True
+
+        save_fallback_data()
+        flash(f"🎉 Vendor '{target_name or ('#' + str(vendor_id))}' was PERMANENTLY REMOVED from website! / वेंडर '{target_name or ('#' + str(vendor_id))}' को पूरी तरह हटा दिया गया है!", "success")
+
+    return redirect(request.referrer or (url_for('owner_dashboard') + "#vendor-management-section"))
 
 
 # Admin & Owner Delete Customer
@@ -1605,7 +2170,16 @@ def vendor_login():
         if conn is not None:
             try:
                 with conn.cursor() as cursor:
-                    cursor.execute("SELECT * FROM vendor WHERE (email=%s OR phone=%s) AND password=%s", (email, email, password))
+                    digits = ''.join(c for c in email if c.isdigit())
+                    clean_p = digits[-10:] if len(digits) >= 10 else None
+                    cursor.execute("""
+                        SELECT * FROM vendor 
+                        WHERE (LOWER(email)=%s 
+                            OR phone=%s 
+                            OR (phone != '' AND RIGHT(phone, 10)=%s) 
+                            OR phone=%s) 
+                          AND password=%s
+                    """, (email.lower(), email, clean_p or email, clean_p or email, password))
                     v = cursor.fetchone()
                     if v:
                         session['vendor'] = v['email']
@@ -1624,13 +2198,13 @@ def vendor_login():
             finally:
                 conn.close()
         else:
-            # Fallback mock mode: check registered mock vendors
+            # Fallback mock mode: check registered mock vendors & global persistent vendors
             default_mock_vendors = [
                 {'id': 101, 'name': 'Royal Palace Garden (Mock)', 'email': 'vendor@shubhlo.com', 'phone': '9876543210', 'password': 'vendor123', 'service': 'venue'},
                 {'id': 102, 'name': 'Shahi Caterers (Mock)', 'email': 'shahi@shubhlo.com', 'phone': '9876543211', 'password': 'vendor123', 'service': 'catering'}
             ]
             session_vendors = session.get('mock_vendors', [])
-            all_vendors = session_vendors + default_mock_vendors
+            all_vendors = list(session_vendors) + list(GLOBAL_REGISTERED_VENDORS) + default_mock_vendors
 
             v = next((x for x in all_vendors if (str(x.get('email', '')).lower() == email.lower() or str(x.get('phone', '')) == email) and str(x.get('password', '')) == password), None)
             if v:
@@ -1673,6 +2247,11 @@ def vendor_register():
         district = request.form.get('district', 'Hoshangabad')
         tehsil = request.form.get('tehsil', 'Itarsi')
         photo = request.files.get('photo')
+        venue_type = request.form.get('venue_type', 'marriage_garden')
+        guest_capacity = request.form.get('guest_capacity', '500 - 2500+ Guests')
+        can_host_wedding = request.form.get('can_host_wedding', 'yes')
+        if venue_type == 'restaurant':
+            can_host_wedding = 'no'
 
         if not selected_services:
             flash("Please select at least one service category. / कृपया कम से कम एक सेवा श्रेणी चुनें।", "danger")
@@ -1702,12 +2281,24 @@ def vendor_register():
                         return render_template('vendor_register.html', registration_status='already_registered')
                     else:
                         first_v_id = None
+                        cursor.execute("SHOW COLUMNS FROM vendor")
+                        vendor_cols = set(r['Field'] for r in cursor.fetchall())
+
                         for idx, s_cat in enumerate(selected_services):
-                            cursor.execute(
-                                """INSERT INTO vendor (name, email, phone, service, description, photo, password, price, state, district, tehsil, approval_status) 
-                                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Pending')""",
-                                (name, email, phone, s_cat, description, photo_filename, password, price, state, district, tehsil)
-                            )
+                            v_cols = ['name', 'email', 'phone', 'service', 'description', 'photo', 'password', 'price', 'state', 'district', 'tehsil', 'approval_status']
+                            v_vals = [name, email, phone, s_cat, description, photo_filename, password, price, state, district, tehsil, 'Pending']
+                            if s_cat == 'venue':
+                                if 'venue_type' in vendor_cols:
+                                    v_cols.append('venue_type')
+                                    v_vals.append(venue_type)
+                                if 'guest_capacity' in vendor_cols:
+                                    v_cols.append('guest_capacity')
+                                    v_vals.append(guest_capacity)
+                                if 'can_host_wedding' in vendor_cols:
+                                    v_cols.append('can_host_wedding')
+                                    v_vals.append(can_host_wedding)
+                            placeholders = ", ".join(["%s"] * len(v_vals))
+                            cursor.execute(f"INSERT INTO vendor ({', '.join(v_cols)}) VALUES ({placeholders})", tuple(v_vals))
                             if idx == 0:
                                 first_v_id = cursor.lastrowid
                         conn.commit()
@@ -1743,7 +2334,9 @@ def vendor_register():
             else:
                 first_v_id = None
                 for idx, s_cat in enumerate(selected_services):
-                    new_v_id = 800 + len(session['mock_vendors'])
+                    all_v_ids = [v.get('id', 0) for v in GLOBAL_REGISTERED_VENDORS] + [v.get('id', 0) for v in session.get('mock_vendors', [])]
+                    max_v_id = max(all_v_ids, default=800)
+                    new_v_id = max_v_id + 1
                     new_v = {
                         'id': new_v_id,
                         'name': name,
@@ -1757,6 +2350,9 @@ def vendor_register():
                         'state': state,
                         'district': district,
                         'tehsil': tehsil,
+                        'venue_type': venue_type if s_cat == 'venue' else None,
+                        'guest_capacity': guest_capacity if s_cat == 'venue' else None,
+                        'can_host_wedding': (can_host_wedding == 'yes') if s_cat == 'venue' else True,
                         'approval_status': 'Pending'
                     }
                     session['mock_vendors'].append(new_v)
@@ -1764,6 +2360,7 @@ def vendor_register():
                         GLOBAL_REGISTERED_VENDORS.append(new_v)
                     if idx == 0:
                         first_v_id = new_v_id
+                save_fallback_data()
                 
                 session.modified = True
                 
@@ -1792,13 +2389,14 @@ def vendor_dashboard():
         return redirect(url_for('vendor_login'))
 
     email = session['vendor']
-    vendor_name = session['vendor_name']
+    vendor_name = session.get('vendor_name')
     service_type = session.get('vendor_service')
 
     conn = get_db_connection()
     bookings = []
     vendor_details = {}
     all_services = []
+    blocked_dates = []
 
     if conn is not None:
         try:
@@ -1808,16 +2406,31 @@ def vendor_dashboard():
                 all_services = cursor.fetchall()
 
                 if all_services:
-                    valid_services = [s['service'] for s in all_services]
-                    if not service_type or service_type not in valid_services:
+                    valid_services = [str(s['service']).strip().lower() for s in all_services]
+                    if not service_type or str(service_type).strip().lower() not in valid_services:
                         service_type = all_services[0]['service']
                         session['vendor_service'] = service_type
                         session['vendor_id'] = all_services[0]['id']
 
-                # Fetch active vendor details
-                cursor.execute("SELECT * FROM vendor WHERE email=%s AND service=%s", (email, service_type))
-                vendor_details = cursor.fetchone()
-                
+                # Fetch active vendor details and all associated names for this vendor account
+                cursor.execute("SELECT * FROM vendor WHERE email=%s OR (phone=%s AND phone != '')", (email, email))
+                v_rows = cursor.fetchall()
+                v_names = set()
+                if vendor_name:
+                    v_names.add(str(vendor_name).strip())
+
+                if v_rows:
+                    matched_v_db = next(
+                        (v for v in v_rows if str(v.get('service', '')).strip().lower() == str(service_type or '').strip().lower()), 
+                        v_rows[0]
+                    )
+                    vendor_details = matched_v_db
+                    vendor_name = matched_v_db['name']
+                    session['vendor_name'] = vendor_name
+                    for vr in v_rows:
+                        if vr.get('name'):
+                            v_names.add(str(vr['name']).strip())
+
                 # Fetch rating summary for this vendor name
                 if vendor_details:
                     cursor.execute(
@@ -1834,55 +2447,89 @@ def vendor_dashboard():
                         (vendor_details['name'],)
                     )
                     vendor_details['reviews'] = cursor.fetchall()
-                
-                # Fetch bookings matching the vendor name and service category
-                valid_columns = ['venue', 'catering', 'dj', 'decoration', 'transport', 'photography', 'shahi_sawari', 'invitation_card']
-                if service_type in valid_columns:
-                    query = f"SELECT * FROM booking WHERE {service_type}=%s ORDER BY event_date DESC"
-                    cursor.execute(query, (vendor_name,))
+
+                    # Fetch blocked dates for this vendor
+                    cursor.execute(
+                        "SELECT * FROM vendor_availability WHERE vendor_id=%s ORDER BY event_date ASC",
+                        (vendor_details['id'],)
+                    )
+                    blocked_dates = cursor.fetchall()
+
+                # Fetch bookings matching any of the vendor's names across ALL service categories
+                where_clauses = []
+                params = []
+                for name_item in v_names:
+                    for cat in ALL_VENDOR_CATEGORIES:
+                        where_clauses.append(f"LOWER(TRIM({cat})) = LOWER(TRIM(%s))")
+                        params.append(name_item)
+
+                if where_clauses:
+                    query = f"SELECT * FROM booking WHERE {' OR '.join(where_clauses)} ORDER BY event_date DESC"
+                    cursor.execute(query, tuple(params))
                     bookings = cursor.fetchall()
-                    
-                    # Fetch OTP verification status for each booking
-                    for b in bookings:
+
+                # Calculate date blocked status for each booking
+                blocked_dates_clean = set(normalize_date_str(bd.get('event_date')) for bd in blocked_dates)
+                for b in bookings:
+                    b_date_clean = normalize_date_str(b.get('event_date'))
+                    b['is_date_blocked'] = (b_date_clean in blocked_dates_clean)
+
+                # Fetch OTP verification status for each booking
+                for b in bookings:
+                    ver_status = 'Pending'
+                    ver_time = None
+                    for name_item in v_names:
                         cursor.execute(
-                            "SELECT status, verified_at FROM booking_verification WHERE booking_id=%s AND vendor_name=%s AND service_type=%s",
-                            (b['id'], vendor_name, service_type)
+                            "SELECT status, verified_at FROM booking_verification WHERE booking_id=%s AND LOWER(TRIM(vendor_name))=LOWER(TRIM(%s))",
+                            (b['id'], name_item)
                         )
                         v_row = cursor.fetchone()
                         if v_row:
-                            b['verification_status'] = v_row['status']
-                            b['verified_at'] = v_row['verified_at']
-                        else:
-                            b['verification_status'] = 'Pending'
-                            b['verified_at'] = None
-                else:
-                    bookings = []
+                            ver_status = v_row['status']
+                            ver_time = v_row['verified_at']
+                            break
+                    b['verification_status'] = ver_status
+                    b['verified_at'] = ver_time
         except Exception as e:
             print(f"Error fetching vendor bookings: {e}")
         finally:
             conn.close()
     else:
-        # Mock details and bookings with session checks
-        session_vendors = session.get('mock_vendors', [])
-        matched_v = next((v for v in session_vendors if v['email'] == email and v['service'] == service_type), None)
-        if not matched_v:
-            # Fallback to first matched email if active service is not found
-            matched_v = next((v for v in session_vendors if v['email'] == email), None)
-            if matched_v:
-                session['vendor_service'] = matched_v['service']
-                session['vendor_id'] = matched_v['id']
-                service_type = matched_v['service']
-        
-        if matched_v:
+        # Mock details and bookings with session and global persistent checks
+        all_available_vendors = list(session.get('mock_vendors', [])) + list(GLOBAL_REGISTERED_VENDORS)
+        matched_vendors = [
+            v for v in all_available_vendors 
+            if str(v.get('email', '')).lower() == str(email).lower() or (v.get('phone') and str(v.get('phone')) == str(email))
+        ]
+
+        v_names_clean = set()
+        if vendor_name:
+            v_names_clean.add(str(vendor_name).strip().lower())
+
+        for mv in matched_vendors:
+            if mv.get('name'):
+                v_names_clean.add(str(mv['name']).strip().lower())
+
+        if matched_vendors:
+            matched_v = next(
+                (v for v in matched_vendors if str(v.get('service', '')).strip().lower() == str(service_type or '').strip().lower()), 
+                matched_vendors[0]
+            )
+            vendor_name = matched_v['name']
+            session['vendor_name'] = vendor_name
+            if not service_type or str(service_type).strip().lower() != str(matched_v.get('service', '')).strip().lower():
+                service_type = matched_v.get('service', 'venue')
+                session['vendor_service'] = service_type
+
             vendor_details = {
                 'id': matched_v['id'],
                 'name': matched_v['name'],
                 'email': matched_v['email'],
                 'phone': matched_v['phone'],
-                'service': matched_v['service'],
-                'description': matched_v['description'],
-                'price': matched_v['price'],
-                'photo': matched_v['photo'] or '/static/image/logo.png',
+                'service': matched_v.get('service', 'venue'),
+                'description': matched_v.get('description', ''),
+                'price': matched_v.get('price', 0.0),
+                'photo': matched_v.get('photo') or '/static/image/logo.png',
                 'state': matched_v.get('state', 'Madhya Pradesh'),
                 'district': matched_v.get('district', 'Hoshangabad'),
                 'tehsil': matched_v.get('tehsil', 'Itarsi'),
@@ -1890,11 +2537,11 @@ def vendor_dashboard():
             }
         else:
             vendor_details = {
-                'id': 1,
-                'name': vendor_name,
+                'id': 101,
+                'name': vendor_name or 'Royal Palace Garden',
                 'email': email,
                 'phone': '9876543210',
-                'service': service_type,
+                'service': service_type or 'venue',
                 'description': 'Excellent event services provider.',
                 'price': 15000.00,
                 'photo': '/static/image/logo.png',
@@ -1903,7 +2550,8 @@ def vendor_dashboard():
                 'tehsil': 'Itarsi',
                 'approval_status': 'Approved'
             }
-        
+            v_names_clean.add(str(vendor_details['name']).strip().lower())
+
         # Calculate rating for mock vendor
         mock_vendor_ratings = session.get('mock_vendor_ratings', [])
         v_ratings = [r for r in mock_vendor_ratings if r.get('vendor_name') == vendor_details['name']]
@@ -1926,22 +2574,51 @@ def vendor_dashboard():
                 {'stars': 4, 'feedback': 'Good experience overall. On time.', 'created_at': '2026-07-22 15:30:00'}
             ]
 
-        # Populate all_services for mock
-        all_services = [
-            {'id': v['id'], 'service': v['service'], 'price': v['price']} 
-            for v in session_vendors if v['email'] == email
-        ]
+        # Populate all_services for mock deduplicated by service name
+        all_services = []
+        seen_svcs = set()
+        for v in all_available_vendors:
+            if str(v.get('email', '')).strip().lower() == str(email).strip().lower() or (v.get('phone') and str(v.get('phone')) == str(email)):
+                svc_clean = str(v.get('service', '')).strip().lower()
+                if svc_clean and svc_clean not in seen_svcs:
+                    seen_svcs.add(svc_clean)
+                    all_services.append({'id': v.get('id'), 'service': v.get('service'), 'price': v.get('price', 0.0)})
         if not all_services:
-            all_services = [{'id': vendor_details['id'], 'service': vendor_details['service'], 'price': vendor_details['price']}]
-        
-        # Load simulated bookings matching this vendor from session
-        mock_bookings = session.get('mock_bookings', [])
+            all_services = [{'id': vendor_details.get('id', 101), 'service': vendor_details.get('service', 'venue'), 'price': vendor_details.get('price', 15000.0)}]
+
+        # Load simulated bookings matching this vendor across ALL service categories
+        all_mock_bookings = list(GLOBAL_REGISTERED_BOOKINGS) + list(session.get('mock_bookings', []))
+        seen_b_ids = set()
+        unique_mb = []
+        for mb in all_mock_bookings:
+            b_id = mb.get('id')
+            if b_id and b_id not in seen_b_ids:
+                seen_b_ids.add(b_id)
+                unique_mb.append(mb)
+
         bookings = []
-        for mb in mock_bookings:
-            if mb.get(service_type) == vendor_name:
+        all_verifications = list(GLOBAL_MOCK_VERIFICATIONS) + list(session.get('mock_verifications', []))
+
+        for mb in unique_mb:
+            matched_cat = None
+            for col in ALL_VENDOR_CATEGORIES:
+                col_val = str(mb.get(col) or '').strip().lower()
+                if not col_val:
+                    continue
+                if col_val in v_names_clean:
+                    matched_cat = col
+                    break
+                if any((vn in col_val or col_val in vn) for vn in v_names_clean if len(vn) >= 2):
+                    matched_cat = col
+                    break
+
+            if matched_cat:
                 mb_copy = mb.copy()
-                mock_verifications = session.get('mock_verifications', [])
-                mv = next((v for v in mock_verifications if v['booking_id'] == mb['id'] and v['vendor_name'] == vendor_name and v['service_type'] == service_type), None)
+                mv = next(
+                    (v for v in all_verifications 
+                     if v['booking_id'] == mb['id'] and (str(v['vendor_name']).strip().lower() in v_names_clean or any(vn in str(v['vendor_name']).strip().lower() for vn in v_names_clean if len(vn) >= 2))), 
+                    None
+                )
                 if mv:
                     mb_copy['verification_status'] = mv['status']
                     mb_copy['verified_at'] = mv['verified_at']
@@ -1958,6 +2635,13 @@ def vendor_dashboard():
             m for m in mock_avail
             if (str(m.get('vendor_id')) == str(vendor_details.get('id')) or (vendor_name and m.get('vendor_name') == vendor_name))
         ]
+        mock_blocked_dates_clean = set(normalize_date_str(bd.get('event_date')) for bd in blocked_dates)
+        for mb in bookings:
+            mb_date_clean = normalize_date_str(mb.get('event_date'))
+            mb['is_date_blocked'] = (mb_date_clean in mock_blocked_dates_clean)
+
+    if vendor_details and str(vendor_details.get('service', '')).strip().lower() == 'venue':
+        enrich_venue_attributes(vendor_details)
 
     return render_template(
         'vendor_dashboard.html',
@@ -2033,6 +2717,11 @@ def vendor_verify_otp():
                     'verified_at': now_str
                 })
             session['mock_verifications'] = mock_verifications
+            for gv in GLOBAL_MOCK_VERIFICATIONS:
+                if str(gv['booking_id']) == str(booking_id) and str(gv['vendor_name']).strip().lower() == str(vendor_name).strip().lower():
+                    gv['status'] = 'Verified'
+                    gv['verified_at'] = now_str
+            save_fallback_data()
             flash(f"OTP Verified Successfully (Simulated) for Booking #{booking_id}! 🎉", "success")
         else:
             flash("Invalid OTP (Simulated). Please check again.", "danger")
@@ -2196,7 +2885,10 @@ def vendor_switch_service(service_name=None):
     if conn is not None:
         try:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT id, name, service FROM vendor WHERE email=%s AND service=%s", (email, service_name))
+                cursor.execute(
+                    "SELECT id, name, service FROM vendor WHERE LOWER(TRIM(email))=LOWER(TRIM(%s)) AND LOWER(TRIM(service))=LOWER(TRIM(%s))", 
+                    (email, service_name)
+                )
                 v_data = cursor.fetchone()
                 if v_data:
                     session['vendor_service'] = v_data['service']
@@ -2213,7 +2905,12 @@ def vendor_switch_service(service_name=None):
     else:
         # Mock mode
         all_registered = list(session.get('mock_vendors', [])) + GLOBAL_REGISTERED_VENDORS
-        matched_v = next((v for v in all_registered if v.get('email') == email and v.get('service') == service_name), None)
+        matched_v = next(
+            (v for v in all_registered 
+             if (str(v.get('email', '')).strip().lower() == str(email).strip().lower() or (v.get('phone') and str(v.get('phone')) == str(email)))
+             and str(v.get('service', '')).strip().lower() == str(service_name).strip().lower()), 
+            None
+        )
         if matched_v:
             session['vendor_service'] = matched_v.get('service')
             session['vendor_id'] = matched_v.get('id')
@@ -2309,33 +3006,39 @@ def vendor_add_service():
     else:
         # Mock mode
         session_vendors = session.get('mock_vendors', [])
-        base_vendor = next((v for v in session_vendors if v['email'] == email), None)
+        all_registered = list(session_vendors) + GLOBAL_REGISTERED_VENDORS
+        base_vendor = next(
+            (v for v in all_registered 
+             if str(v.get('email', '')).strip().lower() == str(email).strip().lower() or (v.get('phone') and str(v.get('phone')) == str(email))), 
+            None
+        )
         if base_vendor:
-            if any(v['email'] == email and v['service'] == new_service for v in session_vendors):
+            if any(str(v.get('email', '')).strip().lower() == str(email).strip().lower() and str(v.get('service', '')).strip().lower() == str(new_service).strip().lower() for v in all_registered):
                 flash(f"You have already registered the {new_service.upper()} service category.", "danger")
             else:
-                new_v_id = 850 + len(session_vendors)
+                new_v_id = 850 + len(all_registered)
                 new_v = {
                     'id': new_v_id,
                     'name': base_vendor['name'],
                     'email': email,
                     'phone': base_vendor['phone'],
                     'service': new_service,
-                    'description': description,
-                    'photo': photo_filename,
-                    'password': base_vendor['password'],
-                    'price': float(price),
-                    'state': base_vendor['state'],
-                    'district': base_vendor['district'],
-                    'tehsil': base_vendor['tehsil'],
+                    'description': description or f"Professional {new_service.replace('_', ' ').title()} services.",
+                    'photo': photo_filename or '/static/image/logo.png',
+                    'password': base_vendor.get('password', '123456'),
+                    'price': float(price) if price and str(price).strip() else 5000.0,
+                    'state': base_vendor.get('state', 'Madhya Pradesh'),
+                    'district': base_vendor.get('district', 'Hoshangabad'),
+                    'tehsil': base_vendor.get('tehsil', 'Itarsi'),
                     'approval_status': 'Approved'
                 }
                 session_vendors.append(new_v)
+                GLOBAL_REGISTERED_VENDORS.append(new_v)
                 session['mock_vendors'] = session_vendors
                 session.modified = True
                 session['vendor_service'] = new_service
                 session['vendor_id'] = new_v_id
-                flash(f"Successfully added new service category: {new_service.upper()} (Mock)!", "success")
+                flash(f"Successfully added new service category: {new_service.upper()}!", "success")
 
     return redirect(url_for('vendor_dashboard'))
 
@@ -2348,13 +3051,77 @@ def vendor_toggle_date_availability():
     email = session['vendor']
     active_service = session.get('vendor_service')
     vendor_id = session.get('vendor_id')
-    event_date = request.form.get('event_date')
+    raw_date = request.form.get('event_date')
+    event_date = normalize_date_str(raw_date)
     action = request.form.get('action', 'block')
     reason = request.form.get('reason', 'Busy / Already Booked / व्यस्त या बुक')
 
     if not event_date:
         flash("Please select a valid date. / कृपया एक सही तिथि चुनें!", "danger")
         return redirect(url_for('vendor_dashboard'))
+
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id, name, service FROM vendor WHERE email=%s OR (phone=%s AND phone != '')", (email, email))
+                v_rows = cursor.fetchall()
+                target_v_ids = [r['id'] for r in v_rows] if v_rows else ([vendor_id] if vendor_id else [])
+                v_name = session.get('vendor_name') or (v_rows[0]['name'] if v_rows else None)
+
+                if action == 'unblock':
+                    for vid in target_v_ids:
+                        cursor.execute("DELETE FROM vendor_availability WHERE vendor_id=%s AND event_date=%s", (vid, event_date))
+                    flash(f"🔓 Date {event_date} is now OPEN for bookings! / {event_date} अब बुकिंग के लिए खोल दी गई है!", "success")
+                else:
+                    for vid in target_v_ids:
+                        cursor.execute("SELECT id FROM vendor_availability WHERE vendor_id=%s AND event_date=%s", (vid, event_date))
+                        if not cursor.fetchone():
+                            cursor.execute(
+                                "INSERT INTO vendor_availability (vendor_id, event_date, status, reason) VALUES (%s, %s, 'Blocked', %s)",
+                                (vid, event_date, reason)
+                            )
+                    flash(f"🔒 Date {event_date} marked as BUSY / BLOCKED! / {event_date} व्यस्त / ब्लॉक मार्क कर दी गई है!", "info")
+                conn.commit()
+        except Exception as e:
+            flash(f"Error managing event date: {e}", "danger")
+        finally:
+            conn.close()
+    else:
+        mock_avail = session.get('mock_vendor_availability', [])
+        v_name = session.get('vendor_name')
+        v_id = session.get('vendor_id') or 1
+        global GLOBAL_VENDOR_AVAILABILITY
+
+        if action == 'unblock':
+            mock_avail = [
+                m for m in mock_avail 
+                if not ((str(m.get('vendor_id')) == str(v_id) or (v_name and m.get('vendor_name') == v_name)) and normalize_date_str(m.get('event_date')) == event_date)
+            ]
+            GLOBAL_VENDOR_AVAILABILITY = [
+                m for m in GLOBAL_VENDOR_AVAILABILITY
+                if not ((str(m.get('vendor_id')) == str(v_id) or (v_name and m.get('vendor_name') == v_name)) and normalize_date_str(m.get('event_date')) == event_date)
+            ]
+            session['mock_vendor_availability'] = mock_avail
+            flash(f"🔓 Date {event_date} is now OPEN for bookings! / {event_date} अब बुकिंग के लिए खोल दी गई है!", "success")
+        else:
+            if not any((str(m.get('vendor_id')) == str(v_id) or (v_name and m.get('vendor_name') == v_name)) and normalize_date_str(m.get('event_date')) == event_date for m in mock_avail):
+                new_entry = {
+                    'id': len(mock_avail) + 1,
+                    'vendor_id': v_id,
+                    'vendor_name': v_name,
+                    'event_date': event_date,
+                    'status': 'Blocked',
+                    'reason': reason
+                }
+                mock_avail.append(new_entry)
+                GLOBAL_VENDOR_AVAILABILITY.append(dict(new_entry))
+            session['mock_vendor_availability'] = mock_avail
+            flash(f"🔒 Date {event_date} marked as BUSY / BLOCKED! / {event_date} व्यस्त / ब्लॉक मार्क कर दी गई है!", "info")
+        session.modified = True
+        save_fallback_data()
+
+    return redirect(url_for('vendor_dashboard'))
 
     conn = get_db_connection()
     if conn is not None:
@@ -2469,6 +3236,107 @@ def vendor_counter_offer(booking_id):
     return redirect(url_for('vendor_dashboard'))
 
 
+def normalize_date_str(d):
+    if not d:
+        return ''
+    if hasattr(d, 'strftime'):
+        return d.strftime('%Y-%m-%d')
+    s = str(d).strip().split('T')[0].split(' ')[0]
+    if '/' in s:
+        parts = s.split('/')
+        if len(parts) == 3 and len(parts[2]) == 4:
+            return f"{parts[2]}-{parts[1].zfill(2)}-{parts[0].zfill(2)}"
+    return s
+
+def get_blocked_vendors_for_date(event_date):
+    """
+    Returns a dictionary of {vendor_name_lower: reason, str(vendor_id): reason}
+    for all vendors blocked on event_date via vendor_availability OR active bookings.
+    """
+    clean_date = normalize_date_str(event_date)
+    if not clean_date:
+        return {}
+
+    blocked_map = {}
+
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                # 1. Check vendor_availability table
+                cursor.execute(
+                    """SELECT va.vendor_id, va.event_date, va.status, va.reason, v.name as vendor_name, v.service
+                    FROM vendor_availability va
+                    LEFT JOIN vendor v ON va.vendor_id = v.id
+                    WHERE (va.event_date = %s OR DATE(va.event_date) = %s)
+                    AND (va.status = 'Blocked' OR va.status = 'busy' OR va.status IS NULL)""",
+                    (clean_date, clean_date)
+                )
+                avail_rows = cursor.fetchall()
+                for r in avail_rows:
+                    reason = r.get('reason') or 'Date Blocked / व्यस्त'
+                    if r.get('vendor_name'):
+                        blocked_map[str(r['vendor_name']).strip().lower()] = reason
+                    if r.get('vendor_id'):
+                        blocked_map[str(r['vendor_id'])] = reason
+
+                # 2. Check active bookings on this event_date
+                cursor.execute(
+                    """SELECT * FROM booking 
+                    WHERE (event_date = %s OR DATE(event_date) = %s)
+                    AND (status IS NULL OR LOWER(status) NOT IN ('cancelled', 'rejected'))""",
+                    (clean_date, clean_date)
+                )
+                booking_rows = cursor.fetchall()
+                for b in booking_rows:
+                    b_id = b.get('id')
+                    ev_title = b.get('event_name') or 'Event'
+                    book_reason = f"Already Booked for Booking #{b_id} ({ev_title})"
+                    for cat in ALL_VENDOR_CATEGORIES:
+                        booked_name = b.get(cat)
+                        if booked_name and str(booked_name).strip():
+                            blocked_map[str(booked_name).strip().lower()] = book_reason
+        except Exception as e:
+            print(f"Error querying blocked vendors from DB: {e}")
+        finally:
+            conn.close()
+
+    # 3. Check session and global fallback records
+    mock_avail = list(session.get('mock_vendor_availability', [])) + list(GLOBAL_VENDOR_AVAILABILITY)
+    for m in mock_avail:
+        m_date = normalize_date_str(m.get('event_date'))
+        if m_date == clean_date and m.get('status', 'Blocked') in ('Blocked', 'busy'):
+            reason = m.get('reason') or 'Date Blocked (Simulated)'
+            if m.get('vendor_name'):
+                blocked_map[str(m['vendor_name']).strip().lower()] = reason
+            if m.get('vendor_id'):
+                blocked_map[str(m['vendor_id'])] = reason
+
+    mock_bookings = list(session.get('mock_bookings', [])) + list(GLOBAL_REGISTERED_BOOKINGS)
+    for mb in mock_bookings:
+        mb_date = normalize_date_str(mb.get('event_date'))
+        if mb_date == clean_date and str(mb.get('status', '')).lower() not in ('cancelled', 'rejected'):
+            b_id = mb.get('id', '')
+            ev_title = mb.get('event_name') or 'Event'
+            book_reason = f"Already Booked for Booking #{b_id} ({ev_title})"
+            for cat in ALL_VENDOR_CATEGORIES:
+                booked_name = mb.get(cat)
+                if booked_name and str(booked_name).strip():
+                    blocked_map[str(booked_name).strip().lower()] = book_reason
+
+    return blocked_map
+
+def is_vendor_blocked_on_date(vendor_name_or_id, event_date):
+    if not vendor_name_or_id or not event_date:
+        return False, None
+    blocked_map = get_blocked_vendors_for_date(event_date)
+    v_clean = str(vendor_name_or_id).strip().lower()
+    if v_clean in blocked_map:
+        return True, blocked_map[v_clean]
+    if str(vendor_name_or_id) in blocked_map:
+        return True, blocked_map[str(vendor_name_or_id)]
+    return False, None
+
 @app.route('/booking1', methods=['GET', 'POST'])
 def booking1():
     if 'user' not in session:
@@ -2490,6 +3358,7 @@ def booking1():
         district = request.form.get('district')
         tehsil = request.form.get('tehsil')
         event_date = request.form.get('event_date')
+        event_name = request.form.get('event_name') or request.form.get('event_type') or 'Wedding / शादी विवाह'
         target_budget = request.form.get('target_budget')
         budget_flexible = request.form.get('budget_flexible', 'Negotiable')
         session['booking_info'] = {
@@ -2501,7 +3370,9 @@ def booking1():
             'district': district,
             'tehsil': tehsil,
             'event_date': event_date,
-            'target_budget': float(target_budget) if target_budget and target_budget.strip() else None,
+            'event_name': event_name,
+            'event_type': event_name,
+            'target_budget': float(target_budget) if target_budget and str(target_budget).strip() else None,
             'budget_flexible': budget_flexible
         }
         return redirect(url_for('booking2', **request.form))
@@ -2527,6 +3398,7 @@ def booking2():
         district = request.form.get('district') or booking_info.get('district')
         tehsil = request.form.get('tehsil') or booking_info.get('tehsil')
         event_date = request.form.get('event_date') or booking_info.get('event_date')
+        event_name = request.form.get('event_name') or request.form.get('event_type') or booking_info.get('event_name') or booking_info.get('event_type') or 'Wedding / शादी विवाह'
         target_budget_raw = request.form.get('target_budget') or booking_info.get('target_budget')
         budget_flexible = request.form.get('budget_flexible') or booking_info.get('budget_flexible', 'Negotiable')
     else:
@@ -2538,6 +3410,7 @@ def booking2():
         district = request.args.get('district') or booking_info.get('district')
         tehsil = request.args.get('tehsil') or booking_info.get('tehsil')
         event_date = request.args.get('event_date') or booking_info.get('event_date')
+        event_name = request.args.get('event_name') or request.args.get('event_type') or booking_info.get('event_name') or booking_info.get('event_type') or 'Wedding / शादी विवाह'
         target_budget_raw = request.args.get('target_budget') or booking_info.get('target_budget')
         budget_flexible = request.args.get('budget_flexible') or booking_info.get('budget_flexible', 'Negotiable')
 
@@ -2572,6 +3445,8 @@ def booking2():
         'district': district,
         'tehsil': tehsil,
         'event_date': event_date,
+        'event_name': event_name,
+        'event_type': event_name,
         'target_budget': target_budget,
         'budget_flexible': budget_flexible
     }
@@ -2597,6 +3472,42 @@ def booking2():
     mocktails = fetch_vendors_by_service('mocktail', tehsil)
     safas = fetch_vendors_by_service('safa', tehsil)
 
+    # Event Type suitability detection
+    ev_lower = str(event_name or '').lower()
+    is_wedding_event = any(w in ev_lower for w in ['wedding', 'शादी', 'विवाह', 'reception', 'रिसेप्शन', 'engagement', 'सगाई', 'tilak', 'sangeet'])
+    is_small_event = any(w in ev_lower for w in ['birthday', 'जन्मदिन', 'anniversary', 'सालगिरह', 'baby shower', 'गोद भराई', 'party', 'corporate', 'ऑफिस', 'puja', 'पूजा'])
+
+    # Check vendor blocked status for selected event_date
+    blocked_vendors_map = get_blocked_vendors_for_date(event_date)
+    for cat_list in [
+        venues, caterings, djs, decorations, transports, photography,
+        shahi_sawari, invitation_card, security_guards, makeups, mehendis,
+        dhol_bands, pandits, choreographers, wedding_planners, anchors,
+        fireworks_list, mocktails, safas
+    ]:
+        for item in cat_list:
+            v_name_key = str(item.get('name', '')).strip().lower()
+            v_id_key = str(item.get('id', ''))
+            if v_name_key in blocked_vendors_map or v_id_key in blocked_vendors_map:
+                item['is_blocked'] = True
+                item['block_reason'] = blocked_vendors_map.get(v_name_key) or blocked_vendors_map.get(v_id_key) or 'Date Blocked / पहले से बुक है'
+            else:
+                item['is_blocked'] = False
+
+    # Mark venue compatibility and recommendations
+    for v in venues:
+        enrich_venue_attributes(v)
+        if is_wedding_event and not v.get('can_host_wedding'):
+            v['wedding_incompatible'] = True
+            v['compatibility_warning'] = 'यह वेन्यू केवल जन्मदिन व छोटी पार्टियों के लिए है (अधिकतम 100 मेहमान)। शादी-विवाह के लिए उपलब्ध नहीं है। / Restaurant & Small Party Hall (Max 100 Guests). Weddings not hosted.'
+        else:
+            v['wedding_incompatible'] = False
+
+        if is_small_event and v.get('venue_type') == 'restaurant':
+            v['recommended_for_small_event'] = True
+        else:
+            v['recommended_for_small_event'] = False
+
     return render_template(
         'booking2.html',
         venues=venues,
@@ -2620,7 +3531,10 @@ def booking2():
         safas=safas,
         tehsil=tehsil,
         target_budget=target_budget,
-        budget_flexible=budget_flexible
+        budget_flexible=budget_flexible,
+        event_name=event_name,
+        is_wedding_event=is_wedding_event,
+        is_small_event=is_small_event
     )
 
 @app.route('/confirm-booking', methods=['GET', 'POST'])
@@ -2634,7 +3548,7 @@ def confirm_booking():
         flash("Booking session lost. Please start over.", "danger")
         return redirect(url_for('booking1'))
 
-    categories_list = ['venue', 'catering', 'dj', 'decoration', 'transport', 'photography', 'shahi_sawari', 'invitation_card']
+    categories_list = ALL_VENDOR_CATEGORIES
     fallback_prices = {
         'venue': 150000, 
         'catering': 50000, 
@@ -2643,13 +3557,52 @@ def confirm_booking():
         'transport': 25000,
         'photography': 40000,
         'shahi_sawari': 35000,
-        'invitation_card': 15000
+        'invitation_card': 15000,
+        'security_guard': 15000,
+        'makeup': 20000,
+        'mehendi': 10000,
+        'dhol_band': 18000,
+        'pandit': 11000,
+        'choreographer': 25000,
+        'wedding_planner': 50000,
+        'anchor': 15000,
+        'fireworks': 20000,
+        'mocktail': 15000,
+        'safa': 12000
     }
 
     if request.method == 'POST':
         # Get selections from Booking Step 2
         for cat in categories_list:
             booking_info[cat] = request.form.get(cat, "")
+
+        # Strict vendor date availability check: prevent booking vendors on blocked/booked dates
+        ev_date = booking_info.get('event_date')
+        if ev_date:
+            for cat in categories_list:
+                sel_v = booking_info.get(cat)
+                if sel_v and str(sel_v).strip():
+                    is_blk, blk_reason = is_vendor_blocked_on_date(sel_v, ev_date)
+                    if is_blk:
+                        flash(f"⚠️ '{sel_v}' is already booked or unavailable on {ev_date} ({blk_reason}). Please select another vendor. / वेंडर '{sel_v}' इस तारीख को उपलब्ध नहीं है।", "danger")
+                        booking_info[cat] = ""
+                        session['booking_info'] = booking_info
+                        return redirect(url_for('booking2'))
+
+        # Strict venue event suitability check: prevent booking restaurant/small party hall for weddings
+        event_name_val = booking_info.get('event_name') or booking_info.get('event_type') or 'Wedding / शादी विवाह'
+        ev_lower = str(event_name_val).lower()
+        is_wedding_val = any(w in ev_lower for w in ['wedding', 'शादी', 'विवाह', 'reception', 'रिसेप्शन', 'engagement', 'सगाई', 'tilak', 'sangeet'])
+        chosen_venue = booking_info.get('venue')
+        if is_wedding_val and chosen_venue and str(chosen_venue).strip():
+            all_venue_objs = fetch_vendors_by_service('venue', booking_info.get('tehsil'))
+            for vn in all_venue_objs:
+                enrich_venue_attributes(vn)
+                if vn.get('name') == chosen_venue and not vn.get('can_host_wedding'):
+                    flash(f"⚠️ '{chosen_venue}' केवल जन्मदिन व 30-100 मेहमानों की छोटी पार्टियों के लिए है और शादी-विवाह नहीं कराता। कृपया कोई मैरिज गार्डन या बैंक्वेट हॉल चुनें! / The selected venue is a restaurant/small party hall and does not host weddings. Please select an eligible Marriage Garden or Banquet Hall!", "danger")
+                    booking_info['venue'] = ''
+                    session['booking_info'] = booking_info
+                    return redirect(url_for('booking2'))
 
     # Compile detailed selected vendor objects
     amount = 0.00
@@ -2778,8 +3731,12 @@ def process_payment():
     payment_method = request.form.get('payment_method', 'UPI')
     transaction_id = f"TXN{os.urandom(4).hex().upper()}"
     
+    selected_vendors_list = booking_info.get('selected_vendors', [])
+    num_selected = len(selected_vendors_list) if selected_vendors_list else 1
+    total_token_payable = float(booking_info.get('total_token_payable') or (num_selected * 5118.00))
+    token_deposit = float(num_selected * 5000.00)
     total_amount = float(booking_info.get('amount', 50000.00))
-    token_deposit = min(5000.00, round(total_amount * 0.10, 2)) if total_amount > 0 else 5000.00
+    event_name_val = booking_info.get('event_name') or booking_info.get('event_type') or 'Wedding / शादी विवाह'
 
     conn = get_db_connection()
     new_booking_id = None
@@ -2787,10 +3744,12 @@ def process_payment():
     if conn is not None:
         try:
             with conn.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO booking (name, email, phone, address, state, district, tehsil, event_date, amount, token_deposit, payment_status, payment_method, transaction_id, status, booking_status, venue, catering, dj, decoration, transport, photography, shahi_sawari, invitation_card)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Paid', %s, %s, 'Pending Owner Approval', 'Pending', %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (
+                # Build dynamic column list for existing database columns
+                cursor.execute("SHOW COLUMNS FROM booking")
+                existing_cols = set(row['Field'] for row in cursor.fetchall())
+
+                insert_cols = ['name', 'email', 'phone', 'address', 'state', 'district', 'tehsil', 'event_date', 'amount', 'token_deposit', 'payment_status', 'payment_method', 'transaction_id', 'status', 'booking_status']
+                insert_vals = [
                     booking_info.get('name'),
                     booking_info.get('email'),
                     booking_info.get('phone'),
@@ -2801,28 +3760,43 @@ def process_payment():
                     booking_info.get('event_date'),
                     total_amount,
                     token_deposit,
+                    'Paid',
                     payment_method,
                     transaction_id,
-                    booking_info.get('venue', ''),
-                    booking_info.get('catering', ''),
-                    booking_info.get('dj', ''),
-                    booking_info.get('decoration', ''),
-                    booking_info.get('transport', ''),
-                    booking_info.get('photography', ''),
-                    booking_info.get('shahi_sawari', ''),
-                    booking_info.get('invitation_card', '')
-                ))
+                    'Pending Owner Approval',
+                    'Pending'
+                ]
+
+                if 'event_name' in existing_cols:
+                    insert_cols.extend(['event_name', 'event_type'])
+                    insert_vals.extend([event_name_val, event_name_val])
+
+                for cat in ALL_VENDOR_CATEGORIES:
+                    if cat in existing_cols:
+                        insert_cols.append(cat)
+                        insert_vals.append(booking_info.get(cat, ''))
+
+                placeholders = ", ".join(["%s"] * len(insert_vals))
+                col_names = ", ".join(insert_cols)
+                sql = f"INSERT INTO booking ({col_names}) VALUES ({placeholders})"
+                cursor.execute(sql, tuple(insert_vals))
                 new_booking_id = cursor.lastrowid
                 
-                # Insert verifications
-                categories_list = ['venue', 'catering', 'dj', 'decoration', 'transport', 'photography', 'shahi_sawari', 'invitation_card']
-                for cat in categories_list:
+                # Insert verifications for selected categories & auto-block date for booked vendors
+                for cat in ALL_VENDOR_CATEGORIES:
                     v_name = booking_info.get(cat)
                     if v_name and v_name.strip() != "":
                         cursor.execute(
                             "INSERT INTO booking_verification (booking_id, vendor_name, service_type, status) VALUES (%s, %s, %s, 'Pending')",
                             (new_booking_id, v_name, cat)
                         )
+                        cursor.execute("SELECT id FROM vendor WHERE name=%s LIMIT 1", (v_name,))
+                        v_matched = cursor.fetchone()
+                        if v_matched:
+                            cursor.execute(
+                                "INSERT IGNORE INTO vendor_availability (vendor_id, event_date, status, reason) VALUES (%s, %s, 'Blocked', %s)",
+                                (v_matched['id'], event_date_val, f"Booking #{new_booking_id} ({event_name_val})")
+                            )
                 conn.commit()
         except Exception as e:
             print(f"DB process_payment Error: {e}")
@@ -2835,7 +3809,9 @@ def process_payment():
     # Session mock fallback if DB offline or new_booking_id not generated
     if not new_booking_id:
         mock_bookings = session.get('mock_bookings', [])
-        new_booking_id = 200 + len(mock_bookings) + 1
+        all_b_ids = [b.get('id', 0) for b in GLOBAL_REGISTERED_BOOKINGS] + [b.get('id', 0) for b in mock_bookings]
+        max_b_id = max(all_b_ids, default=200)
+        new_booking_id = max_b_id + 1
         new_b = {
             'id': new_booking_id,
             'name': booking_info.get('name'),
@@ -2846,42 +3822,43 @@ def process_payment():
             'district': booking_info.get('district'),
             'tehsil': booking_info.get('tehsil'),
             'event_date': booking_info.get('event_date'),
+            'event_name': event_name_val,
+            'event_type': event_name_val,
             'amount': total_amount,
             'token_deposit': token_deposit,
             'payment_status': 'Paid',
             'payment_method': payment_method,
             'transaction_id': transaction_id,
             'status': 'Pending Owner Approval',
-            'booking_status': 'Pending Owner Approval',
-            'venue': booking_info.get('venue', ''),
-            'catering': booking_info.get('catering', ''),
-            'dj': booking_info.get('dj', ''),
-            'decoration': booking_info.get('decoration', ''),
-            'transport': booking_info.get('transport', ''),
-            'photography': booking_info.get('photography', ''),
-            'shahi_sawari': booking_info.get('shahi_sawari', ''),
-            'invitation_card': booking_info.get('invitation_card', '')
+            'booking_status': 'Pending Owner Approval'
         }
+        for cat in ALL_VENDOR_CATEGORIES:
+            new_b[cat] = booking_info.get(cat, '')
+
         mock_bookings.append(new_b)
         session['mock_bookings'] = mock_bookings
+        if not any(b.get('id') == new_b['id'] for b in GLOBAL_REGISTERED_BOOKINGS):
+            GLOBAL_REGISTERED_BOOKINGS.append(new_b)
 
         # Add mock verifications
         mock_verifications = session.get('mock_verifications', [])
-        categories_list = ['venue', 'catering', 'dj', 'decoration', 'transport', 'photography', 'shahi_sawari', 'invitation_card']
-        for cat in categories_list:
+        for cat in ALL_VENDOR_CATEGORIES:
             v_name = booking_info.get(cat)
             if v_name and v_name.strip() != "":
-                mock_verifications.append({
+                v_obj = {
                     'booking_id': new_booking_id,
                     'vendor_name': v_name,
                     'service_type': cat,
                     'status': 'Pending',
                     'verified_at': None
-                })
+                }
+                mock_verifications.append(v_obj)
+                GLOBAL_MOCK_VERIFICATIONS.append(v_obj)
         session['mock_verifications'] = mock_verifications
+        save_fallback_data()
 
     # Send SMS Confirmation
-    c_msg = f"Dear {booking_info.get('name')}, your Shubhlo Event Booking #{new_booking_id} has been registered! Token Deposit: ₹{token_deposit}. Status: Pending Owner Approval (48 Hours). - Shubhlo"
+    c_msg = f"Dear {booking_info.get('name')}, your Shubhlo Event Booking #{new_booking_id} has been registered! Token Deposit: ₹{token_deposit}. Deal: Decided directly between you & vendor. Status: Pending Owner Approval (48 Hours). - Shubhlo"
     send_sms_notification('Customer', booking_info.get('phone'), c_msg)
 
     # Clear active booking session
@@ -2987,7 +3964,7 @@ def reassign_booking(booking_id=1):
 
                 service_cat = current_service
                 if not service_cat:
-                    categories = ['venue', 'catering', 'dj', 'decoration', 'transport', 'photography', 'shahi_sawari', 'invitation_card', 'security_guard', 'makeup', 'mehendi', 'dhol_band', 'choreographer', 'wedding_planner', 'anchor', 'fireworks', 'safa']
+                    categories = ALL_VENDOR_CATEGORIES
                     for cat in categories:
                         if b.get(cat) == current_vendor or (not current_vendor and b.get(cat)):
                             service_cat = cat
@@ -3126,7 +4103,7 @@ def cancel_booking(booking_id=1):
                 send_sms_notification('Customer', b['phone'], c_msg)
                 
                 # Notify vendors
-                categories = ['venue', 'catering', 'dj', 'decoration', 'transport', 'photography', 'shahi_sawari', 'invitation_card']
+                categories = ALL_VENDOR_CATEGORIES
                 for cat in categories:
                     v_name = b.get(cat)
                     if v_name and v_name.strip() != "":
@@ -3155,7 +4132,7 @@ def cancel_booking(booking_id=1):
             send_sms_notification('Customer', mb['phone'], c_msg)
             
             # Vendor simulated notifications
-            categories = ['venue', 'catering', 'dj', 'decoration', 'transport', 'photography', 'shahi_sawari', 'invitation_card']
+            categories = ALL_VENDOR_CATEGORIES
             for cat in categories:
                 v_name = mb.get(cat)
                 if v_name and v_name.strip() != "":
@@ -3174,6 +4151,229 @@ def cancel_booking(booking_id=1):
             flash("Booking not found in session fallback.", "danger")
             
     return redirect(url_for('dashboard'))
+
+# =========================================================================
+# SHUBHLO 100% SAFE DEAL GUARANTEE & TOKEN REFUND SYSTEM
+# =========================================================================
+
+@app.route('/booking/report_deal_issue/<int:booking_id>', methods=['POST'], endpoint='report_deal_issue')
+@app.route('/report-deal-issue/<int:booking_id>', methods=['POST'], endpoint='report_deal_issue_alias')
+def report_deal_issue(booking_id):
+    if 'user' not in session:
+        flash("Please log in first to manage your booking. / कृपया पहले लॉगिन करें।", "warning")
+        return redirect(url_for('login'))
+
+    email = session['user']
+    resolution_choice = request.form.get('resolution_choice', 'alternate_vendor')
+    deal_issue_reason = request.form.get('deal_issue_reason', 'Deal not finalized with vendor')
+    custom_note = request.form.get('custom_note', '').strip()
+    full_reason = f"{deal_issue_reason} ({custom_note})" if custom_note else deal_issue_reason
+
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM booking WHERE id=%s AND email=%s", (booking_id, email))
+                b = cursor.fetchone()
+                if not b:
+                    flash("Booking not found or unauthorized access. / बुकिंग नहीं मिली या अनधिकृत अनुरोध।", "danger")
+                    return redirect(url_for('dashboard'))
+
+                cust_name = b.get('name', 'Customer')
+                cust_phone = b.get('phone', '9876543210')
+                token_val = float(b.get('advance_paid') or b.get('token_deposit') or 5118.00)
+
+                if resolution_choice == 'alternate_vendor':
+                    service_cat = None
+                    current_vendor = None
+                    for cat in ALL_VENDOR_CATEGORIES:
+                        if b.get(cat):
+                            service_cat = cat
+                            current_vendor = b.get(cat)
+                            break
+                    if not service_cat:
+                        service_cat = 'venue'
+
+                    tehsil = b.get('tehsil')
+                    district = b.get('district')
+
+                    cursor.execute(
+                        "SELECT name, phone FROM vendor WHERE service=%s AND (approval_status IS NULL OR approval_status='Approved') AND name != %s AND (tehsil=%s OR district=%s) LIMIT 1",
+                        (service_cat, current_vendor or '', tehsil, district)
+                    )
+                    alt_vendor = cursor.fetchone()
+
+                    if not alt_vendor:
+                        cursor.execute(
+                            "SELECT name, phone FROM vendor WHERE service=%s AND (approval_status IS NULL OR approval_status='Approved') AND name != %s LIMIT 1",
+                            (service_cat, current_vendor or '')
+                        )
+                        alt_vendor = cursor.fetchone()
+
+                    if alt_vendor:
+                        new_vendor_name = alt_vendor['name']
+                        new_vendor_phone = alt_vendor['phone']
+
+                        cursor.execute(
+                            f"UPDATE booking SET {service_cat}=%s, dispute_status='Alternate Vendor Assigned', dispute_reason=%s WHERE id=%s",
+                            (new_vendor_name, full_reason, booking_id)
+                        )
+                        cursor.execute(
+                            "DELETE FROM booking_verification WHERE booking_id=%s AND service_type=%s",
+                            (booking_id, service_cat)
+                        )
+                        cursor.execute(
+                            "INSERT INTO booking_verification (booking_id, vendor_name, service_type, status) VALUES (%s, %s, %s, 'Pending')",
+                            (booking_id, new_vendor_name, service_cat)
+                        )
+                        conn.commit()
+
+                        c_msg = f"Dear {cust_name}, under Shubhlo 100% Safe Guarantee, your booking #{booking_id} for {service_cat.replace('_', ' ').title()} has been transferred to verified partner {new_vendor_name} with ZERO extra charge! - Shubhlo"
+                        send_sms_notification('Customer', cust_phone, c_msg)
+
+                        v_msg = f"Dear {new_vendor_name}, booking #{booking_id} on {b.get('event_date')} has been reassigned to you under Shubhlo Safe Guarantee. Please contact customer. - Shubhlo"
+                        send_sms_notification('Vendor', new_vendor_phone, v_msg)
+
+                        flash(f"🎉 100% Safe Guarantee: नया वेंडर ({new_vendor_name}) सफलतापूर्वक आवंटित कर दिया गया है! आपका टोकन अमाउंट 100% सुरक्षित है और नए वेंडर के बिल में एडजस्ट होगा।", "success")
+                    else:
+                        cursor.execute(
+                            "UPDATE booking SET dispute_status='Pending Alternate Vendor', dispute_reason=%s WHERE id=%s",
+                            (full_reason, booking_id)
+                        )
+                        conn.commit()
+                        flash("🛡️ Shubhlo Safe Guarantee: आपका वेंडर बदलाव अनुरोध दर्ज कर लिया गया है। सेलिब्रेटो टीम 24 घंटे के भीतर आपके लिए बेहतरीन वेंडर की व्यवस्था करेगी या 100% रिफंड देगी।", "info")
+
+                else: # 100% Refund Request
+                    cursor.execute(
+                        "UPDATE booking SET dispute_status='Refund Requested', booking_status='Refund Requested', refund_status='Pending Approval', refund_amount=%s, dispute_reason=%s, refund_method='Original Payment Method / UPI' WHERE id=%s",
+                        (token_val, full_reason, booking_id)
+                    )
+                    conn.commit()
+
+                    c_msg = f"Dear {cust_name}, your 100% Token Refund request of Rs.{token_val:.2f} for Booking #{booking_id} has been registered under Shubhlo Safe Guarantee. Refund will be credited within 24-48 hours. - Shubhlo"
+                    send_sms_notification('Customer', cust_phone, c_msg)
+
+                    admin_msg = f"ALERT: Customer {cust_name} requested 100% Token Refund of Rs.{token_val:.2f} for Booking #{booking_id}. Reason: {full_reason} - Shubhlo"
+                    send_sms_notification('Admin', '7067883131', admin_msg)
+
+                    flash(f"✅ 100% Safe Guarantee: बुकिंग #{booking_id} के लिए ₹{token_val:,.2f} का पूर्ण टोकन रिफंड अनुरोध दर्ज हो गया है! राशि 24-48 घंटे में आपके मूल खाते में वापस आ जाएगी।", "success")
+        except Exception as e:
+            flash(f"Error processing safe guarantee request: {e}", "danger")
+        finally:
+            conn.close()
+    else:
+        # Fallback simulation for mock sessions
+        mock_bookings = session.get('mock_bookings', [])
+        b = next((x for x in mock_bookings if x.get('id') == booking_id and x.get('email') == email), None)
+        if b:
+            cust_name = b.get('name', 'Customer')
+            cust_phone = b.get('phone', '9876543210')
+            token_val = float(b.get('advance_paid') or b.get('token_deposit') or 5118.00)
+
+            if resolution_choice == 'alternate_vendor':
+                service_cat = 'venue'
+                old_vendor = ''
+                for cat in ALL_VENDOR_CATEGORIES:
+                    if b.get(cat):
+                        service_cat = cat
+                        old_vendor = b.get(cat)
+                        break
+
+                mock_vendors = session.get('mock_vendors', [])
+                alt_v = next((v for v in mock_vendors if v.get('service') == service_cat and v.get('name') != old_vendor and v.get('approval_status', 'Approved') == 'Approved'), None)
+                if not alt_v:
+                    m_list = MOCK_VENDORS.get(service_cat, [])
+                    alt_v = next((v for v in m_list if v['name'] != old_vendor), None)
+
+                new_v_name = alt_v['name'] if alt_v else f"Shubhlo Verified Partner ({service_cat.title()})"
+                b[service_cat] = new_v_name
+                b['dispute_status'] = 'Alternate Vendor Assigned'
+                b['dispute_reason'] = full_reason
+
+                mock_verifications = session.get('mock_verifications', [])
+                session['mock_verifications'] = [mv for mv in mock_verifications if not (mv['booking_id'] == booking_id and mv['service_type'] == service_cat)]
+                session['mock_verifications'].append({
+                    'booking_id': booking_id,
+                    'vendor_name': new_v_name,
+                    'service_type': service_cat,
+                    'status': 'Pending',
+                    'verified_at': None
+                })
+
+                c_msg = f"Dear {cust_name}, under Shubhlo 100% Safe Guarantee, your booking #{booking_id} for {service_cat.replace('_', ' ').title()} has been transferred to verified partner {new_v_name} with ZERO extra charge! - Shubhlo"
+                send_sms_notification('Customer', cust_phone, c_msg)
+
+                session.modified = True
+                flash(f"🎉 100% Safe Guarantee: नया वेंडर ({new_v_name}) सफलतापूर्वक आवंटित कर दिया गया है! आपका टोकन अमाउंट 100% सुरक्षित है।", "success")
+            else:
+                b['dispute_status'] = 'Refund Requested'
+                b['booking_status'] = 'Refund Requested'
+                b['refund_status'] = 'Pending Approval'
+                b['refund_amount'] = token_val
+                b['dispute_reason'] = full_reason
+                b['refund_method'] = 'Original Payment Method / UPI'
+
+                c_msg = f"Dear {cust_name}, your 100% Token Refund request of Rs.{token_val:.2f} for Booking #{booking_id} has been registered under Shubhlo Safe Guarantee. Refund will be credited within 24-48 hours. - Shubhlo"
+                send_sms_notification('Customer', cust_phone, c_msg)
+
+                session.modified = True
+                flash(f"✅ 100% Safe Guarantee: बुकिंग #{booking_id} के लिए ₹{token_val:,.2f} का पूर्ण टोकन रिफंड अनुरोध दर्ज हो गया है! राशि 24-48 घंटे में आपके खाते में वापस आ जाएगी।", "success")
+        else:
+            flash("Booking not found in session.", "danger")
+
+    return redirect(url_for('dashboard'))
+
+@app.route('/owner/process_refund/<int:booking_id>', methods=['POST'])
+def owner_process_refund(booking_id):
+    if 'admin' not in session:
+        flash("Owner login required. / एडमिन लॉगिन अनिवार्य है।", "danger")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM booking WHERE id=%s", (booking_id,))
+                b = cursor.fetchone()
+                if not b:
+                    flash(f"Booking #{booking_id} not found.", "danger")
+                    return redirect(url_for('owner_dashboard'))
+
+                ref_amt = float(b.get('refund_amount') or b.get('advance_paid') or b.get('token_deposit') or 5118.00)
+                cursor.execute(
+                    "UPDATE booking SET refund_status='Refund Completed', dispute_status='Refund Completed', booking_status='Refunded', refunded_at=CURRENT_TIMESTAMP WHERE id=%s",
+                    (booking_id,)
+                )
+                cursor.execute(
+                    "UPDATE booking_verification SET status='Cancelled' WHERE booking_id=%s AND status != 'Verified'",
+                    (booking_id,)
+                )
+                conn.commit()
+
+                cust_msg = f"Dear {b.get('name', 'Customer')}, your 100% Token Refund of Rs.{ref_amt:,.2f} for Booking #{booking_id} has been PROCESSED successfully to your account. Transaction Ref: RFND{booking_id}98. Thank you for choosing Shubhlo."
+                send_sms_notification('Customer', b.get('phone', '9876543210'), cust_msg)
+
+                flash(f"✔ 100% Token Refund of ₹{ref_amt:,.2f} for Booking #{booking_id} successfully approved and completed! Customer has been notified via SMS.", "success")
+        except Exception as e:
+            flash(f"Error processing refund: {e}", "danger")
+        finally:
+            conn.close()
+    else:
+        mock_bookings = session.get('mock_bookings', [])
+        b = next((x for x in mock_bookings if str(x.get('id')) == str(booking_id)), None)
+        if b:
+            ref_amt = float(b.get('refund_amount') or b.get('advance_paid') or b.get('token_deposit') or 5118.00)
+            b['refund_status'] = 'Refund Completed'
+            b['dispute_status'] = 'Refund Completed'
+            b['booking_status'] = 'Refunded'
+            cust_msg = f"Dear {b.get('name', 'Customer')}, your 100% Token Refund of Rs.{ref_amt:,.2f} for Booking #{booking_id} has been PROCESSED successfully. Ref: RFND{booking_id}98. - Shubhlo"
+            send_sms_notification('Customer', b.get('phone', '9876543210'), cust_msg)
+            session.modified = True
+            flash(f"✔ 100% Token Refund of ₹{ref_amt:,.2f} for Booking #{booking_id} processed successfully (Simulated).", "success")
+        else:
+            flash("Booking not found.", "danger")
+
+    return redirect(url_for('owner_dashboard'))
 
 # Ratings Page
 
@@ -3310,16 +4510,32 @@ def customer_accept_counter_offer(booking_id):
 
 # Vendor Send Counter Offer
 
-def dispatch_fast2sms(phone, message):
-    api_key = os.environ.get("FAST2SMS_API_KEY", FAST2SMS_API_KEY).strip()
+def dispatch_fast2sms(phone, message, api_key=None, return_details=False):
     if not api_key:
+        api_key = os.environ.get("FAST2SMS_API_KEY", FAST2SMS_API_KEY).strip()
+    if not api_key:
+        try:
+            api_key_setting, _ = get_system_setting("fast2sms_api_key")
+            if api_key_setting and api_key_setting not in ['ON', 'OFF']:
+                api_key = str(api_key_setting).strip()
+        except Exception:
+            pass
+
+    if not api_key or api_key.startswith('test_fast2sms'):
+        err = "Fast2SMS API Key not configured. Please enter your API Key in Owner Dashboard."
+        print(f"[FAST2SMS ERR]: {err}")
+        if return_details:
+            return False, err
         return False
 
     digits = ''.join(c for c in str(phone) if c.isdigit())
     if len(digits) > 10:
         digits = digits[-10:]
     if len(digits) != 10:
-        print(f"[FAST2SMS ERR]: Invalid 10-digit phone number '{phone}'")
+        err = f"Invalid 10-digit Indian phone number '{phone}'."
+        print(f"[FAST2SMS ERR]: {err}")
+        if return_details:
+            return False, err
         return False
 
     import urllib.request
@@ -3327,11 +4543,59 @@ def dispatch_fast2sms(phone, message):
     import json
     import re
 
+    otp_match = re.search(r'\b\d{4,8}\b', str(message))
+    is_otp = ("otp" in str(message).lower()) and bool(otp_match)
+    otp_val = otp_match.group(0) if otp_match else ""
+
+    # Method 1: If OTP, use Fast2SMS GET API (fastest and most reliable for OTPs without DLT)
+    if is_otp and otp_val:
+        try:
+            get_params = urllib.parse.urlencode({
+                "authorization": api_key,
+                "variables_values": otp_val,
+                "route": "otp",
+                "numbers": digits
+            })
+            req_url = f"https://www.fast2sms.com/dev/bulkV2?{get_params}"
+            req = urllib.request.Request(req_url, headers={"cache-control": "no-cache"})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                res_body = response.read().decode("utf-8")
+                res_json = json.loads(res_body)
+                if res_json.get("return"):
+                    print(f"[FAST2SMS OTP DISPATCH SUCCESS to {digits}]: {res_json}")
+                    raw_msg = res_json.get("message", ["OTP SMS dispatched successfully"])
+                    succ_msg = raw_msg[0] if isinstance(raw_msg, list) and raw_msg else str(raw_msg)
+                    if return_details:
+                        return True, succ_msg
+                    return True
+                else:
+                    raw_msg = res_json.get("message", "Fast2SMS dispatch failed")
+                    fail_msg = raw_msg[0] if isinstance(raw_msg, list) and raw_msg else str(raw_msg)
+                    print(f"[FAST2SMS OTP FAILURE to {digits}]: {fail_msg}")
+                    if return_details:
+                        return False, fail_msg
+                    return False
+        except urllib.error.HTTPError as he:
+            try:
+                err_body = he.read().decode("utf-8")
+                err_json = json.loads(err_body)
+                err_msg = err_json.get("message", err_body)
+                if isinstance(err_msg, list) and err_msg:
+                    err_msg = err_msg[0]
+            except Exception:
+                err_msg = str(he)
+            print(f"[FAST2SMS HTTP ERROR {he.code}]: {err_msg}")
+            if return_details:
+                return False, f"Fast2SMS API Error ({he.code}): {err_msg}"
+            return False
+        except Exception as e:
+            print(f"[FAST2SMS GET OTP EXCEPTION to {digits}]: {e}")
+            # Continue to POST JSON attempt
+
+    # Method 2: POST JSON
     try:
         url = "https://www.fast2sms.com/dev/bulkV2"
-        otp_match = re.search(r'\b\d{4,8}\b', str(message))
-        if "otp" in str(message).lower() and otp_match:
-            otp_val = otp_match.group(0)
+        if is_otp and otp_val:
             payload = {
                 "route": "otp",
                 "variables_values": otp_val,
@@ -3348,21 +4612,44 @@ def dispatch_fast2sms(phone, message):
             
         headers = {
             "authorization": api_key,
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/json"
         }
-        data = urllib.parse.urlencode(payload).encode("utf-8")
+        data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers=headers)
         with urllib.request.urlopen(req, timeout=10) as response:
             res_body = response.read().decode("utf-8")
             res_json = json.loads(res_body)
             if res_json.get("return"):
                 print(f"[FAST2SMS DISPATCH SUCCESS to {digits}]: {res_json}")
+                raw_msg = res_json.get("message", ["SMS dispatched successfully"])
+                succ_msg = raw_msg[0] if isinstance(raw_msg, list) and raw_msg else str(raw_msg)
+                if return_details:
+                    return True, succ_msg
                 return True
             else:
-                print(f"[FAST2SMS DISPATCH FAILURE to {digits}]: {res_json}")
+                raw_msg = res_json.get("message", "Fast2SMS dispatch failed")
+                fail_msg = raw_msg[0] if isinstance(raw_msg, list) and raw_msg else str(raw_msg)
+                print(f"[FAST2SMS DISPATCH FAILURE to {digits}]: {fail_msg}")
+                if return_details:
+                    return False, fail_msg
                 return False
+    except urllib.error.HTTPError as he:
+        try:
+            err_body = he.read().decode("utf-8")
+            err_json = json.loads(err_body)
+            err_msg = err_json.get("message", err_body)
+            if isinstance(err_msg, list) and err_msg:
+                err_msg = err_msg[0]
+        except Exception:
+            err_msg = str(he)
+        print(f"[FAST2SMS HTTP ERROR {he.code}]: {err_msg}")
+        if return_details:
+            return False, f"Fast2SMS API Error ({he.code}): {err_msg}"
+        return False
     except Exception as e:
         print(f"[FAST2SMS DISPATCH EXCEPTION to {phone}]: {e}")
+        if return_details:
+            return False, str(e)
         return False
 
 def dispatch_twilio(phone, message):
@@ -3458,8 +4745,9 @@ def admin_reset_all_data():
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/rating', methods=['GET', 'POST'])
-@app.route('/rate_vendor', methods=['GET', 'POST'])
-@app.route('/rate-vendor', methods=['GET', 'POST'])
+@app.route('/rate_vendor', methods=['GET', 'POST'], endpoint='rate_vendor')
+@app.route('/rate-vendor', methods=['GET', 'POST'], endpoint='rate_vendor_alias')
+@app.route('/submit_rating', methods=['GET', 'POST'], endpoint='submit_rating')
 def rating():
     if request.method == 'POST':
         booking_id = request.form.get('booking_id') or 101
@@ -3592,7 +4880,33 @@ def booking_invoice(booking_id=1):
 def ad_video():
     return render_template('ad_video.html')
 
+@app.route('/budget-calculator')
+@app.route('/budget_calculator', endpoint='budget_calculator')
+def budget_calculator():
+    return redirect(url_for('services'))
+
+@app.route('/guest-manager')
+@app.route('/guest_manager', endpoint='guest_manager')
+def guest_manager():
+    return redirect(url_for('services'))
+
+@app.route('/guest-manager/add', methods=['POST'])
+@app.route('/guest_manager_add', methods=['POST'], endpoint='guest_manager_add')
+def guest_manager_add():
+    return redirect(url_for('services'))
+
+@app.route('/guest-manager/delete/<int:guest_id>', methods=['POST'])
+@app.route('/guest_manager_delete/<int:guest_id>', methods=['POST'], endpoint='guest_manager_delete')
+def guest_manager_delete(guest_id=None):
+    return redirect(url_for('services'))
+
+@app.route('/guest-manager/update_status/<int:guest_id>', methods=['POST'])
+@app.route('/guest_manager_update_status/<int:guest_id>', methods=['POST'], endpoint='guest_manager_update_status')
+def guest_manager_update_status(guest_id=None):
+    return redirect(url_for('services'))
+
 @app.route('/youtube')
+@app.route('/youtube_hub', endpoint='youtube_hub')
 def youtube():
     return render_template('youtube.html')
 
@@ -3636,8 +4950,7 @@ def dashboard():
     else:
         # Fallback realistic mock data if DB is down
         mock_bookings = session.get('mock_bookings', [])
-        import copy
-        bookings = copy.deepcopy(mock_bookings)
+        bookings = [b for b in mock_bookings if b.get('email') == email]
         
         mock_verifications = session.get('mock_verifications', [])
         for b in bookings:
@@ -3650,7 +4963,7 @@ def dashboard():
 
     # Calculate statistics
     total_bookings = len(bookings)
-    total_spent = sum(float(b['amount']) for b in bookings if b['payment_status'] == 'Paid')
+    total_spent = sum(float(b.get('amount', 0) or 0) for b in bookings if b.get('payment_status') == 'Paid')
 
     return render_template(
         'dashboard.html',
@@ -3744,7 +5057,114 @@ def owner_login():
             flash("Invalid owner credentials!", "danger")
     return redirect(url_for('login'))
 
+# Fast2SMS Management & Live Test Routes
+
+@app.route('/owner/update_fast2sms', methods=['POST'])
+@app.route('/admin/update_fast2sms', methods=['POST'])
+def owner_update_fast2sms():
+    if not (session.get('is_owner') or session.get('admin')):
+        flash("Unauthorized access. Admin login required.", "danger")
+        return redirect(url_for('login'))
+
+    api_key = request.form.get('fast2sms_api_key', '').strip()
+    enabled = request.form.get('fast2sms_enabled', 'OFF').strip().upper()
+    if enabled not in ['ON', 'OFF']:
+        enabled = 'OFF'
+
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO system_settings (setting_key, setting_value)
+                    VALUES ('fast2sms_enabled', %s)
+                    ON DUPLICATE KEY UPDATE setting_value=%s
+                """, (enabled, enabled))
+                if api_key:
+                    cursor.execute("""
+                        INSERT INTO system_settings (setting_key, setting_value)
+                        VALUES ('fast2sms_api_key', %s)
+                        ON DUPLICATE KEY UPDATE setting_value=%s
+                    """, (api_key, api_key))
+                conn.commit()
+        except Exception as e:
+            print(f"Error saving Fast2SMS DB setting: {e}")
+        finally:
+            conn.close()
+
+    # Session and Global Settings
+    global GLOBAL_SYSTEM_SETTINGS
+    GLOBAL_SYSTEM_SETTINGS['fast2sms_enabled'] = {'value': enabled, 'msg': ''}
+    if api_key:
+        GLOBAL_SYSTEM_SETTINGS['fast2sms_api_key'] = {'value': api_key, 'msg': ''}
+        os.environ['FAST2SMS_API_KEY'] = api_key
+
+    mock_settings = session.get('mock_system_settings', {})
+    mock_settings['fast2sms_enabled'] = {'value': enabled, 'msg': ''}
+    if api_key:
+        mock_settings['fast2sms_api_key'] = {'value': api_key, 'msg': ''}
+    session['mock_system_settings'] = mock_settings
+    session.modified = True
+
+    # Persist in .env
+    try:
+        env_lines = []
+        if os.path.exists('.env'):
+            with open('.env', 'r', encoding='utf-8') as f:
+                env_lines = f.readlines()
+        has_key = False
+        new_lines = []
+        for line in env_lines:
+            if line.startswith('FAST2SMS_API_KEY='):
+                if api_key:
+                    new_lines.append(f'FAST2SMS_API_KEY={api_key}\n')
+                has_key = True
+            else:
+                new_lines.append(line)
+        if not has_key and api_key:
+            new_lines.append(f'FAST2SMS_API_KEY={api_key}\n')
+        with open('.env', 'w', encoding='utf-8') as f:
+            f.writelines(new_lines)
+    except Exception as e:
+        print(f"Error persisting Fast2SMS key to .env: {e}")
+
+    status_badge = "ACTIVATED (ON) 🟢" if enabled == "ON" else "PAUSED (OFF) ⚪"
+    flash(f"🎉 Fast2SMS Gateway Settings saved successfully! Status: {status_badge} / Fast2SMS सेटिंग्स सफलतापूर्वक अपडेट की गईं!", "success")
+    return redirect(request.referrer or (url_for('owner_dashboard') + "#fast2sms-section"))
+
+@app.route('/owner/send_test_fast2sms', methods=['POST'])
+@app.route('/admin/send_test_fast2sms', methods=['POST'])
+def owner_send_test_fast2sms():
+    if not (session.get('is_owner') or session.get('admin')):
+        flash("Unauthorized access. Admin login required.", "danger")
+        return redirect(url_for('login'))
+
+    test_phone = request.form.get('test_phone', '').strip()
+    test_message = request.form.get('test_message', '').strip()
+    api_key_override = request.form.get('api_key_override', '').strip()
+
+    if not test_phone:
+        flash("Please enter a valid 10-digit mobile number for test SMS. / कृपया टेस्ट SMS के लिए 10 अंकों का मोबाइल नंबर डालें।", "warning")
+        return redirect(request.referrer or (url_for('owner_dashboard') + "#fast2sms-section"))
+
+    if not test_message:
+        test_message = "Shubhlo Event Platform: This is a live test SMS from your Shubhlo Control Panel via Fast2SMS gateway. Service is active!"
+
+    success, msg = dispatch_fast2sms(test_phone, test_message, api_key=api_key_override or None, return_details=True)
+
+    # Also log to simulated_sms table
+    send_sms_notification('Test-Fast2SMS', test_phone, f"[TEST SMS]: {test_message}", auto_dispatch_fast2sms=False)
+
+    if success:
+        flash(f"🎉 Live Test SMS sent successfully to {test_phone} via Fast2SMS! Response: {msg} / असली टेस्ट SMS आपके फोन पर भेज दिया गया है!", "success")
+    else:
+        flash(f"⚠️ Fast2SMS Live Dispatch Failed: {msg}. Please check your Fast2SMS API Key or Wallet Balance on fast2sms.com. / कृपया अपनी API Key या Fast2SMS बैलेंस चेक करें।", "danger")
+
+    return redirect(request.referrer or (url_for('owner_dashboard') + "#fast2sms-section"))
+
+
 @app.route('/owner/dashboard')
+@app.route('/owner_dashboard')
 def owner_dashboard():
     session['admin'] = session.get('admin', 'owner@shubhlo.com')
     session['is_owner'] = True
@@ -3752,6 +5172,7 @@ def owner_dashboard():
     conn = get_db_connection()
     db_vendors = []
     db_bookings = []
+    db_customers = []
     
     if conn is not None:
         try:
@@ -3760,15 +5181,20 @@ def owner_dashboard():
                 db_vendors = cursor.fetchall()
                 cursor.execute("SELECT * FROM booking ORDER BY id DESC")
                 db_bookings = cursor.fetchall()
+                cursor.execute("SELECT * FROM users ORDER BY id DESC")
+                db_customers = cursor.fetchall()
         except Exception as e:
             print(f"Error loading owner dashboard DB data: {e}")
         finally:
             conn.close()
             
     if not db_vendors:
-        db_vendors = session.get('mock_vendors', MOCK_VENDORS.get('venue', []))
+        session_vendors = session.get('mock_vendors')
+        db_vendors = list(session_vendors) if session_vendors is not None else list(GLOBAL_REGISTERED_VENDORS)
     if not db_bookings:
         db_bookings = session.get('mock_bookings', [])
+    if not db_customers:
+        db_customers = session.get('customers', session.get('mock_customers', []))
         
     all_tickets = session.get('mock_tickets', [
         {
@@ -3789,12 +5215,35 @@ def owner_dashboard():
     platform_net_revenue = (total_gross_volume * commission_rate) / 100.0
     is_maintenance = session.get('is_maintenance', False)
 
+    # Master Location Management Data
+    permitted_locations = get_permitted_locations(only_active=False)
+    total_states = len(set(loc['state'] for loc in permitted_locations))
+    total_districts = len(set(f"{loc['state']}_{loc['district']}" for loc in permitted_locations))
+    total_tehsils = len(permitted_locations)
+    active_tehsils = len([loc for loc in permitted_locations if loc.get('is_active', 1) == 1])
+    paused_tehsils = total_tehsils - active_tehsils
+
+    fast2sms_enabled_val, _ = get_system_setting('fast2sms_enabled')
+    fast2sms_api_key_val, _ = get_system_setting('fast2sms_api_key')
+    if not fast2sms_api_key_val or fast2sms_api_key_val in ['ON', 'OFF']:
+        fast2sms_api_key_val = os.environ.get('FAST2SMS_API_KEY', FAST2SMS_API_KEY)
+
     return render_template(
         'owner_dashboard.html',
+        fast2sms_enabled=fast2sms_enabled_val,
+        fast2sms_api_key=fast2sms_api_key_val,
+        permitted_locations=permitted_locations,
+        total_states=total_states,
+        total_districts=total_districts,
+        total_tehsils=total_tehsils,
+        active_tehsils=active_tehsils,
+        paused_tehsils=paused_tehsils,
         vendors=db_vendors,
         bookings=db_bookings,
+        customers=db_customers,
         tickets=all_tickets,
         total_vendors=len(db_vendors),
+        total_customers=len(db_customers),
         total_gross_volume=total_gross_volume,
         total_deposits_collected=total_deposits_collected,
         commission_rate=commission_rate,
@@ -3823,9 +5272,6 @@ def owner_toggle_maintenance():
     return redirect(url_for('owner_dashboard'))
 
 
-if __name__ == '__main__':
-    migrate_db_schema()
-    app.run(debug=True, host='0.0.0.0', port=8080)
 
 @app.route('/owner/approve_and_unlock/<int:booking_id>', methods=['POST'])
 def owner_approve_and_unlock(booking_id):
@@ -3842,10 +5288,19 @@ def owner_approve_and_unlock(booking_id):
 
     mock_bookings = session.get('mock_bookings', [])
     for b in mock_bookings:
-        if b.get('id') == booking_id:
+        if b.get('id') == booking_id or str(b.get('id')) == str(booking_id):
             b['status'] = 'Confirmed'
             b['booking_status'] = 'Confirmed'
             b['unlocked_by_owner'] = True
+    session['mock_bookings'] = mock_bookings
+
+    for gb in GLOBAL_REGISTERED_BOOKINGS:
+        if gb.get('id') == booking_id or str(gb.get('id')) == str(booking_id):
+            gb['status'] = 'Confirmed'
+            gb['booking_status'] = 'Confirmed'
+            gb['unlocked_by_owner'] = True
+    save_fallback_data()
+
     session.modified = True
     flash(f"Booking #{booking_id} approved and customer contact details unlocked to Vendor! / बुकिंग #{booking_id} कन्फर्म कर दी गई है और ग्राहक का संपर्क वेंडर के लिए अनलॉक कर दिया गया है।", "success")
     return redirect(url_for('owner_dashboard'))
@@ -3969,14 +5424,10 @@ def ai_assistant_api():
                    "1. <strong>Step 1:</strong> Click <a href='/booking1'>Book Now</a> and select your event date & Tehsil location.<br>"
                    "2. <strong>Step 2:</strong> Compare verified Venues, Catering, DJ, Photography & Decoration vendors.<br>"
                    "3. <strong>Step 3:</strong> Review your selected service summary.<br>"
-                   "4. <strong>Step 4:</strong> Pay a nominal token deposit of ₹5,100 to lock your booking!")
-        elif any(w in q_lower for w in ["price", "rate", "cost", "budget", "package"]):
-          reply = ("💰 <strong>Shubhlo Best Price Guarantee:</strong><br>"
-                   "• 🏰 Venues & Lawns: ₹1,00,000 - ₹2,50,000<br>"
-                   "• 🍲 Catering Packages: ₹50,000 - ₹1,50,000<br>"
-                   "• 🎵 DJ & Sound: ₹15,000 - ₹35,000<br>"
-                   "• 📸 Photography: ₹25,000 - ₹60,000<br>"
-                   "• 🌸 Decoration: ₹20,000 - ₹50,000" + vendor_info)
+                   "4. <strong>Step 4:</strong> Pay nominal token money of ₹5,118 per vendor to lock your booking! (Remaining deal & package is directly decided between you and the vendor, with ₹5,000 deducted from your final bill).")
+        elif any(w in q_lower for w in ["price", "rate", "cost", "budget", "package", "token", "डील"]):
+          reply = ("💰 <strong>Direct Deal & Token Money Model:</strong><br>"
+                   "Shubhlo par keval <strong>₹5,118 Token Money</strong> jama karke date lock karni hoti hai. Baki sabhi package rate, services aur final bill customer aur vendor aapas mein decide karte hain. ₹5,000 aapke final bill se kam ho jayenge!" + vendor_info)
         elif any(w in q_lower for w in ["contact", "phone", "number", "email", "support", "help"]):
           reply = ("📞 <strong>Shubhlo Direct Support:</strong><br>"
                    "• Helpline Call / WhatsApp: <strong>+91 7067883131</strong><br>"
@@ -3996,12 +5447,17 @@ def ai_assistant_api():
     except Exception as e:
         return jsonify({'status': 'error', 'reply': 'An unexpected error occurred. Please try asking your question again!'}), 500
 
-def get_permitted_locations():
+def get_permitted_locations(only_active=False):
+    global GLOBAL_PERMITTED_LOCATIONS
     conn = get_db_connection()
     if conn is not None:
         try:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT id, state, district, tehsil FROM permitted_locations ORDER BY state, district, tehsil")
+                query = "SELECT id, state, district, tehsil, COALESCE(is_active, 1) as is_active FROM permitted_locations"
+                if only_active:
+                    query += " WHERE is_active=1"
+                query += " ORDER BY state, district, tehsil"
+                cursor.execute(query)
                 rows = cursor.fetchall()
                 if rows:
                     return rows
@@ -4010,7 +5466,10 @@ def get_permitted_locations():
         finally:
             conn.close()
 
-    return session.get('permitted_locations', DEFAULT_PERMITTED_LOCATIONS)
+    locs = session.get('permitted_locations', GLOBAL_PERMITTED_LOCATIONS)
+    if only_active:
+        return [l for l in locs if l.get('is_active', 1) == 1]
+    return locs
 
 def is_location_permitted(state, district, tehsil):
     if not state or not district or not tehsil:
@@ -4031,6 +5490,7 @@ def is_location_permitted(state, district, tehsil):
     return False
 
 @app.route('/owner/add_location', methods=['POST'])
+@app.route('/owner_add_location', methods=['POST'])
 def owner_add_location():
     if not session.get('is_owner') and session.get('admin') != 'owner@shubhlo.com':
         flash("Access Denied: Owner permission required! / केवल ऑनर्स कंट्रोल पैनल!", "danger")
@@ -4038,68 +5498,215 @@ def owner_add_location():
 
     state = request.form.get('state', '').strip()
     district = request.form.get('district', '').strip()
-    tehsil = request.form.get('tehsil', '').strip()
+    tehsil_input = request.form.get('tehsil', '').strip()
 
-    if not state or not district or not tehsil:
+    if not state or not district or not tehsil_input:
         flash("Please enter State, District, and Tehsil. / कृपया राज्य, ज़िला और तहसील दर्ज करें।", "danger")
-        return redirect(url_for('owner_dashboard'))
+        return redirect(url_for('owner_dashboard') + "#location-control-section")
+
+    tehsils = [t.strip() for t in tehsil_input.split(',') if t.strip()]
+    if not tehsils:
+        flash("Please provide at least one valid Tehsil name.", "danger")
+        return redirect(url_for('owner_dashboard') + "#location-control-section")
+
+    global GLOBAL_PERMITTED_LOCATIONS
+    added_count = 0
+    already_count = 0
 
     conn = get_db_connection()
     if conn is not None:
         try:
             with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT id FROM permitted_locations WHERE LOWER(state)=LOWER(%s) AND LOWER(district)=LOWER(%s) AND LOWER(tehsil)=LOWER(%s)",
-                    (state, district, tehsil)
-                )
-                if cursor.fetchone():
-                    flash(f"Location '{tehsil}, {district}, {state}' is already permitted! / यह स्थान पहले से अनुमति प्राप्त है!", "warning")
-                else:
+                for teh in tehsils:
                     cursor.execute(
-                        "INSERT INTO permitted_locations (state, district, tehsil) VALUES (%s, %s, %s)",
-                        (state, district, tehsil)
+                        "SELECT id FROM permitted_locations WHERE LOWER(state)=LOWER(%s) AND LOWER(district)=LOWER(%s) AND LOWER(tehsil)=LOWER(%s)",
+                        (state, district, teh)
                     )
-                    conn.commit()
-                    flash(f"Permitted Location '{tehsil}, {district}, {state}' added successfully! / स्थान अनुमति स्वीकृत की गई!", "success")
+                    if cursor.fetchone():
+                        already_count += 1
+                    else:
+                        cursor.execute(
+                            "INSERT INTO permitted_locations (state, district, tehsil, is_active) VALUES (%s, %s, %s, 1)",
+                            (state, district, teh)
+                        )
+                        added_count += 1
+                conn.commit()
         except Exception as e:
-            flash(f"Error adding permitted location: {e}", "danger")
+            flash(f"Error adding location to database: {e}", "danger")
         finally:
             conn.close()
     else:
-        mock_locs = session.get('permitted_locations', list(DEFAULT_PERMITTED_LOCATIONS))
-        if any(str(m['state']).lower() == state.lower() and str(m['district']).lower() == district.lower() and str(m['tehsil']).lower() == tehsil.lower() for m in mock_locs):
-            flash(f"Location '{tehsil}, {district}, {state}' is already permitted!", "warning")
-        else:
-            new_loc = {'id': 900 + len(mock_locs), 'state': state, 'district': district, 'tehsil': tehsil}
-            mock_locs.append(new_loc)
-            session['permitted_locations'] = mock_locs
-            session.modified = True
-            flash(f"Permitted Location '{tehsil}, {district}, {state}' added (Simulated)! / स्थान अनुमति स्वीकृत की गई!", "success")
+        mock_locs = session.get('permitted_locations', GLOBAL_PERMITTED_LOCATIONS)
+        for teh in tehsils:
+            if any(str(m['state']).lower() == state.lower() and str(m['district']).lower() == district.lower() and str(m['tehsil']).lower() == teh.lower() for m in mock_locs):
+                already_count += 1
+            else:
+                new_id = 900 + len(mock_locs) + 1
+                new_loc = {'id': new_id, 'state': state, 'district': district, 'tehsil': teh, 'is_active': 1}
+                mock_locs.append(new_loc)
+                added_count += 1
+        GLOBAL_PERMITTED_LOCATIONS = list(mock_locs)
+        session['permitted_locations'] = mock_locs
+        session['mock_allowed_locations'] = mock_locs
+        session.modified = True
 
-    return redirect(url_for('owner_dashboard'))
+    if added_count > 0:
+        flash(f"🎉 Successfully granted permission for {added_count} location(s) under {district}, {state}! Live for bookings now.", "success")
+    if already_count > 0:
+        flash(f"Notice: {already_count} location(s) were already in the permitted list.", "info")
+
+    return redirect(url_for('owner_dashboard') + "#location-control-section")
+
+@app.route('/owner/toggle_location/<int:loc_id>', methods=['POST', 'GET'])
+@app.route('/owner_toggle_location/<int:loc_id>', methods=['POST', 'GET'])
+def owner_toggle_location(loc_id):
+    if not session.get('is_owner') and session.get('admin') != 'owner@shubhlo.com':
+        flash("Access Denied: Owner permission required!", "danger")
+        return redirect(url_for('login'))
+
+    global GLOBAL_PERMITTED_LOCATIONS
+    loc_name = ""
+    new_status = 1
+
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT tehsil, district, COALESCE(is_active, 1) as is_active FROM permitted_locations WHERE id=%s", (loc_id,))
+                row = cursor.fetchone()
+                if row:
+                    loc_name = f"{row['tehsil']} ({row['district']})"
+                    new_status = 0 if row['is_active'] == 1 else 1
+                    cursor.execute("UPDATE permitted_locations SET is_active=%s WHERE id=%s", (new_status, loc_id))
+                    conn.commit()
+        except Exception as e:
+            flash(f"Error toggling location status: {e}", "danger")
+        finally:
+            conn.close()
+    else:
+        mock_locs = session.get('permitted_locations', GLOBAL_PERMITTED_LOCATIONS)
+        for loc in mock_locs:
+            if loc.get('id') == loc_id:
+                loc_name = f"{loc['tehsil']} ({loc['district']})"
+                loc['is_active'] = 0 if loc.get('is_active', 1) == 1 else 1
+                new_status = loc['is_active']
+                break
+        GLOBAL_PERMITTED_LOCATIONS = list(mock_locs)
+        session['permitted_locations'] = mock_locs
+        session['mock_allowed_locations'] = mock_locs
+        session.modified = True
+
+    status_label = "🟢 ACTIVATED (Live for booking)" if new_status == 1 else "⏸️ PAUSED (Hidden from booking)"
+    flash(f"Location '{loc_name}' is now {status_label}!", "success" if new_status == 1 else "warning")
+    return redirect(url_for('owner_dashboard') + "#location-control-section")
+
+@app.route('/owner/edit_location/<int:loc_id>', methods=['POST'])
+@app.route('/owner_edit_location/<int:loc_id>', methods=['POST'])
+def owner_edit_location(loc_id):
+    if not session.get('is_owner') and session.get('admin') != 'owner@shubhlo.com':
+        flash("Access Denied: Owner permission required!", "danger")
+        return redirect(url_for('login'))
+
+    state = request.form.get('state', '').strip()
+    district = request.form.get('district', '').strip()
+    tehsil = request.form.get('tehsil', '').strip()
+
+    if not state or not district or not tehsil:
+        flash("State, District, and Tehsil cannot be empty.", "danger")
+        return redirect(url_for('owner_dashboard') + "#location-control-section")
+
+    global GLOBAL_PERMITTED_LOCATIONS
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE permitted_locations SET state=%s, district=%s, tehsil=%s WHERE id=%s",
+                    (state, district, tehsil, loc_id)
+                )
+                conn.commit()
+                flash(f"Location updated to '{tehsil}, {district}, {state}'! ✏️", "success")
+        except Exception as e:
+            flash(f"Error updating location: {e}", "danger")
+        finally:
+            conn.close()
+    else:
+        mock_locs = session.get('permitted_locations', GLOBAL_PERMITTED_LOCATIONS)
+        for loc in mock_locs:
+            if loc.get('id') == loc_id:
+                loc['state'] = state
+                loc['district'] = district
+                loc['tehsil'] = tehsil
+                break
+        GLOBAL_PERMITTED_LOCATIONS = list(mock_locs)
+        session['permitted_locations'] = mock_locs
+        session['mock_allowed_locations'] = mock_locs
+        session.modified = True
+        flash(f"Location updated to '{tehsil}, {district}, {state}'! ✏️", "success")
+
+    return redirect(url_for('owner_dashboard') + "#location-control-section")
 
 @app.route('/owner/delete_location/<int:loc_id>', methods=['POST', 'GET'])
+@app.route('/owner_delete_location/<int:loc_id>', methods=['POST', 'GET'])
 def owner_delete_location(loc_id):
     if not session.get('is_owner') and session.get('admin') != 'owner@shubhlo.com':
         flash("Access Denied: Owner permission required!", "danger")
         return redirect(url_for('login'))
 
+    global GLOBAL_PERMITTED_LOCATIONS
     conn = get_db_connection()
     if conn is not None:
         try:
             with conn.cursor() as cursor:
                 cursor.execute("DELETE FROM permitted_locations WHERE id=%s", (loc_id,))
                 conn.commit()
-                flash("Location permission revoked! / स्थान अनुमति सफलतापूर्वक हटाई गई!", "info")
+                flash("Location permission permanently deleted from database! 🗑️", "info")
         except Exception as e:
-            flash(f"Error revoking location permission: {e}", "danger")
+            flash(f"Error deleting location: {e}", "danger")
         finally:
             conn.close()
     else:
-        mock_locs = session.get('permitted_locations', list(DEFAULT_PERMITTED_LOCATIONS))
-        session['permitted_locations'] = [m for m in mock_locs if str(m.get('id')) != str(loc_id)]
+        mock_locs = session.get('permitted_locations', GLOBAL_PERMITTED_LOCATIONS)
+        mock_locs = [m for m in mock_locs if str(m.get('id')) != str(loc_id)]
+        GLOBAL_PERMITTED_LOCATIONS = list(mock_locs)
+        session['permitted_locations'] = mock_locs
+        session['mock_allowed_locations'] = mock_locs
         session.modified = True
-        flash("Location permission revoked (Simulated)! / स्थान अनुमति सफलतापूर्वक हटाई गई!", "info")
+        flash("Location permission permanently deleted! 🗑️", "info")
+
+    return redirect(url_for('owner_dashboard') + "#location-control-section")
+
+@app.route('/owner/prefill_locations', methods=['POST'])
+@app.route('/owner_prefill_locations', methods=['POST'])
+def owner_prefill_locations():
+    if not session.get('is_owner') and session.get('admin') != 'owner@shubhlo.com':
+        flash("Access Denied: Owner permission required!", "danger")
+        return redirect(url_for('login'))
+
+    global GLOBAL_PERMITTED_LOCATIONS
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                for item in DEFAULT_PERMITTED_LOCATIONS:
+                    cursor.execute(
+                        "INSERT IGNORE INTO permitted_locations (state, district, tehsil, is_active) VALUES (%s, %s, %s, 1)",
+                        (item['state'], item['district'], item['tehsil'])
+                    )
+                conn.commit()
+                flash("Successfully loaded standard MP & Maharashtra locations! 📍", "success")
+        except Exception as e:
+            flash(f"Error prefilling locations: {e}", "danger")
+        finally:
+            conn.close()
+    else:
+        GLOBAL_PERMITTED_LOCATIONS = [dict(d) for d in DEFAULT_PERMITTED_LOCATIONS]
+        session['permitted_locations'] = list(GLOBAL_PERMITTED_LOCATIONS)
+        session['mock_allowed_locations'] = list(GLOBAL_PERMITTED_LOCATIONS)
+        session.modified = True
+        flash("Successfully loaded standard MP & Maharashtra locations! 📍", "success")
+
+    return redirect(url_for('owner_dashboard') + "#location-control-section")
 
 @app.route('/owner/toggle_setting', methods=['POST'])
 def owner_toggle_setting():
@@ -4472,68 +6079,7 @@ def vendor_remove_service(service_name=None):
 
     return redirect(url_for('vendor_dashboard'))
 
-def is_email_or_phone_registered(email, phone, conn=None):
-    if not email and not phone:
-        return False
 
-    clean_email = (email or '').strip().lower()
-    clean_phone = (phone or '').strip()
-
-    # 1. Check DB if connection provided or available
-    close_db = False
-    if conn is None:
-        conn = get_db_connection()
-        close_db = True
-
-    if conn is not None:
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT id FROM users WHERE LOWER(email)=%s OR phone=%s LIMIT 1", (clean_email, clean_phone))
-                if cursor.fetchone():
-                    if close_db: conn.close()
-                    return True
-                cursor.execute("SELECT id FROM vendor WHERE LOWER(email)=%s OR phone=%s LIMIT 1", (clean_email, clean_phone))
-                if cursor.fetchone():
-                    if close_db: conn.close()
-                    return True
-        except Exception as e:
-            print(f"Error checking DB duplicate registration: {e}")
-        finally:
-            if close_db:
-                conn.close()
-
-    # 2. Check GLOBAL_REGISTERED_VENDORS
-    for v in GLOBAL_REGISTERED_VENDORS:
-        v_email = (v.get('email') or '').strip().lower()
-        v_phone = (v.get('phone') or '').strip()
-        if (clean_email and v_email == clean_email) or (clean_phone and v_phone == clean_phone):
-            return True
-
-    # 3. Check session mock_vendors and mock_users
-    try:
-        mock_v = session.get('mock_vendors', [])
-        for v in mock_v:
-            v_email = (v.get('email') or '').strip().lower()
-            v_phone = (v.get('phone') or '').strip()
-            if (clean_email and v_email == clean_email) or (clean_phone and v_phone == clean_phone):
-                return True
-
-        mock_u = session.get('mock_users', [])
-        for u in mock_u:
-            u_email = (u.get('email') or '').strip().lower()
-            u_phone = (u.get('phone') or '').strip()
-            if (clean_email and u_email == clean_email) or (clean_phone and u_phone == clean_phone):
-                return True
-    except Exception:
-        pass
-
-    # 4. Check known hardcoded seed accounts
-    seed_emails = {'user@shubhlo.com', 'owner@shubhlo.com', 'royal@shubhlo.com', 'meadow@shubhlo.com', 'shahi@shubhlo.com', 'djrock@shubhlo.com', 'n9599@gmail.com'}
-    seed_phones = {'9876543210', '9876543211', '9876543212', '9876543213', '9876543214', '9599000000'}
-    if clean_email in seed_emails or clean_phone in seed_phones:
-        return True
-
-    return False
 
 @app.route('/admin/customer/delete/<int:user_id>', methods=['POST'])
 @app.route('/owner/customer/delete/<int:user_id>', methods=['POST'])
@@ -4636,6 +6182,99 @@ def handle_html_extension_redirect(page_name):
         return redirect(url_for(target_endpoint), code=301)
     return redirect(url_for('home'), code=302)
 
+@app.route('/api/assistant', methods=['POST'])
+def api_assistant():
+    data = request.get_json() or {}
+    query = (data.get('query') or '').strip()
+    if not query:
+        return jsonify({'reply': '👑 Please type a message or ask a question about our services!'})
+    
+    q_lower = query.lower()
+    
+    # Query live DB vendors if available
+    conn = get_db_connection()
+    all_vendors = []
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT name, service, price, min_order_value, tehsil FROM vendor WHERE approval_status='Approved'")
+                all_vendors = cursor.fetchall()
+        except Exception as e:
+            print(f"Assistant DB Query Error: {e}")
+        finally:
+            conn.close()
+    
+    if not all_vendors:
+        all_vendors = GLOBAL_REGISTERED_VENDORS + session.get('mock_vendors', [])
+    
+    # 0. Parent Company & Ownership
+    if any(w in q_lower for w in ['company', 'apna infotech', 'who owns', 'parent', 'कंपनी', 'मालिक', 'संचालक']):
+        return jsonify({
+            'reply': "🏢 <strong>Apna Infotech Pvt. Ltd.</strong><br><strong>Shubhlo (शुभलो)</strong> is proudly owned, managed, and operated by <strong>Apna Infotech Pvt. Ltd.</strong><br>We provide India's most transparent and verified event management platform.<br><br>📞 Helpline: <strong>+91 7067883131</strong><br>📧 Email: <strong>support@shubhlo.com</strong>"
+        })
+
+    # 1. Greetings & Help
+    if any(w in q_lower for w in ['hi', 'hello', 'namaste', 'hey', 'start', 'help']):
+        return jsonify({
+            'reply': "👑 <strong>Namaste & Welcome to Shubhlo AI Assistant!</strong><br>I am your smart event guide. How can I assist you today?<br><br>• Search Venues & Marriage Gardens 🏰<br>• Catering & Menu Packages 🍲<br>• DJ Sound & Lighting Setup 🎵<br>• Professional Photography 📸<br>• Instant Multi-Category Booking 📝"
+        })
+    
+    # 2. Category Matching
+    cat_keywords = {
+        'venue': ['venue', 'garden', 'lawn', 'hall', 'palace', 'marriage garden', 'मैरिज गार्डन'],
+        'catering': ['cater', 'food', 'khana', 'menu', 'buffet', 'कैटरिंग', 'खाना'],
+        'dj': ['dj', 'music', 'sound', 'dhol', 'डीजे', 'साउंड'],
+        'photography': ['photo', 'camera', 'video', 'shoot', 'photographer', 'फोटो', 'शूट'],
+        'makeup': ['makeup', 'beauty', 'parlor', 'bridal makeup', 'मेकअप'],
+        'decoration': ['decor', 'flower', 'stage', 'lighting', 'सजावट', 'डेकोरेशन'],
+        'transport': ['car', 'bus', 'vehicle', 'travel', 'गाड़ी', 'ट्रांसपोर्ट'],
+    }
+    
+    matched_cat = None
+    for cat, kws in cat_keywords.items():
+        if any(kw in q_lower for kw in kws):
+            matched_cat = cat
+            break
+            
+    if matched_cat:
+        matching_v = [v for v in all_vendors if v.get('service') == matched_cat]
+        cat_display = matched_cat.upper()
+        if matching_v:
+            v_list_html = "".join([
+                f"<li><strong>{v.get('name')}</strong> ({v.get('tehsil', 'MP')}): Starting ₹{int(v.get('price', 0)):,}</li>"
+                for v in matching_v[:3]
+            ])
+            return jsonify({
+                'reply': f"✨ <strong>Found Verified {cat_display} Vendors:</strong><ul>{v_list_html}</ul>👉 <a href='/services' style='color:#10b981;font-weight:bold;'>Explore All {cat_display} Options ➔</a>"
+            })
+        else:
+            return jsonify({
+                'reply': f"✨ We have top verified <strong>{cat_display}</strong> partners ready across Madhya Pradesh!<br>👉 <a href='/services' style='color:#10b981;font-weight:bold;'>View {cat_display} Catalog & Prices ➔</a>"
+            })
+            
+    # 3. Booking Process
+    if any(w in q_lower for w in ['book', 'process', 'how', 'step', 'booking', 'बुक']):
+        return jsonify({
+            'reply': "📝 <strong>Simple 3-Step Booking Process:</strong><br>1. Click <a href='/booking1'>Book Now</a> & enter event date & location.<br>2. Select vendors from verified categories.<br>3. Confirm with Token Money of ₹5,118 (Remaining deal & package is directly decided between customer & vendor, with ₹5,000 deducted from your final bill)!"
+        })
+        
+    # 4. WhatsApp / Owner Communication
+    if any(w in q_lower for w in ['whatsapp', 'owner', 'chat', 'ऑनर', 'व्हाट्सएप', 'व्हाट्सऐप', 'बात']):
+        return jsonify({
+            'reply': "💬 <strong>Direct WhatsApp Chat with Owner:</strong><br>Click the button below to start a 1-on-1 WhatsApp chat directly with the Shubhlo Owner (+91 7067883131):<br><br><a href='https://wa.me/917067883131?text=Namaste%20Shubhlo%20Owner!%20I%20have%20an%20inquiry%20regarding%20event%20services.' target='_blank' style='background:linear-gradient(135deg, #25d366, #128c7e);color:white;padding:10px 18px;border-radius:25px;font-weight:bold;text-decoration:none;display:inline-block;box-shadow:0 4px 12px rgba(37,211,102,0.3);'>💬 Open WhatsApp Chat (+91 7067883131) ➔</a>"
+        })
+        
+    # 5. Contact & Support
+    if any(w in q_lower for w in ['contact', 'phone', 'number', 'support', 'call', 'helpline', 'संपर्क']):
+        return jsonify({
+            'reply': "📞 <strong>Shubhlo 24/7 Helpline:</strong><br>Call or WhatsApp us at <strong>+91 7067883131</strong>.<br>Email: <strong>support@shubhlo.com</strong><br><br><a href='https://wa.me/917067883131' target='_blank' style='color:#25d366;font-weight:bold;'>💬 Chat on WhatsApp ➔</a>"
+        })
+
+    # Default Fallback
+    return jsonify({
+        'reply': f"✨ <strong>Shubhlo AI Assistant:</strong><br>You asked: '<em>{query}</em>'.<br>I can help you compare 18 event service categories or customize your budget.<br>👉 <a href='/booking1' style='color:#10b981;font-weight:bold;'>Start Direct Booking ➔</a> or Call <strong>+91 7067883131</strong>"
+    })
+
 def handle_url_build_error(error, endpoint, values):
     if endpoint in ['booking1', 'booking']:
         return '/booking1'
@@ -4672,6 +6311,12 @@ def handle_url_build_error(error, endpoint, values):
     if endpoint in ['download_invoice', 'booking_invoice']:
         b_id = values.get('booking_id', 1) if values else 1
         return f"/booking/invoice/{b_id}"
+    if endpoint in ['rating', 'submit_rating', 'rate_vendor']:
+        return '/rating'
+    if endpoint in ['youtube', 'youtube_hub']:
+        return '/youtube'
+    if endpoint in ['budget_calculator', 'budget-calculator', 'guest_manager', 'guest-manager', 'guest_manager_add', 'guest_manager_delete', 'guest_manager_update_status']:
+        return '/services'
     if endpoint == 'vendor_remove_service':
         svc = values.get('service_name', '') if values else ''
         return f"/vendor/remove_service/{svc}" if svc else "/vendor/remove_service"
@@ -4691,4 +6336,4 @@ def page_not_found(e):
 
 if __name__ == '__main__':
     migrate_db_schema()
-    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=8080)
+    app.run(debug=True, use_reloader=True, host='0.0.0.0', port=8080)

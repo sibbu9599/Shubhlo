@@ -1176,30 +1176,6 @@
       box-shadow: 0 12px 32px rgba(16, 185, 129, 0.7);
     }
 
-    /* Floating WhatsApp / Support Action Button */
-    .floating-help-btn {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      background: #25d366;
-      color: white;
-      text-decoration: none;
-      padding: 12px 22px;
-      border-radius: 30px;
-      font-weight: 800;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 6px 22px rgba(37, 211, 102, 0.5);
-      z-index: 999;
-      transition: all 0.3s ease;
-    }
-
-    .floating-help-btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 8px 28px rgba(37, 211, 102, 0.7);
-    }
 
     /* Footer */
     footer {
@@ -1323,7 +1299,7 @@
 
   <!-- Floating Header Navbar -->
   <header>
-    <a href="/home" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="/home" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="/home" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -1339,7 +1315,6 @@
         <li><a href="/vendor_login" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
         <li><a href="/about" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
         <li><a href="/contact" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
-        <li><a href="/advertisement" {% if request.endpoint == 'advertisement' %}class="active"{% endif %}>📢 Marketing Hub</a></li>
         <li><a href="/terms" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
         {% if session.get('admin') or session.get('user') or session.get('vendor') %}
           <li><a href="/logout" class="logout-btn">Logout</a></li>
@@ -1385,7 +1360,7 @@
 
     <div class="hero-content">
       <div class="welcome-pill">
-        ✨ {% if session.get('user_name') %}Welcome back, <strong>{{ session.get('user_name') }}</strong>!{% else %}India's Premier Event Booking & Vendor Marketplace{% endif %}
+        ✨ {% if session.get('user_name') %}Welcome back, <strong>{{ session.get('user_name') }}</strong>! • Powered by Apna Infotech{% else %}👑 Shubhlo • A Product of Apna Infotech Pvt. Ltd.{% endif %}
       </div>
 
       <h1>Plan Your <span class="highlight">Perfect Event</span> in Minutes</h1>
@@ -1905,15 +1880,15 @@
       <div class="step-card">
         <div class="step-number">3</div>
         <div class="step-icon">💰</div>
-        <h3>Lock Token & Get Offers</h3>
-        <p>Pay token deposit under 48-Hour hold guarantee and receive custom vendor counter-offers.</p>
+        <h3>Lock Token (₹5,118)</h3>
+        <p>Pay only nominal token money to lock your event date. ₹5,000 is 100% deducted from your final bill!</p>
       </div>
 
       <div class="step-card">
         <div class="step-number">4</div>
-        <div class="step-icon">📄</div>
-        <h3>Track & Get GST Bill</h3>
-        <p>Verify OTP upon service completion and download official GST tax invoices on your dashboard.</p>
+        <div class="step-icon">🤝</div>
+        <h3>Direct Deal With Vendor</h3>
+        <p>Packages, custom services, and remaining payments are decided directly between customer and vendor!</p>
       </div>
     </div>
   </section>
@@ -1935,9 +1910,9 @@
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon">💰</div>
-          <h3>Budget Match & Counter Offers</h3>
-          <p>Receive custom budget discount counter-offers directly from vendor partners.</p>
+          <div class="feature-icon">🤝</div>
+          <h3>100% Direct Deal Model</h3>
+          <p>Zero platform price interference. You and the vendor discuss and decide your event package and pricing directly.</p>
         </div>
 
         <div class="feature-card">
@@ -2013,10 +1988,6 @@
     </div>
   </div>
 
-  <!-- Floating WhatsApp & Phone Action Button -->
-  <a href="https://wa.me/917067883131?text=Hi%20Shubhlo%20Team!%20I%20want%20to%20inquire%20about%20event%20booking." target="_blank" class="floating-help-btn">
-    💬 Quick WhatsApp Help
-  </a>
 
   <!-- Footer -->
   <footer>
@@ -2038,7 +2009,7 @@
       </div>
       <div class="footer-col">
         <h4>Contact Us</h4>
-        <p>Email: info@shubhlo.com<br>Support: +91 7067883131<br>Office: Setu Infotech, Saket, MP</p>
+        <p>Email: info@shubhlo.com<br>Support: +91 7067883131<br>Corporate Office: Apna Infotech Pvt. Ltd., India</p>
       </div>
       <div class="footer-col">
         <h4>Follow & Connect</h4>
@@ -2047,7 +2018,7 @@
     </div>
     <div class="footer-bottom">
       <span>© 2026 Shubhlo (शुभलो). All Rights Reserved.</span>
-      <span>Powered by Setu Infotech Pvt Ltd</span>
+      <span style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">Operated & Managed by Apna Infotech Pvt. Ltd. <img src="{{ url_for('static', filename='image/apna_infotech_logo.png') }}" alt="Apna Infotech Pvt. Ltd." style="height: 30px; border-radius: 6px; background: white; padding: 2px 8px; vertical-align: middle;"></span>
     </div>
   </footer>
 
@@ -2189,5 +2160,6 @@
       }
     });
   </script>
+  {% include 'chatbot_include.html' %}
 </body>
 </html>

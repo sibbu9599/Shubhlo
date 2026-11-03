@@ -68,6 +68,13 @@ CREATE TABLE IF NOT EXISTS `booking` (
   `counter_offer_status` VARCHAR(20) DEFAULT NULL,
   `payment_status` VARCHAR(20) DEFAULT 'Pending',
   `payment_method` VARCHAR(50) DEFAULT 'Online UPI/Card',
+  `dispute_status` VARCHAR(50) DEFAULT NULL,
+  `dispute_reason` TEXT DEFAULT NULL,
+  `refund_amount` DECIMAL(10, 2) DEFAULT 0.00,
+  `refund_status` VARCHAR(50) DEFAULT NULL,
+  `refund_method` VARCHAR(50) DEFAULT 'Original Payment Method / UPI',
+  `refund_notes` TEXT DEFAULT NULL,
+  `refunded_at` TIMESTAMP NULL DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -101,23 +108,34 @@ CREATE TABLE IF NOT EXISTS `rating` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 7. Allowed Locations Table
+-- 7. Permitted Locations Table (Master Location Control)
+CREATE TABLE IF NOT EXISTS `permitted_locations` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `state` VARCHAR(100) NOT NULL,
+  `district` VARCHAR(100) NOT NULL,
+  `tehsil` VARCHAR(100) NOT NULL,
+  `is_active` TINYINT(1) DEFAULT 1,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `uq_loc` (`state`, `district`, `tehsil`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `allowed_locations` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `state` VARCHAR(100) NOT NULL,
   `district` VARCHAR(100) NOT NULL,
-  `tehsil` VARCHAR(100) NOT NULL
+  `tehsil` VARCHAR(100) NOT NULL,
+  `is_active` TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Insert Default Locations
-INSERT INTO `allowed_locations` (`state`, `district`, `tehsil`) VALUES
-('Madhya Pradesh', 'Hoshangabad', 'Itarsi'),
-('Madhya Pradesh', 'Hoshangabad', 'Sohagpur'),
-('Madhya Pradesh', 'Hoshangabad', 'Pipariya'),
-('Madhya Pradesh', 'Hoshangabad', 'Hoshangabad'),
-('Madhya Pradesh', 'Bhopal', 'Berasia'),
-('Madhya Pradesh', 'Bhopal', 'Kolar'),
-('Madhya Pradesh', 'Indore', 'Indore');
+-- Insert Default Permitted Locations
+INSERT IGNORE INTO `permitted_locations` (`state`, `district`, `tehsil`, `is_active`) VALUES
+('Madhya Pradesh', 'Hoshangabad', 'Itarsi', 1),
+('Madhya Pradesh', 'Hoshangabad', 'Sohagpur', 1),
+('Madhya Pradesh', 'Hoshangabad', 'Pipariya', 1),
+('Madhya Pradesh', 'Hoshangabad', 'Hoshangabad', 1),
+('Madhya Pradesh', 'Bhopal', 'Berasia', 1),
+('Madhya Pradesh', 'Bhopal', 'Kolar', 1),
+('Madhya Pradesh', 'Indore', 'Indore', 1);
 
 -- 8. System Settings Table (Master Controls)
 CREATE TABLE IF NOT EXISTS `system_settings` (

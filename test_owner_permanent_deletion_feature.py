@@ -8,11 +8,13 @@ class TestOwnerPermanentDeletionFeature(unittest.TestCase):
         self.app.testing = True
 
     def test_owner_permanent_deletion(self):
+        import time
+        ts = str(int(time.time()))
         # 1. Register a Customer & a Vendor
-        c_email = "delete_target_cust@shubhlo.com"
-        c_phone = "8877665544"
-        v_email = "delete_target_vend@shubhlo.com"
-        v_phone = "7766554433"
+        c_email = f"delete_cust_{ts}@shubhlo.com"
+        c_phone = f"8877{ts[-6:]}"
+        v_email = f"delete_vend_{ts}@shubhlo.com"
+        v_phone = f"7766{ts[-6:]}"
 
         self.app.post('/signup', data={'name': 'Delete Cust', 'email': c_email, 'phone': c_phone, 'password': 'p'}, follow_redirects=True)
         self.app.post('/vendor_register', data={'name': 'Delete Vend', 'email': v_email, 'phone': v_phone, 'service': ['venue'], 'description': 'd', 'govt_id_number': '123', 'password': 'p', 'price': '100', 'state': 'Madhya Pradesh', 'district': 'Hoshangabad', 'tehsil': 'Itarsi', 'accept_terms_vendor': 'on'}, follow_redirects=True)

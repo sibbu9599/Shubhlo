@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <button class="suggestion-chip" data-query="dj sound price">🎵 DJ & Sound</button>
         <button class="suggestion-chip" data-query="photography cost">📸 Photography</button>
         <button class="suggestion-chip" data-query="how to book">📝 How to Book</button>
+        <button class="suggestion-chip" data-query="chat on whatsapp with owner" style="background:#dcfce7;color:#15803d;border:1px solid #86efac;font-weight:bold;">💬 Chat on WhatsApp</button>
         <button class="suggestion-chip" data-query="contact support">📞 Contact Support</button>
       </div>
 
@@ -228,9 +229,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (q.includes("book") || q.includes("step") || q.includes("how")) {
-      return "📝 <strong>How to Book:</strong><br>1. Go to <a href='/booking1'>Book Now</a>.<br>2. Enter your event details & Tehsil location.<br>3. Select your preferred verified vendors.<br>4. Pay a token deposit of ₹5,100 to lock your booking!";
+      return "📝 <strong>How to Book:</strong><br>1. Go to <a href='/booking1'>Book Now</a>.<br>2. Enter your event details & Tehsil location.<br>3. Select your preferred verified vendors.<br>4. Pay nominal token money of ₹5,118 to lock your date! (Remaining deal & package is decided directly between you and the vendor, with ₹5,000 deducted from your final bill).";
     }
 
-    return "✨ <strong>Shubhlo AI Assistant:</strong><br>You asked about: '<em>" + query + "</em>'. Please feel free to call our 24/7 support helpline at <strong>+91 7067883131</strong> or start a <a href='/booking1'>Direct Booking</a>!";
+    if (q.includes("price") || q.includes("rate") || q.includes("cost") || q.includes("token")) {
+      return "💰 <strong>Direct Deal & Token Money Policy:</strong><br>Shubhlo par keval <strong>₹5,118 Token Money</strong> jama karke date lock karni hoti hai. Baki sabhi package rate, services aur bill customer aur vendor aapas mein decide karte hain. ₹5,000 aapke final bill se kam ho jayenge!";
+    }
+
+    if (q.includes("whatsapp") || q.includes("owner") || q.includes("chat") || q.includes("ऑनर") || q.includes("बात")) {
+      return "💬 <strong>Direct WhatsApp Chat with Owner:</strong><br>Click below to chat 1-on-1 on WhatsApp with Shubhlo Owner (+91 7067883131):<br><br><a href='https://wa.me/917067883131?text=Namaste%20Shubhlo%20Owner!%20I%20have%20an%20inquiry%20regarding%20event%20services.' target='_blank' style='background:linear-gradient(135deg, #25d366, #128c7e);color:white;padding:8px 16px;border-radius:20px;font-weight:bold;text-decoration:none;display:inline-block;'>💬 Open WhatsApp Chat ➔</a>";
+    }
+
+    return "✨ <strong>Shubhlo AI Assistant:</strong><br>You asked about: '<em>" + query + "</em>'. Please feel free to call or <a href='https://wa.me/917067883131' target='_blank'>WhatsApp our Owner at +91 7067883131</a> or start a <a href='/booking1'>Direct Booking</a>!";
   }
 });

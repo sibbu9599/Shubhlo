@@ -259,7 +259,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -331,6 +331,21 @@
       </div>
     </div>
 
+    
+    <!-- Parent Company Showcase Card -->
+    <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.95)); border: 2px solid rgba(245, 158, 11, 0.4); border-radius: 24px; padding: 36px 30px; text-align: center; color: white; margin: 40px 0; box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+      <div style="display: inline-block; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fef08a; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;">
+        🏢 Corporate Structure / मूल संस्था
+      </div>
+      <div style="margin-bottom: 16px;"><img src="{{ url_for('static', filename='image/apna_infotech_logo.png') }}" alt="Apna Infotech Pvt. Ltd. Logo" style="max-height: 64px; border-radius: 12px; background: #ffffff; padding: 6px 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.25);"></div>
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; margin: 0 0 12px; color: #ffffff;">
+        A Proud Venture of <span style="background: linear-gradient(135deg, #fbbf24 30%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Apna Infotech Pvt. Ltd.</span>
+      </h2>
+      <p style="max-width: 820px; margin: 0 auto; color: #cbd5e1; font-size: 15.5px; line-height: 1.7;">
+        <strong>Shubhlo (शुभलो)</strong> is an event management and vendor marketplace platform owned, managed, and operated by <strong>Apna Infotech Pvt. Ltd.</strong> Our commitment is to deliver 100% price transparency, zero brokerage, guaranteed vendor quality, and reliable event execution for every family celebration.
+      </p>
+    </div>
+
     <!-- Core Values Grid -->
     <h2 style="text-align: center; color: #0f172a; font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 900; margin-bottom: 30px;">
       Why Choose Shubhlo? / शुभलो ही क्यों चुनें? ✨
@@ -351,8 +366,8 @@
 
       <div class="value-card">
         <span class="value-icon">🔒</span>
-        <h3>₹5,100 Token Protection</h3>
-        <p>Lock your preferred event date with just a ₹5,100 initial token advance and complete balance upon verification.</p>
+        <h3>₹5,118 Token & Direct Deal</h3>
+        <p>Lock your event date with ₹5,118 Token Money. All packages and services are decided directly between customer and vendor, with ₹5,000 deducted from your final bill.</p>
       </div>
 
       <div class="value-card">
@@ -375,10 +390,9 @@
 
   <!-- Footer -->
   <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
-    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
-    <div style="text-align: center; margin-top: 15px;">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Shubhlo Brand Logo" style="max-height: 52px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
-    </div>
+    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo (शुभलो). All Rights Reserved. • A Product of Apna Infotech Pvt. Ltd.</p>
+    
   </footer>
+  {% include 'chatbot_include.html' %}
 </body>
 </html>

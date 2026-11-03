@@ -287,7 +287,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="/home" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="/home" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="/home" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -365,6 +365,17 @@
   </div>
 
   <main style="max-width: 1200px; margin: 0 auto 60px; padding: 0 20px;">
+    <!-- 100% Direct Customer & Vendor Deal Policy Banner -->
+    <div style="background: linear-gradient(135deg, #ecfdf5, #f0fdf4); border: 1.5px solid #a7f3d0; border-radius: 16px; padding: 18px 22px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.08); display: flex; align-items: center; gap: 16px;">
+      <span style="font-size: 32px;">💡</span>
+      <div style="font-size: 13.5px; color: #065f46; line-height: 1.6;">
+        <strong style="font-size: 15px; color: #047857; display: block; margin-bottom: 4px;">
+          ✨ 100% DIRECT CUSTOMER & VENDOR DEAL ECOSYSTEM / सीधा सौदा व टोकन बुकिंग
+        </strong>
+        शुभलो पर आप केवल <strong>₹5,118 टोकन मनी</strong> जमा करके अपनी तारीख और वेंडर बुक करते हैं। बाकी सभी चीजें (पैकेज रेट, मेन्यू, सुविधाएं और कुल बिल) <strong>कस्टमर और वेंडर सीधे आपस में तय करते हैं</strong>। वेंडर के फाइनल बिल में से <strong>₹5,000 सीधे कम (Deduct)</strong> हो जाएंगे!
+      </div>
+    </div>
+
     <!-- Vendor Counter Badge -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
       <div style="font-size: 15px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
@@ -403,17 +414,18 @@
               <div>
                 <h3 class="vendor-title">{{ v.name }}</h3>
                 <p class="vendor-desc">
-                  {{ v.description or 'Premium verified event service provider in MP. Contact for customized packages.' }}
+                  {{ v.description if (v.description and v.description != 'None' and v.description != 'null' and v.description|trim != '') else 'Premium verified event service provider in MP. Contact for customized packages.' }}
                 </p>
               </div>
 
               <div class="vendor-footer">
                 <div>
-                  <span class="price-label">Starting From</span>
-                  <span class="price-val">₹{{ "{:,.0f}".format(v.price) if v.price else '0' }}</span>
+                  <span class="price-label">Deal / सौदा</span>
+                  <span class="price-val" style="font-size: 16px; color: #7c3aed;">Direct Deal</span>
+                  <div style="font-size: 11px; color: #059669; font-weight: 800; margin-top: 2px;">🔒 Token: ₹5,118</div>
                 </div>
                 <a href="/booking1?select_service={{ v.service }}" class="btn-book-now">
-                  Select & Book ➔
+                  Book Token ➔
                 </a>
               </div>
             </div>
@@ -476,10 +488,9 @@
 
   <!-- Footer -->
   <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
-    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
-    <div style="text-align: center; margin-top: 15px;">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Shubhlo Brand Logo" style="max-height: 52px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
-    </div>
+    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo - A Venture of Apna Infotech Pvt. Ltd. All Rights Reserved.</p>
+    
   </footer>
+  {% include 'chatbot_include.html' %}
 </body>
 </html>

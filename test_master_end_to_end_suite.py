@@ -1,6 +1,6 @@
 import unittest, sys
 sys.stdout.reconfigure(encoding='utf-8')
-from app import app, GLOBAL_REGISTERED_USERS, GLOBAL_REGISTERED_VENDORS, is_email_or_phone_registered
+from app import app, GLOBAL_REGISTERED_USERS, GLOBAL_REGISTERED_VENDORS, is_email_or_phone_registered, get_db_connection
 
 class TestCelebratoMasterSuite(unittest.TestCase):
     def setUp(self):
@@ -170,11 +170,30 @@ class TestCelebratoMasterSuite(unittest.TestCase):
             sess['admin'] = 'owner@shubhlo.com'
             sess['is_owner'] = True
 
-        cust_entry = next((u for u in GLOBAL_REGISTERED_USERS if u.get('email') == c_email), None)
-        vend_entry = next((v for v in GLOBAL_REGISTERED_VENDORS if v.get('email') == v_email), None)
+        cust_id = None
+        vend_id = None
+        conn = get_db_connection()
+        if conn is not None:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT id FROM users WHERE email=%s", (c_email,))
+                    row = cur.fetchone()
+                    if row:
+                        cust_id = row['id']
+                    cur.execute("SELECT id FROM vendor WHERE email=%s", (v_email,))
+                    vrow = cur.fetchone()
+                    if vrow:
+                        vend_id = vrow['id']
+            finally:
+                conn.close()
 
-        cust_id = cust_entry.get('id', 1) if cust_entry else 1
-        vend_id = vend_entry.get('id', 1) if vend_entry else 1
+        if not cust_id:
+            cust_entry = next((u for u in GLOBAL_REGISTERED_USERS if u.get('email') == c_email), None)
+            cust_id = cust_entry.get('id', 1) if cust_entry else 1
+
+        if not vend_id:
+            vend_entry = next((v for v in GLOBAL_REGISTERED_VENDORS if v.get('email') == v_email), None)
+            vend_id = vend_entry.get('id', 1) if vend_entry else 1
 
         # Delete Customer & Vendor
         self.app.post(f'/owner/customer/delete/{cust_id}', follow_redirects=True)

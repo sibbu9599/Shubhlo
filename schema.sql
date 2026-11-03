@@ -90,7 +90,13 @@ CREATE TABLE IF NOT EXISTS booking (
     dhol_band VARCHAR(150),
     choreographer VARCHAR(150),
     anchor VARCHAR(150),
-    fireworks VARCHAR(150),
+    dispute_status VARCHAR(50) DEFAULT NULL,
+    dispute_reason TEXT DEFAULT NULL,
+    refund_amount DECIMAL(10, 2) DEFAULT 0.00,
+    refund_status VARCHAR(50) DEFAULT NULL,
+    refund_method VARCHAR(50) DEFAULT 'Original Payment Method / UPI',
+    refund_notes TEXT DEFAULT NULL,
+    refunded_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_booking_email (email),
     INDEX idx_booking_event_date (event_date)
@@ -104,6 +110,7 @@ CREATE TABLE IF NOT EXISTS permitted_locations (
     state VARCHAR(100) NOT NULL,
     district VARCHAR(100) NOT NULL,
     tehsil VARCHAR(100) NOT NULL,
+    is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -130,25 +137,64 @@ CREATE TABLE IF NOT EXISTS booking_verification (
     vendor_name VARCHAR(150) NOT NULL,
     service_type VARCHAR(50) NOT NULL,
     status VARCHAR(20) DEFAULT 'Pending',
+    verified_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (booking_id) REFERENCES booking(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
--- 7. VENDOR RATINGS TABLE (वेंडर रेटिंग तालिका)
+-- 6B. BLACKLIST TABLE (ब्लैकलिस्टेड नंबर व ईमेल्स)
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS vendor_ratings (
+CREATE TABLE IF NOT EXISTS blacklist (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    vendor_id INT NOT NULL,
-    customer_name VARCHAR(100) NOT NULL,
-    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
-    review TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (vendor_id) REFERENCES vendor(id) ON DELETE CASCADE
+    type VARCHAR(50) DEFAULT 'phone',
+    value VARCHAR(255) NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
--- 8. SYSTEM SETTINGS TABLE (सिस्टम कंट्रोल सेटिंग्स)
+-- 7. VENDOR RATINGS TABLE (वेंडर रेटिंग तालिका)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS rating (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    vendor_name VARCHAR(100) NOT NULL,
+    stars INT NOT NULL DEFAULT 5,
+    feedback TEXT,
+    review_text TEXT,
+    customer_name VARCHAR(100) DEFAULT 'Anonymous Host',
+    booking_id INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- 8. CONTACT MESSAGES TABLE (सम्पर्क संदेश तालिका)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    phone VARCHAR(50),
+    email VARCHAR(255),
+    message_type VARCHAR(100),
+    message TEXT,
+    status VARCHAR(50) DEFAULT 'New',
+    owner_reply TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- 9. SIMULATED SMS TABLE (एसएमएस सूचना तालिका)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS simulated_sms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recipient VARCHAR(100),
+    phone VARCHAR(50),
+    message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- 10. SYSTEM SETTINGS TABLE (सिस्टम कंट्रोल सेटिंग्स)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS system_settings (
     setting_key VARCHAR(50) PRIMARY KEY,

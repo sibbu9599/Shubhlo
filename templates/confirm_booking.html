@@ -272,7 +272,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -369,14 +369,19 @@
           <div class="vendor-items-list">
             {% for item in selected_vendors %}
               <div class="vendor-item-row">
-                <img src="{{ item.photo }}" alt="{{ item.name }}" class="vendor-item-img" onerror="this.src='/static/image/logo.png'">
+                <img src="{{ item.photo }}" alt="{{ item.name }}" class="vendor-item-img" onerror="this.src='/static/image/vanue.png'">
                 <div class="vendor-item-details">
                   <span class="vendor-cat-badge">{{ item.category }}</span>
                   <h4>{{ item.name }}</h4>
-                  <p>{{ item.description }}</p>
+                  <p>{{ item.description if (item.description and item.description != 'None' and item.description != 'null' and item.description|trim != '') else 'Verified partner offering authentic setups, transparent pricing, and punctual service.' }}</p>
+                  <div style="margin-top: 6px; font-size: 12px; color: #7c3aed; font-weight: 700;">
+                    🤝 Final Package & Deal: Direct with Vendor (कस्टमर व वेंडर आपस में तय करेंगे)
+                  </div>
                 </div>
-                <div class="vendor-item-price">
-                  ₹{{ "{:,.2f}".format(item.price) }}
+                <div class="vendor-item-price" style="text-align: right;">
+                  <span style="display: block; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">Token Payable</span>
+                  <span style="color: #10b981; font-weight: 900; font-size: 18px;">₹5,118.00</span>
+                  <span style="display: block; font-size: 10px; color: #059669; font-weight: 700;">(-₹5,000 Bill Deduction)</span>
                 </div>
               </div>
             {% endfor %}
@@ -419,23 +424,37 @@
 
         <div style="background: linear-gradient(135deg, #ecfdf5, #f0fdf4); border: 1.5px solid #6ee7b7; border-radius: 12px; padding: 14px; margin-bottom: 15px; color: #065f46; line-height: 1.55;">
           <h4 style="margin: 0 0 6px 0; color: #047857; font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
-            📢 CLEAR TOKEN MONEY INSTRUCTIONS / ग्राहक टोकन निर्देश
+            📢 100% DIRECT DEAL & TOKEN MODEL / ग्राहक टोकन निर्देश
           </h4>
-          <div style="font-size: 12px; color: #064e3b;">
-            • <strong>Online Token Paid Now:</strong> You pay <strong>₹5,118 Token Money</strong> per booked service.<br>
-            • <strong>₹5,000 Direct Bill Credit:</strong> Exactly <strong>₹5,000 will be DEDUCTED / KAM</strong> from your final invoice balance with the vendor on event day.<br>
-            • <strong>₹118 Platform Processing Fee:</strong> ₹100 platform fee + ₹18 GST is for Shubhlo processing.<br>
-            • <strong>Remaining Balance:</strong> Pay the remaining package balance directly to the vendor on event day.
+          <div style="font-size: 12px; color: #064e3b; line-height: 1.6;">
+            • <strong>Online Token Paid Now:</strong> आप केवल <strong>₹5,118 टोकन मनी</strong> प्रति सेवा जमा कर रहे हैं।<br>
+            • <strong>₹5,000 Direct Bill Credit:</strong> आपके अंतिम बिल में से <strong>₹5,000 सीधे कम (Deduct)</strong> कर दिए जाएंगे।<br>
+            • <strong>Direct Deal (सीधा सौदा):</strong> कुल पैकेज रेट, मेन्यू, सुविधाएं व बाकी भुगतान ग्राहक और वेंडर सीधे आपस में तय करेंगे।<br>
+            • <strong>₹118 Platform Processing Fee:</strong> ₹100 प्लेटफ़ॉर्म फीस + ₹18 GST शुभलो सुविधा शुल्क है।
           </div>
         </div>
 
+        <!-- 🛡️ 100% Safe Guarantee Banner -->
+        <div style="background: linear-gradient(135deg, #eff6ff, #f0fdf4); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 12px 14px; margin-bottom: 15px; color: #1e40af; font-size: 12.5px; line-height: 1.5;">
+          <strong style="color: #1d4ed8; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+            🛡️ Shubhlo 100% Safe Deal Guarantee (सुरक्षित सौदा गारंटी):
+          </strong>
+          अगर किसी भी वजह से वेंडर के साथ आपका सौदा तय नहीं होता है, तो आप <strong>फ्री में दूसरा वेंडर बदल सकते हैं</strong> या <strong>100% टोकन रिफंड</strong> प्राप्त कर सकते हैं। आपका टोकन पैसा 100% सुरक्षित है!
+        </div>
+
         <form action="{{ url_for('pay') }}" method="POST" id="confirmPayForm" style="margin-top: 10px;" onsubmit="return validateTermsCheckbox()">
-          <!-- Interactive English Declaration & Terms Checkbox Box -->
-          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; margin-bottom: 15px;">
-            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12.5px; color: #1e293b; font-weight: 600; line-height: 1.45;">
-              <input type="checkbox" name="accept_terms" id="acceptTermsCheckbox" value="on" required style="width: 18px; height: 18px; accent-color: #10b981; margin-top: 2px; cursor: pointer;">
+          <!-- Interactive English & Hindi Declaration & Zero Liability Checkbox Box -->
+          <div style="background: #fff5f5; border: 2px solid #fca5a5; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;">
+            <div style="font-size: 11.5px; font-weight: 800; color: #991b1b; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+              🛡️ ग्राहक वैधानिक घोषणा व कंपनी/मालिक दायित्व मुक्ती (Customer Legal Declaration)
+            </div>
+            <div style="font-size: 12px; color: #7f1d1d; line-height: 1.5; margin-bottom: 10px;">
+              मैं (ग्राहक) स्वीकार करता हूँ कि वेंडर के साथ सेवा गुणवत्ता, खाने की शुद्धता, कार्यक्रम में देरी, दुर्घटना या पैसों के लेन-देन के लिए केवल वेंडर व मैं स्वयं ज़िम्मेदार होंगे। <strong>वेबसाइट (Shubhlo), कंपनी (Apna Infotech Pvt. Ltd.) और कंपनी का मालिक किसी भी परिस्थिति में ज़िम्मेदार नहीं होंगे।</strong>
+            </div>
+            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12.5px; color: #1e293b; font-weight: 700; line-height: 1.45;">
+              <input type="checkbox" name="accept_terms" id="acceptTermsCheckbox" value="on" required style="width: 20px; height: 20px; accent-color: #dc2626; margin-top: 2px; cursor: pointer;">
               <span>
-                <strong>CUSTOMER OFFICIAL DECLARATION:</strong> I have read, understood, and hereby agree to the Shubhlo <a href="{{ url_for('terms') }}" target="_blank" style="color: #10b981; font-weight: 700; text-decoration: underline;">Terms & Conditions</a>, Token Deposit Policy, and Billing Rules. *
+                मैंने Shubhlo के सभी <a href="{{ url_for('terms') }}" target="_blank" style="color: #dc2626; font-weight: 800; text-decoration: underline;">Terms & Conditions (नियम व शर्तें)</a>, 100% Zero Liability Policy, और टोकन नियमों को ध्यानपूर्वक पढ़ लिया है और मैं इनसे पूर्णतः सहमत हूँ। *
               </span>
             </label>
           </div>
@@ -457,12 +476,16 @@
           }
         </script>
         <a href="{{ url_for('booking2') }}" class="btn-edit-selection">✏️ Modify Choices</a>
+        
+        <a href="https://wa.me/917067883131?text=Namaste%20Shubhlo%20Owner!%20I%20am%20confirming%20my%20event%20booking%20for%20{{ event_date|urlencode }}%20at%20{{ tehsil|urlencode }}.%20Please%20guide%20me%20further!" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; margin-top: 12px; font-size: 14px; font-weight: 800; border-radius: 10px; background: linear-gradient(135deg, #25d366, #128c7e); color: white; text-decoration: none; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); box-sizing: border-box;">
+          💬 Connect with Owner on WhatsApp (+91 7067883131)
+        </a>
       </div>
     </div>
   </div>
 
   <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
-    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo - A Venture of Apna Infotech Pvt. Ltd. All Rights Reserved.</p>
   </footer>
 </body>
 </html>

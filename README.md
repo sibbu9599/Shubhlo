@@ -1,6 +1,7 @@
 # 👑 Shubhlo (शुभलो) - Event Management & Vendor Booking Platform
+### 🏢 A Flagship Product of Apna Infotech Pvt. Ltd.
 
-**Shubhlo** is a comprehensive, full-stack event management and vendor booking platform built using **Python (Flask)**, **Jinja2**, **HTML5/CSS3**, and **MySQL**. It enables customers to discover verified vendors across **18 complete event service categories**, customize packages according to target budgets, manage event date availability, send custom counter-offers, rate completed bookings, and download GST tax invoices.
+**Shubhlo** is a comprehensive, full-stack event management and vendor booking platform owned, managed, and operated by **Apna Infotech Pvt. Ltd.** Built using **Python (Flask)**, **Jinja2**, **HTML5/CSS3**, and **MySQL**, it enables customers to discover verified vendors across **18 complete event service categories**, customize packages according to target budgets, manage event date availability, send custom counter-offers, rate completed bookings, and download official tax receipts.
 
 ---
 
@@ -116,7 +117,8 @@ celebrato project/
 
 ---
 
-## 🔒 Branding & License
+## 🔒 Corporate Branding & License
 
-- **Brand Name**: Shubhlo (शुभलो)
-- **Copyright**: © 2026 Shubhlo. All rights reserved.
+- **Parent Company**: Apna Infotech Pvt. Ltd. (Flagship Venture: Shubhlo)
+- **Brand Name**: Shubhlo (शुभलो) - Event Management & Vendor Booking Platform
+- **Copyright**: © 2026 Shubhlo - A Venture of Apna Infotech Pvt. Ltd. All rights reserved.

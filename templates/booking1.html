@@ -229,7 +229,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -360,6 +360,9 @@
                 <option value="Other Royal Event / अन्य कार्यक्रम">🎈 Other Grand Event / अन्य भव्य कार्यक्रम</option>
               </select>
             </div>
+            <small style="color: #64748b; font-size: 12px; margin-top: 5px; display: block;">
+              💡 <em>Note: Weddings are matched with grand Marriage Gardens & Banquet Halls. Birthday parties & small celebrations are matched with best-rated Restaurants & Party Lounges!</em>
+            </small>
           </div>
 
           <div class="form-group full-width">
@@ -377,8 +380,6 @@
                 <span class="input-icon">📍</span>
                 <select id="state" name="state" class="form-control" required>
                   <option value="">Select State / राज्य चुनें</option>
-                  <option value="Madhya Pradesh">Madhya Pradesh</option>
-                  <option value="Maharashtra">Maharashtra</option>
                 </select>
               </div>
             </div>
@@ -437,47 +438,91 @@
       const distSel = document.getElementById('district');
       const tehsilSel = document.getElementById('tehsil');
 
-      if (stateSel) {
+      const initialDistrict = "{{ session.get('booking_info', {}).get('district', '') or request.args.get('district', '') }}";
+      const initialTehsil = "{{ session.get('booking_info', {}).get('tehsil', '') or request.args.get('tehsil', '') }}";
+      const initialState = "{{ session.get('booking_info', {}).get('state', '') or request.args.get('state', '') }}";
+
+      if (stateSel && distSel && tehsilSel) {
         fetch('/api/allowed-locations')
           .then(res => res.json())
           .then(data => {
-            stateSel.addEventListener('change', function() {
-              const stateVal = this.value;
-              distSel.innerHTML = '<option value="">Select District / जिला चुनें</option>';
-              tehsilSel.innerHTML = '<option value="">Select Tehsil / तहसील चुनें</option>';
-              
-              if (data[stateVal]) {
-                Object.keys(data[stateVal]).forEach(dist => {
+            const states = Object.keys(data);
+            stateSel.innerHTML = '<option value="">-- Select State / राज्य चुनें --</option>';
+
+            states.forEach(st => {
+              const opt = document.createElement('option');
+              opt.value = st;
+              opt.textContent = st;
+              stateSel.appendChild(opt);
+            });
+
+            function populateDistricts(stVal, preselectDist, preselectTeh) {
+              distSel.innerHTML = '<option value="">-- Select District / ज़िला चुनें --</option>';
+              tehsilSel.innerHTML = '<option value="">-- Select Tehsil / तहसील चुनें --</option>';
+
+              if (stVal && data[stVal]) {
+                const districts = Object.keys(data[stVal]);
+                districts.forEach(dist => {
                   const opt = document.createElement('option');
                   opt.value = dist;
                   opt.textContent = dist;
+                  if (preselectDist && dist.toLowerCase() === preselectDist.toLowerCase()) {
+                    opt.selected = true;
+                  }
                   distSel.appendChild(opt);
                 });
+
+                if (distSel.value) {
+                  populateTehsils(stVal, distSel.value, preselectTeh);
+                }
               }
-            });
+            }
 
-            distSel.addEventListener('change', function() {
-              const stateVal = stateSel.value;
-              const distVal = this.value;
-              tehsilSel.innerHTML = '<option value="">Select Tehsil / तहसील चुनें</option>';
+            function populateTehsils(stVal, distVal, preselectTeh) {
+              tehsilSel.innerHTML = '<option value="">-- Select Tehsil / तहसील चुनें --</option>';
 
-              if (data[stateVal] && data[stateVal][distVal]) {
-                data[stateVal][distVal].forEach(t => {
+              if (stVal && distVal && data[stVal] && data[stVal][distVal]) {
+                data[stVal][distVal].forEach(t => {
                   const opt = document.createElement('option');
                   opt.value = t;
                   opt.textContent = t;
+                  if (preselectTeh && t.toLowerCase() === preselectTeh.toLowerCase()) {
+                    opt.selected = true;
+                  }
                   tehsilSel.appendChild(opt);
                 });
               }
+            }
+
+            stateSel.addEventListener('change', function() {
+              populateDistricts(this.value, null, null);
             });
+
+            distSel.addEventListener('change', function() {
+              populateTehsils(stateSel.value, this.value, null);
+            });
+
+            if (initialState && states.some(s => s.toLowerCase() === initialState.toLowerCase())) {
+              const matchState = states.find(s => s.toLowerCase() === initialState.toLowerCase());
+              stateSel.value = matchState;
+              populateDistricts(matchState, initialDistrict, initialTehsil);
+            } else if (states.length === 1) {
+              stateSel.value = states[0];
+              populateDistricts(states[0], initialDistrict, initialTehsil);
+            }
           })
-          .catch(err => console.log('Location API Error:', err));
+          .catch(err => console.error('Allowed Locations API Error:', err));
       }
     });
   </script>
 
   <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
-    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+      <img src="{{ url_for('static', filename='image/apna_infotech_logo.png') }}" alt="Apna Infotech Pvt. Ltd." style="height: 36px; border-radius: 6px; background: #ffffff; padding: 3px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+      <span style="font-weight: 700; font-size: 14px; color: #f8fafc;">Apna Infotech Pvt. Ltd.</span>
+    </div>
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo - A Venture of Apna Infotech Pvt. Ltd. All Rights Reserved.</p>
   </footer>
+  {% include 'chatbot_include.html' %}
 </body>
 </html>

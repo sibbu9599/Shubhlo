@@ -252,7 +252,6 @@
         <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
         <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
         <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
-        <li><a href="{{ url_for('advertisement') }}" {% if request.endpoint == 'advertisement' %}class="active"{% endif %}>📢 Marketing Hub</a></li>
         <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
         {% if session.get('admin') or session.get('user') or session.get('vendor') %}
           <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
@@ -270,6 +269,20 @@
       <div>
         <h2>👑 Master Owner Control Dashboard</h2>
         <p>Complete super admin controls: 48-Hour Owner Booking Approvals, Vendor Contact Unlocking, Revenue Analytics, and Location Control.</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
+          <a href="#vendor-management-section" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12.5px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+            🏢 Manage & Delete Vendors (वेंडर हटाएं) ➔
+          </a>
+          <a href="#location-control-section" style="background: rgba(212, 175, 55, 0.2); color: var(--owner-gold); border: 1px solid var(--owner-gold); padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12.5px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+            📍 State, District & Tehsil Control ➔
+          </a>
+          <a href="#fast2sms-section" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12.5px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+            📲 Fast2SMS Live SMS Gateway ➔
+          </a>
+          <a href="#owner-bookings-section" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12.5px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+            📅 Booking Approvals & OTPs ➔
+          </a>
+        </div>
       </div>
 
       <!-- Maintenance Mode Master Toggle -->
@@ -363,8 +376,173 @@
             </form>
           </div>
         </div>
+
+        <!-- Control 3: Fast2SMS Live Gateway ON/OFF -->
+        {% set sms_status = fast2sms_enabled if fast2sms_enabled else 'OFF' %}
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="margin: 0; color: white; font-size: 16px;">📲 Fast2SMS Live SMS Dispatch</h4>
+            <span class="badge-status {% if sms_status=='ON' %}badge-green{% else %}badge-red{% endif %}" style="font-size: 13px; padding: 6px 12px;">
+              {% if sms_status=='ON' %}🟢 ACTIVE (ON){% else %}⚪ SIMULATION (OFF){% endif %}
+            </span>
+          </div>
+          <p style="color: #94a3b8; font-size: 12.5px; margin-bottom: 18px; line-height: 1.5;">
+            Sends real SMS to customer & vendor mobile numbers via Fast2SMS gateway. When OFF, simulated SMS logs are used.
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <form action="{{ url_for('owner_update_fast2sms') }}" method="POST" style="margin:0; flex:1;">
+              <input type="hidden" name="fast2sms_enabled" value="ON">
+              <input type="hidden" name="fast2sms_api_key" value="{{ fast2sms_api_key or '' }}">
+              <button type="submit" class="btn-action-sm btn-approve" style="width: 100%; padding: 10px; text-align: center; font-size: 13px;">
+                🟢 Turn ON (चालू करें)
+              </button>
+            </form>
+            <form action="{{ url_for('owner_update_fast2sms') }}" method="POST" style="margin:0; flex:1;">
+              <input type="hidden" name="fast2sms_enabled" value="OFF">
+              <input type="hidden" name="fast2sms_api_key" value="{{ fast2sms_api_key or '' }}">
+              <button type="submit" class="btn-action-sm btn-reject" style="width: 100%; padding: 10px; text-align: center; font-size: 13px;">
+                🔴 Turn OFF (सिमुलेशन)
+              </button>
+            </form>
+          </div>
+        </div>
+
       </div>
     </div>
+
+    <!-- Fast2SMS Live SMS Gateway Integration & Test Portal Card -->
+    <div class="switchboard-card" id="fast2sms-section" style="margin-bottom: 30px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1.5px solid rgba(56, 189, 248, 0.4); border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
+        <div>
+          <h3 style="margin: 0; color: #38bdf8; font-size: 22px; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 10px;">
+            📲 Fast2SMS Live SMS Gateway Integration & Test Portal
+          </h3>
+          <p style="color: #cbd5e1; font-size: 13.5px; margin: 6px 0 0 0; line-height: 1.5;">
+            <strong>असली मोबाइल SMS सुविधा:</strong> Fast2SMS भारत का सबसे लोकप्रिय SMS गेटवे है। यहाँ अपनी Fast2SMS API Key जोड़ें और बुकिंग कन्फर्मेशन व OTP असली कस्टमर व वेंडर के मोबाइल नंबर पर <strong>सीधे SMS</strong> भेजें।
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <span class="badge-status {% if fast2sms_enabled=='ON' %}badge-green{% else %}badge-yellow{% endif %}" style="font-size: 13px; padding: 6px 14px;">
+            {% if fast2sms_enabled=='ON' %}🟢 Real SMS: ACTIVE{% else %}⚪ Real SMS: Simulation Mode{% endif %}
+          </span>
+          <a href="https://www.fast2sms.com/" target="_blank" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; text-decoration: none; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+            🌐 Fast2SMS Portal ↗
+          </a>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;">
+        <!-- Left: API Key Configuration -->
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 22px;">
+          <h4 style="margin: 0 0 14px 0; color: white; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            🔑 Fast2SMS API Key Configuration
+          </h4>
+          <form action="{{ url_for('owner_update_fast2sms') }}" method="POST">
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; color: #94a3b8; font-size: 12.5px; margin-bottom: 6px; font-weight: bold;">
+                Fast2SMS Authorization API Key:
+              </label>
+              <div style="position: relative;">
+                <input 
+                  type="password" 
+                  id="fast2smsApiKeyInput" 
+                  name="fast2sms_api_key" 
+                  value="{{ fast2sms_api_key or '' }}" 
+                  placeholder="Paste your Fast2SMS API Key here (e.g. o73N0t6mF2C4hK...)" 
+                  style="width: 100%; padding: 11px 40px 11px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; font-family: monospace; font-size: 13.5px; box-sizing: border-box;"
+                >
+                <button 
+                  type="button" 
+                  onclick="toggleFast2smsVisibility()" 
+                  style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 14px;"
+                  title="Show/Hide API Key"
+                >
+                  👁️
+                </button>
+              </div>
+              <span style="display: block; color: #64748b; font-size: 11.5px; margin-top: 5px;">
+                🔒 यह की आपके सर्वर पर सुरक्षित रखी जाती है।
+              </span>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+              <label style="display: block; color: #94a3b8; font-size: 12.5px; margin-bottom: 6px; font-weight: bold;">
+                Fast2SMS Delivery Mode:
+              </label>
+              <select name="fast2sms_enabled" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; font-size: 13.5px; box-sizing: border-box;">
+                <option value="ON" {% if fast2sms_enabled=='ON' %}selected{% endif %}>🟢 LIVE DISPATCH (असली मोबाइल पर SMS भेजें)</option>
+                <option value="OFF" {% if fast2sms_enabled!='ON' %}selected{% endif %}>⚪ SIMULATION (टेस्ट सिमुलेशन लॉग्स)</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn-action-sm btn-approve" style="width: 100%; padding: 12px; font-size: 13.5px; border-radius: 8px; font-weight: 800; cursor: pointer;">
+              💾 Save Fast2SMS Settings (सेव करें)
+            </button>
+          </form>
+
+          <!-- Step-by-step Guide -->
+          <div style="margin-top: 18px; padding: 12px 14px; background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8; border-radius: 6px;">
+            <div style="color: #38bdf8; font-weight: bold; font-size: 12px; margin-bottom: 4px;">💡 Fast2SMS API Key कैसे प्राप्त करें?</div>
+            <ol style="margin: 0; padding-left: 18px; color: #cbd5e1; font-size: 11.5px; line-height: 1.6;">
+              <li><a href="https://www.fast2sms.com/" target="_blank" style="color: #38bdf8;">fast2sms.com</a> पर फ्री अकाउंट बनाएं।</li>
+              <li>लॉगिन करके बायीं तरफ <strong>Dev API</strong> विकल्प पर क्लिक करें।</li>
+              <li>वहां दिखाई देने वाली <strong>Authorization Key</strong> कॉपी करें।</li>
+              <li>यहाँ पेस्ट करके <strong>Save Settings</strong> पर क्लिक करें।</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Right: 1-Click Live Test SMS Tool -->
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 22px;">
+          <h4 style="margin: 0 0 14px 0; color: white; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            🚀 1-Click Live Test SMS Tool (तुरंत टेस्ट करें)
+          </h4>
+          <p style="color: #94a3b8; font-size: 12.5px; margin-bottom: 15px; line-height: 1.5;">
+            अपनी Fast2SMS API Key और वॉलेट को लाइव चेक करने के लिए अपना 10 अंकों का मोबाइल नंबर डालें और तुरंत टेस्ट SMS भेजें।
+          </p>
+
+          <form action="{{ url_for('owner_send_test_fast2sms') }}" method="POST">
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; color: #94a3b8; font-size: 12.5px; margin-bottom: 6px; font-weight: bold;">
+                Recipient Mobile Number (मोबाइल नंबर):
+              </label>
+              <div style="display: flex; align-items: center;">
+                <span style="background: #334155; color: white; padding: 10px 12px; border-radius: 8px 0 0 8px; font-size: 13px; font-weight: bold; border: 1px solid #475569; border-right: none;">+91</span>
+                <input 
+                  type="tel" 
+                  name="test_phone" 
+                  pattern="[0-9]{10}" 
+                  maxlength="10" 
+                  required 
+                  placeholder="10-digit Mobile Number" 
+                  style="flex: 1; padding: 10px 14px; border-radius: 0 8px 8px 0; border: 1px solid #475569; background: #1e293b; color: white; font-size: 14px; font-weight: bold; box-sizing: border-box;"
+                >
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <label style="display: block; color: #94a3b8; font-size: 12.5px; margin-bottom: 6px; font-weight: bold;">
+                Test Message:
+              </label>
+              <textarea 
+                name="test_message" 
+                rows="3" 
+                style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; font-size: 13px; box-sizing: border-box; resize: vertical;"
+              >Shubhlo Event Platform: This is a live test SMS from your Shubhlo Control Panel via Fast2SMS gateway. Service is active!</textarea>
+            </div>
+
+            <button type="submit" class="btn-action-sm" style="width: 100%; padding: 12px; font-size: 14px; background: linear-gradient(135deg, #0284c7, #2563eb); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4); display: flex; align-items: center; justify-content: center; gap: 8px;">
+              🚀 Send Live Test SMS Now (असली टेस्ट SMS भेजें)
+            </button>
+          </form>
+
+          <div style="margin-top: 14px; color: #64748b; font-size: 11.5px; text-align: center;">
+            ℹ️ यह टेस्ट SMS आपके द्वारा दर्ज किए गए Fast2SMS API Key के माध्यम से तुरंत डिलीवर होगा।
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Stat Cards Grid -->
     <div class="stats-grid">
@@ -394,7 +572,7 @@
     </div>
 
     <!-- 48-Hour Owner Hold & Contact Unlocking Control Card -->
-    <div class="switchboard-card">
+    <div class="switchboard-card" id="owner-bookings-section">
       <h3>🛡️ 48-Hour Owner Booking Approvals & Contact Unlocking Desk</h3>
       <p style="color: #94a3b8; font-size: 13.5px; margin: -5px 0 15px 0;">
         Vendor cannot see customer phone/email until you speak with vendor and click <strong>"Approve & Unlock Contact to Vendor"</strong>.
@@ -422,6 +600,15 @@
                   <strong style="color: white;">{{ b.name or 'Rahul Sharma' }}</strong><br>
                   <span style="color: #38bdf8; font-weight: bold;">📞 {{ b.phone or '9876543210' }}</span><br>
                   <span style="color: #94a3b8; font-size: 12px;">{{ b.email or 'customer@example.com' }}</span>
+                  {% set b_clean_phone = (b.phone or '9876543210') | replace(' ', '') | replace('-', '') | replace('+', '') %}
+                  <div style="margin-top: 6px; display: flex; gap: 5px; flex-wrap: wrap;">
+                    <a href="https://wa.me/91{{ b_clean_phone }}?text=Hello%20{{ (b.name or 'Customer') | urlencode }}%2C%20this%20is%20Shubhlo%20Owner%20regarding%20booking%20%23{{ b.id }}" target="_blank" class="btn-whatsapp-owner" style="background: #25D366; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(37, 211, 102, 0.3);">
+                      💬 WhatsApp
+                    </a>
+                    <a href="sms:{{ b_clean_phone }}?body=Hello%20{{ (b.name or 'Customer') | urlencode }}%2C%20this%20is%20Shubhlo%20Owner%20regarding%20booking%20%23{{ b.id }}" class="btn-sms-owner" style="background: #0284c7; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);">
+                      ✉️ SMS
+                    </a>
+                  </div>
                 </td>
                 <td>
                   <span style="color: #fbbf24; font-weight: bold; font-size: 12px; display: block;">🎉 {{ b.event_name or 'Wedding / शादी' }}</span>
@@ -468,20 +655,113 @@
       </div>
     </div>
 
-    <!-- State / District / Tehsil Master Manager Card -->
-    <div class="switchboard-card">
-      <h3>📍 Master Location Control (State, District & Tehsil Manager)</h3>
-      <p style="color: #94a3b8; font-size: 13.5px; margin: -5px 0 15px 0;">
-        Full control over allowed service locations across Madhya Pradesh and all states.
-      </p>
+    <!-- 🛡️ 100% Safe Guarantee: Customer Dispute & Token Refund Desk -->
+    <div class="switchboard-card" style="border: 1.5px solid #f59e0b; background: linear-gradient(135deg, rgba(30,27,75,0.7), rgba(15,23,42,0.95));">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+        <div>
+          <h3 style="color: #fbbf24; margin: 0; display: flex; align-items: center; gap: 8px;">
+            🛡️ 100% Safe Deal Guarantee & Token Refund Desk (टोकन रिफंड व विवाद डेस्क)
+          </h3>
+          <p style="color: #cbd5e1; font-size: 13.5px; margin: 4px 0 0 0;">
+            Manage customer requests when a vendor deal cannot be finalized. Guarantee includes <strong>Free Alternate Vendor</strong> or <strong>100% Instant Token Refund</strong>.
+          </p>
+        </div>
+      </div>
 
-      <form action="{{ url_for('admin_add_allowed_location') }}" method="POST" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155;">
-        <input type="text" name="state" placeholder="State (e.g. Madhya Pradesh)" value="Madhya Pradesh" required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; flex: 1;">
-        <input type="text" name="district" placeholder="District (e.g. Hoshangabad)" required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; flex: 1;">
-        <input type="text" name="tehsil" placeholder="Tehsil (e.g. Itarsi)" required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; flex: 1;">
-        <button type="submit" class="btn-action-sm btn-approve" style="padding: 10px 20px; font-size: 14px;">➕ Add New Tehsil Location</button>
-      </form>
+      {% set dispute_bookings = [] %}
+      {% for b in bookings %}
+        {% if b.dispute_status or b.booking_status in ['Refund Requested', 'Refunded'] or b.refund_status %}
+          {% set _ = dispute_bookings.append(b) %}
+        {% endif %}
+      {% endfor %}
+
+      {% if dispute_bookings and dispute_bookings|length > 0 %}
+        <div style="overflow-x: auto;">
+          <table class="owner-table">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Customer Contact</th>
+                <th>Resolution Requested</th>
+                <th>Refund Token Amount</th>
+                <th>Stated Issue / Reason</th>
+                <th>Status</th>
+                <th>Owner Resolution Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in dispute_bookings %}
+                <tr>
+                  <td>
+                    <strong style="color: #fbbf24;">#{{ b.id }}</strong><br>
+                    <span style="font-size: 11.5px; color: #94a3b8;">📅 {{ b.event_date }}</span>
+                  </td>
+                  <td>
+                    <strong style="color: white;">{{ b.name or 'Customer' }}</strong><br>
+                    <span style="color: #38bdf8; font-weight: bold; font-size: 12.5px;">📞 {{ b.phone or '9876543210' }}</span><br>
+                    {% set b_clean_phone = (b.phone or '9876543210') | replace(' ', '') | replace('-', '') | replace('+', '') %}
+                    <div style="margin-top: 5px; display: flex; gap: 5px;">
+                      <a href="https://wa.me/91{{ b_clean_phone }}?text=Hello%20{{ (b.name or 'Customer') | urlencode }}%2C%20this%20is%20Shubhlo%20Platform%20Owner%20regarding%20your%20Safe%20Guarantee%20request%20on%20Booking%20%23{{ b.id }}" target="_blank" style="background: #25D366; color: white; padding: 3px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                        💬 WhatsApp
+                      </a>
+                    </div>
+                  </td>
+                  <td>
+                    {% if b.dispute_status == 'Alternate Vendor Assigned' %}
+                      <span style="background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 12px; display: inline-block;">
+                        🔄 Free Alternate Vendor
+                      </span>
+                    {% elif b.dispute_status in ['Refund Requested', 'Refund Completed'] or b.booking_status in ['Refund Requested', 'Refunded'] %}
+                      <span style="background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid #ef4444; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 12px; display: inline-block;">
+                        💸 100% Token Refund
+                      </span>
+                    {% else %}
+                      <span style="background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid #f59e0b; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 12px; display: inline-block;">
+                        🛡️ Assistance Needed
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td style="color: #34d399; font-weight: 800; font-size: 14px;">
+                    ₹{{ "%.2f"|format(b.refund_amount if b.refund_amount else (b.advance_paid or b.token_deposit or 5118.00)) }}
+                  </td>
+                  <td style="max-width: 250px;">
+                    <div style="font-size: 12px; color: #e2e8f0; line-height: 1.4;">
+                      {{ b.dispute_reason or 'Deal could not be finalized with vendor' }}
+                    </div>
+                  </td>
+                  <td>
+                    {% if b.refund_status == 'Refund Completed' or b.dispute_status == 'Refund Completed' or b.booking_status == 'Refunded' %}
+                      <span class="badge-status badge-green" style="font-size: 11px;">✔ Refund Completed</span>
+                    {% elif b.dispute_status == 'Alternate Vendor Assigned' %}
+                      <span class="badge-status badge-green" style="font-size: 11px;">✔ Alternate Assigned</span>
+                    {% else %}
+                      <span class="badge-status badge-yellow" style="font-size: 11px;">⏳ Pending Approval</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if b.refund_status != 'Refund Completed' and b.booking_status != 'Refunded' and b.dispute_status != 'Refund Completed' %}
+                      <form action="/owner/process_refund/{{ b.id }}" method="POST" style="margin: 0;" onsubmit="return confirm('क्या आप वाकई ₹{{ b.refund_amount or b.advance_paid or 5118 }} का 100% रिफंड पास करना चाहते हैं? Are you sure you want to approve this 100% refund?');">
+                        <button type="submit" class="btn-action-sm btn-approve" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 7px 14px; font-size: 12px; font-weight: 800; border-radius: 8px;">
+                          ✔ Approve 100% Refund
+                        </button>
+                      </form>
+                    {% else %}
+                      <span style="color: #4ade80; font-size: 12px; font-weight: 800;">✔ Refund Settled</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="text-align: center; padding: 22px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15); color: #94a3b8; font-size: 13.5px;">
+          🛡️ <strong>Zero Pending Disputes:</strong> All customer bookings are progressing smoothly with verified vendors under the 100% Safe Guarantee policy.
+        </div>
+      {% endif %}
     </div>
+
+
 
     <!-- Platform Financial & Commission Control Card -->
     <div class="switchboard-card">
@@ -535,16 +815,38 @@
                 <td>
                   ✉️ <span style="color: #38bdf8;">{{ c.email }}</span><br>
                   📞 <span style="color: var(--owner-gold);">{{ c.phone or 'N/A' }}</span>
+                  {% if c.phone %}
+                    {% set c_clean_phone = c.phone | replace(' ', '') | replace('-', '') | replace('+', '') %}
+                    <div style="margin-top: 6px; display: flex; gap: 5px; flex-wrap: wrap;">
+                      <a href="https://wa.me/91{{ c_clean_phone }}?text=Hello%20{{ c.name | urlencode }}%2C%20this%20is%20Shubhlo%20Owner." target="_blank" class="btn-whatsapp-owner-cust" style="background: #25D366; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(37, 211, 102, 0.3);">
+                        💬 WhatsApp
+                      </a>
+                      <a href="sms:{{ c_clean_phone }}?body=Hello%20{{ c.name | urlencode }}%2C%20this%20is%20Shubhlo%20Owner." class="btn-sms-owner-cust" style="background: #0284c7; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);">
+                        ✉️ SMS
+                      </a>
+                    </div>
+                  {% endif %}
                 </td>
                 <td>
                   <span class="badge-status badge-green">Active Customer</span>
                 </td>
                 <td>
-                  <form action="/owner/customer/delete/{{ c.id }}" method="POST" style="margin: 0;" onsubmit="return confirm('क्या आप निश्चित रूप से ग्राहक {{ c.name }} ({{ c.email }}) के खाते को पूरी तरह से डिलीट करना चाहते हैं? / Are you sure you want to PERMANENTLY DELETE customer {{ c.name }}?');">
-                    <button type="submit" class="btn-action-sm" style="background: #ef4444; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                      🗑️ Delete Customer (स्थायी रूप से हटाएं)
-                    </button>
-                  </form>
+                  <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    {% if c.phone %}
+                      {% set c_clean_phone = c.phone | replace(' ', '') | replace('-', '') | replace('+', '') %}
+                      <a href="https://wa.me/91{{ c_clean_phone }}?text=Hello%20{{ c.name | urlencode }}%2C%20this%20is%20Shubhlo%20Owner." target="_blank" style="background: #25D366; color: white; border: none; padding: 7px 12px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(37, 211, 102, 0.3);">
+                        💬 WhatsApp
+                      </a>
+                      <a href="sms:{{ c_clean_phone }}?body=Hello%20{{ c.name | urlencode }}%2C%20this%20is%20Shubhlo%20Owner." style="background: #0284c7; color: white; border: none; padding: 7px 12px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(2, 132, 199, 0.3);">
+                        ✉️ SMS
+                      </a>
+                    {% endif %}
+                    <form action="/owner/customer/delete/{{ c.id }}" method="POST" style="margin: 0;" onsubmit="return confirm('क्या आप निश्चित रूप से ग्राहक {{ c.name }} ({{ c.email }}) के खाते को पूरी तरह से डिलीट करना चाहते हैं? / Are you sure you want to PERMANENTLY DELETE customer {{ c.name }}?');">
+                      <button type="submit" class="btn-action-sm" style="background: #ef4444; color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                        🗑️ Delete Customer (स्थायी रूप से हटाएं)
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             {% else %}
@@ -559,76 +861,144 @@
       </div>
     </div>
 
-    <!-- Vendor Anti-Fake Verification & Audit Table -->
-    <div class="switchboard-card">
-      <h3>🏢 Vendor Verification Engine & Anti-Fake Audit</h3>
-      <div style="overflow-x: auto;">
-        <table class="owner-table">
+    <!-- Vendor Master Management & Instant Removal Desk -->
+    <div class="switchboard-card" id="vendor-management-section" style="margin-bottom: 30px; border: 1.5px solid rgba(239, 68, 68, 0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.35);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; margin-bottom: 18px;">
+        <div>
+          <h3 style="margin: 0; color: #f87171; font-size: 22px; display: flex; align-items: center; gap: 10px;">
+            🏢 Vendor Master Management & Instant Removal Desk
+          </h3>
+          <p style="color: #cbd5e1; font-size: 13.5px; margin: 6px 0 0 0; line-height: 1.5;">
+            <strong>सुपर-कंट्रोल (वेंडर हटाने की सुविधा):</strong> आप जिस भी वेंडर को चाहें, उसे यहाँ से <strong>1-क्लिक में हमेशा के लिए हटा (Permanently Delete)</strong> कर सकते हैं। वेंडर की लिस्ट, प्रोफाइल, सेवाएं और कॉन्टैक्ट वेबसाइट से तुरंत साफ़ हो जाएंगे।
+          </p>
+        </div>
+        
+        <!-- Live Quick Stats Badges -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <div style="background: #1e293b; border: 1px solid #475569; padding: 6px 14px; border-radius: 20px; font-size: 12.5px; color: #f8fafc;">
+            📊 कुल वेंडर्स: <strong style="color: var(--owner-gold);" id="ownerVendorTotalCount">{{ vendors | length }}</strong>
+          </div>
+          <div style="background: rgba(22, 101, 52, 0.5); border: 1px solid #16a34a; padding: 6px 14px; border-radius: 20px; font-size: 12.5px; color: #bbf7d0;">
+            ✔ एक्टिव (Approved): <strong>{{ vendors | selectattr('approval_status', 'equalto', 'Approved') | list | length if vendors else 0 }}</strong>
+          </div>
+          <div style="background: rgba(153, 27, 27, 0.4); border: 1px solid #ef4444; padding: 6px 14px; border-radius: 20px; font-size: 12.5px; color: #fca5a5;">
+            🗑️ 1-क्लिक रिमूवल: <strong>सक्रिय</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Filter & Search Bar -->
+      <div style="display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; background: #0f172a; padding: 12px 16px; border-radius: 12px; border: 1px solid #334155;">
+        <div style="flex: 1; min-width: 260px; position: relative;">
+          <input 
+            type="text" 
+            id="ownerVendorSearchInput" 
+            onkeyup="filterOwnerVendorTable()" 
+            placeholder="🔍 वेंडर खोजें (नाम, सर्विस, फोन, ईमेल, तहसील या डिस्ट्रिक्ट टाइप करें)..." 
+            style="width: 100%; padding: 10px 14px 10px 38px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; font-size: 13.5px; box-sizing: border-box;"
+          >
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #94a3b8; pointer-events: none;">🔍</span>
+        </div>
+        <button type="button" onclick="document.getElementById('ownerVendorSearchInput').value=''; filterOwnerVendorTable();" class="btn-action-sm" style="background: #334155; color: #cbd5e1; padding: 10px 14px; font-size: 12px; cursor: pointer;">
+          ✕ Clear Search
+        </button>
+      </div>
+
+      <!-- Table of Vendors -->
+      <div style="overflow-x: auto; border-radius: 10px; border: 1px solid #334155;">
+        <table class="owner-table" id="ownerVendorTable" style="margin-bottom: 0;">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Vendor Name & Service</th>
-              <th>Uploaded Documents & Photo ID</th>
-              <th>Contact Info</th>
-              <th>Location</th>
-              <th>Anti-Fake Audit Details</th>
-              <th>Approval Status</th>
-              <th>Owner Actions</th>
+              <th>Vendor & Business Name</th>
+              <th>Service Category</th>
+              <th>Contact Details (Phone / Email)</th>
+              <th>Service Tehsil / District</th>
+              <th>Status</th>
+              <th style="min-width: 230px; text-align: center;">Owner Action & Delete (हटाएं)</th>
             </tr>
           </thead>
           <tbody>
-            {% for v in vendors %}
-              <tr>
-                <td>#{{ v.id }}</td>
-                <td>
-                  <strong style="color: white;">{{ v.name }}</strong>
-                  <p style="margin: 2px 0 0 0; color: var(--owner-gold); font-size: 12px;">{{ v.service | title }}</p>
-                </td>
-                <td>
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="{{ v.photo or '/static/image/logo.png' }}" alt="Vendor Banner" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1.5px solid #38bdf8;" onerror="this.src='/static/image/logo.png'">
-                    <div>
-                      <span style="color: #4ade80; font-size: 11.5px; font-weight: bold; display: block;">
-                        💳 ID: {{ v.govt_id_number or '998877665544' }}
-                      </span>
-                      <a href="{{ v.id_proof or v.photo or '/static/image/logo.png' }}" target="_blank" style="background: #0284c7; color: white; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
-                        📄 View Document Proof
+            {% if vendors and vendors|length > 0 %}
+              {% for v in vendors %}
+                <tr class="owner-vendor-row" data-search="{{ (v.name or '') ~ ' ' ~ (v.service or '') ~ ' ' ~ (v.phone or '') ~ ' ' ~ (v.email or '') ~ ' ' ~ (v.tehsil or '') ~ ' ' ~ (v.district or '') ~ ' ' ~ (v.state or '') }}">
+                  <td>
+                    <span style="font-family: monospace; font-size: 12px; color: #94a3b8; font-weight: bold;">#{{ v.id }}</span>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <img src="{{ v.photo or '/static/image/vanue.png' }}" alt="{{ v.name }}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1.5px solid #d4af37;" onerror="this.src='/static/image/vanue.png'">
+                      <div>
+                        <strong style="color: #ffffff; font-size: 14px; display: block;">{{ v.name }}</strong>
+                        {% if v.govt_id_number %}
+                          <span style="color: #64748b; font-size: 11px;">💳 ID: {{ v.govt_id_number }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span style="background: rgba(212, 175, 55, 0.15); color: var(--owner-gold); border: 1px solid rgba(212, 175, 55, 0.35); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; display: inline-block;">
+                      🏷️ {{ v.service | title }}
+                    </span>
+                  </td>
+                  <td>
+                    <div style="font-size: 12.5px; line-height: 1.5;">
+                      <a href="tel:{{ v.phone }}" style="color: #38bdf8; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">
+                        📞 {{ v.phone or 'N/A' }}
+                      </a>
+                      <br>
+                      <a href="mailto:{{ v.email }}" style="color: #94a3b8; text-decoration: none; font-size: 11.5px;">
+                        ✉️ {{ v.email or 'N/A' }}
                       </a>
                     </div>
-                  </div>
-                </td>
-                <td>
-                  {{ v.email }}<br>
-                  <span style="color: #94a3b8;">📞 {{ v.phone }}</span>
-                </td>
-                <td>{{ v.tehsil or 'Itarsi' }}, {{ v.district or 'Hoshangabad' }}</td>
-                <td>
-                  <span style="color: #4ade80; font-size: 12px;">✔ Document Verified</span><br>
-                  <span style="color: #94a3b8; font-size: 11.5px;">Aadhaar/GST: Verified</span>
-                </td>
-                <td>
-                  <span class="badge-status {% if v.approval_status=='Approved' %}badge-green{% elif v.approval_status=='Rejected' %}badge-red{% else %}badge-yellow{% endif %}">
-                    {{ v.approval_status or 'Approved' }}
-                  </span>
-                </td>
-                <td>
-                  <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <form action="/admin/vendor/approve/{{ v.id }}" method="POST" style="margin:0;">
-                      <button type="submit" class="btn-action-sm btn-approve">✔ Approve</button>
-                    </form>
-                    <form action="/admin/vendor/reject/{{ v.id }}" method="POST" style="margin:0;">
-                      <button type="submit" class="btn-action-sm btn-reject">✖ Reject</button>
-                    </form>
-                    <form action="/admin/vendor/blacklist/{{ v.id }}" method="POST" style="margin:0;" onsubmit="return confirm('Blacklist vendor {{ v.name }}? They will be permanently blocked from logging in!');">
-                      <button type="submit" class="btn-action-sm" style="background: #991b1b; color: white;">🚫 Blacklist</button>
-                    </form>
-                    <form action="/admin/vendor/delete/{{ v.id }}" method="POST" style="margin:0;" onsubmit="return confirm('Permanently delete vendor {{ v.name }}?');">
-                      <button type="submit" class="btn-action-sm" style="background: #475569; color: white;">🗑️ Delete</button>
-                    </form>
-                  </div>
+                  </td>
+                  <td>
+                    <div style="font-size: 12.5px;">
+                      <strong style="color: #f1f5f9;">📍 {{ v.tehsil or 'Itarsi' }}</strong>
+                      <div style="color: #94a3b8; font-size: 11.5px;">{{ v.district or 'Hoshangabad' }}, {{ v.state or 'Madhya Pradesh' }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge-status {% if v.approval_status=='Approved' %}badge-green{% elif v.approval_status=='Rejected' %}badge-red{% else %}badge-yellow{% endif %}">
+                      {{ v.approval_status or 'Approved' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                      {% if v.approval_status != 'Approved' %}
+                        <form action="/admin/vendor/approve/{{ v.id }}" method="POST" style="margin:0;">
+                          <button type="submit" class="btn-action-sm btn-approve" title="Approve Vendor">✔ Approve</button>
+                        </form>
+                      {% endif %}
+                      
+                      <!-- Prominent High-Visibility Instant Delete Button -->
+                      <form action="/owner/vendor/delete/{{ v.id }}" method="POST" style="margin:0;" onsubmit="return confirm('⚠️ क्या आप वेंडर '{{ v.name }}' (ID: #{{ v.id }}) को सचमुच Shubhlo से हमेशा के लिए हटाना चाहते हैं?\n\n- यह वेंडर वेबसाइट और डेटाबेस से पूरी तरह डिलीट हो जाएगा।\n- इसकी सभी सेवाएं व लिस्टिंग तुरंत हट जाएंगी।\n- क्या आप आगे बढ़ना चाहते हैं?');">
+                        <button type="submit" class="btn-action-sm" style="background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: none; padding: 7px 14px; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); display: inline-flex; align-items: center; gap: 5px;">
+                          🗑️ Delete Vendor (हटाएं)
+                        </button>
+                      </form>
+
+                      {% if v.approval_status != 'Blacklisted' %}
+                        <form action="/admin/vendor/blacklist/{{ v.id }}" method="POST" style="margin:0;" onsubmit="return confirm('Blacklist vendor {{ v.name }}? They will not be able to login.');">
+                          <button type="submit" class="btn-action-sm" style="background: #475569; color: #cbd5e1; padding: 6px 10px; font-size: 11px;">🚫 Blacklist</button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr id="ownerNoVendorsRow">
+                <td colspan="7" style="text-align: center; padding: 35px 20px; color: #94a3b8; font-size: 14px;">
+                  ℹ️ कोई वेंडर पंजीकृत नहीं है / No vendors registered yet.
                 </td>
               </tr>
-            {% endfor %}
+            {% endif %}
+            <tr id="ownerVendorSearchEmptyRow" style="display: none;">
+              <td colspan="7" style="text-align: center; padding: 35px 20px; color: #f87171; font-size: 14px; font-weight: bold;">
+                🔍 आपकी सर्च के अनुसार कोई वेंडर नहीं मिला / No vendors found matching search.
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -749,72 +1119,199 @@
     </div>
 
     <!-- State, District & Tehsil Location Permission Manager Card -->
-    <div class="switchboard-card" style="margin-top: 30px;">
-      <h3 style="color: var(--owner-gold); font-size: 20px; font-family: 'Outfit', sans-serif;">
-        📍 Permitted Locations Control (राज्य, ज़िला व तहसील अनुमति नियंत्रण)
-      </h3>
-      <p style="color: #94a3b8; font-size: 13.5px; margin-bottom: 20px;">
-        <strong>Owner Authority:</strong> Aap jin State, District aur Tehsil ki permission denge, keval wahi ke customers aur vendors Shubhlo par register aur booking kar payenge.
-      </p>
+    <div class="switchboard-card" id="location-control-section" style="margin-top: 30px; border: 1.5px solid rgba(212, 175, 55, 0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+        <div>
+          <h3 style="color: var(--owner-gold); font-size: 22px; font-family: 'Outfit', sans-serif; margin: 0 0 8px 0; display: flex; align-items: center; gap: 10px;">
+            📍 State, District & Tehsil Master Command Center <br>
+            <span style="font-size: 16px; color: #cbd5e1; font-weight: normal;">(सम्पूर्ण राज्य, ज़िला व तहसील नियंत्रण केंद्र)</span>
+          </h3>
+          <p style="color: #94a3b8; font-size: 13.5px; margin: 0; line-height: 1.5; max-width: 800px;">
+            <strong>👑 Owner Master Authority:</strong> सम्पूर्ण भारत में से आप जिन <strong>State, District व Tehsil</strong> को यहाँ ऑन (Active) रखेंगे, केवल वही Shubhlo वेबसाइट पर कस्टमर्स व वेंडर्स को दिखेंगी। किसी भी तहसील को कभी भी <strong>Pause (अस्थायी बंद)</strong> या <strong>Delete</strong> कर सकते हैं।
+          </p>
+        </div>
+        <form action="/owner/prefill_locations" method="POST" onsubmit="return confirm('क्या आप डिफ़ॉल्ट MP और महाराष्ट्र के सभी प्रमुख शहरों को 1-क्लिक में जोड़ना चाहते हैं?');" style="margin: 0;">
+          <button type="submit" style="background: rgba(212, 175, 55, 0.15); color: var(--owner-gold); border: 1.5px solid var(--owner-gold); padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;">
+            ⚡ 1-Click Pre-fill Standard Locations (डिफ़ॉल्ट शहर जोड़ें)
+          </button>
+        </form>
+      </div>
 
-      <form action="{{ url_for('owner_add_location') }}" method="POST" style="background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.2); margin-bottom: 25px;">
-        <h4 style="margin-top: 0; color: white;">➕ Add New Permitted Location (नई स्थान अनुमति जोड़ें):</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+      <!-- Real-Time Metrics Summary Bar -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 25px;">
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 14px 16px; text-align: center;">
+          <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 4px;">Active States</span>
+          <strong style="font-size: 24px; color: #ffffff; font-family: 'Outfit', sans-serif;">{{ total_states or 0 }}</strong>
+        </div>
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 14px 16px; text-align: center;">
+          <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 4px;">Districts</span>
+          <strong style="font-size: 24px; color: var(--owner-gold); font-family: 'Outfit', sans-serif;">{{ total_districts or 0 }}</strong>
+        </div>
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 14px 16px; text-align: center;">
+          <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 4px;">Total Tehsils</span>
+          <strong style="font-size: 24px; color: #60a5fa; font-family: 'Outfit', sans-serif;">{{ total_tehsils or 0 }}</strong>
+        </div>
+        <div style="background: #0f172a; border: 1.5px solid rgba(74, 222, 128, 0.4); border-radius: 10px; padding: 14px 16px; text-align: center;">
+          <span style="font-size: 11px; text-transform: uppercase; color: #4ade80; font-weight: 800; display: block; margin-bottom: 4px;">🟢 Live / Active</span>
+          <strong style="font-size: 24px; color: #4ade80; font-family: 'Outfit', sans-serif;">{{ active_tehsils or 0 }}</strong>
+        </div>
+        <div style="background: #0f172a; border: 1.5px solid rgba(251, 191, 36, 0.4); border-radius: 10px; padding: 14px 16px; text-align: center;">
+          <span style="font-size: 11px; text-transform: uppercase; color: #fbbf24; font-weight: 800; display: block; margin-bottom: 4px;">⏸️ Paused (Hidden)</span>
+          <strong style="font-size: 24px; color: #fbbf24; font-family: 'Outfit', sans-serif;">{{ paused_tehsils or 0 }}</strong>
+        </div>
+      </div>
+
+      <!-- Add New Location Form (Supports Single or Comma-Separated Multiple Tehsils) -->
+      <form action="/owner/add_location" method="POST" style="background: #0f172a; padding: 22px; border-radius: 12px; border: 1.5px solid rgba(212, 175, 55, 0.3); margin-bottom: 25px;">
+        <h4 style="margin: 0 0 14px 0; color: white; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+          ➕ Add Permitted Locations (नई लोकेशन जोड़ें व तुरंत लाइव करें):
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 15px; margin-bottom: 15px;">
           <div>
-            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">STATE / राज्य</label>
-            <input type="text" name="state" placeholder="e.g. Madhya Pradesh" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+            <label style="display: block; font-size: 12px; color: #94a3b8; font-weight: 800; margin-bottom: 6px; text-transform: uppercase;">
+              1. STATE / राज्य *
+            </label>
+            <input type="text" name="state" list="state_suggestions" placeholder="उदा. Madhya Pradesh" required style="width: 100%; padding: 11px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box; font-size: 14px;">
+            <datalist id="state_suggestions">
+              <option value="Madhya Pradesh">
+              <option value="Maharashtra">
+              <option value="Rajasthan">
+              <option value="Uttar Pradesh">
+              <option value="Gujarat">
+              <option value="Chhattisgarh">
+              <option value="Delhi NCR">
+            </datalist>
           </div>
           <div>
-            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">DISTRICT / ज़िला</label>
-            <input type="text" name="district" placeholder="e.g. Hoshangabad / Indore" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+            <label style="display: block; font-size: 12px; color: #94a3b8; font-weight: 800; margin-bottom: 6px; text-transform: uppercase;">
+              2. DISTRICT / ज़िला *
+            </label>
+            <input type="text" name="district" placeholder="उदा. Hoshangabad / Bhopal / Indore" required style="width: 100%; padding: 11px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box; font-size: 14px;">
           </div>
           <div>
-            <label style="display: block; font-size: 12.5px; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">TEHSIL / तहसील</label>
-            <input type="text" name="tehsil" placeholder="e.g. Itarsi / Sohagpur" required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+            <label style="display: block; font-size: 12px; color: #94a3b8; font-weight: 800; margin-bottom: 6px; text-transform: uppercase;">
+              3. TEHSIL(S) / तहसील (कॉमा लगाकर कई नाम लिखें) *
+            </label>
+            <input type="text" name="tehsil" placeholder="उदा. Itarsi, Pipariya, Sohagpur, Babai" required style="width: 100%; padding: 11px 14px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box; font-size: 14px;">
+            <small style="color: #64748b; font-size: 11.5px; margin-top: 4px; display: block;">
+              💡 <em>टिप: एक साथ कई तहसील जोड़ने के लिए कॉमा (,) का प्रयोग करें।</em>
+            </small>
           </div>
         </div>
-        <button type="submit" style="background: linear-gradient(135deg, var(--owner-gold), #b8860b); color: #000; font-weight: 900; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">
-          ✔ Grant Permission (स्थान स्वीकृत करें)
+        <button type="submit" style="background: linear-gradient(135deg, var(--owner-gold), #b8860b); color: #000; font-weight: 900; border: none; padding: 12px 26px; border-radius: 8px; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
+          ✔ Grant Permission & Go Live (अनुमति दें व लाइव करें)
         </button>
       </form>
 
-      <h4 style="color: white; margin-bottom: 12px;">Active Permitted Locations (अनुमति प्राप्त स्थान - {{ permitted_locations | length if permitted_locations else 0 }}):</h4>
-      <div style="overflow-x: auto;">
-        <table class="owner-table">
+      <!-- Live Search & Filtering Controls -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+        <h4 style="color: white; margin: 0; font-size: 16px;">
+          Authorized Locations Master Directory (अनुमति प्राप्त स्थानों की सूची - {{ permitted_locations | length if permitted_locations else 0 }}):
+        </h4>
+        <div style="position: relative; min-width: 280px;">
+          <input type="text" id="locationSearchInput" placeholder="🔍 Search State, District, Tehsil..." onkeyup="filterLocationTable()" style="width: 100%; padding: 9px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; box-sizing: border-box;">
+        </div>
+      </div>
+
+      <!-- Locations Master Table -->
+      <div style="overflow-x: auto; border: 1px solid #334155; border-radius: 10px;">
+        <table class="owner-table" id="permittedLocationsTable" style="width: 100%; margin: 0;">
           <thead>
             <tr>
-              <th>ID</th>
+              <th style="width: 60px;">ID</th>
               <th>State (राज्य)</th>
               <th>District (ज़िला)</th>
               <th>Tehsil (तहसील)</th>
-              <th>Permission Status</th>
-              <th>Owner Action</th>
+              <th>Live Status</th>
+              <th style="text-align: right; min-width: 250px;">Owner Master Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for loc in permitted_locations %}
-              <tr>
-                <td>#{{ loc.id }}</td>
-                <td><strong style="color: white;">{{ loc.state }}</strong></td>
-                <td><strong style="color: var(--owner-gold);">{{ loc.district }}</strong></td>
-                <td><strong style="color: #4ade80;">{{ loc.tehsil }}</strong></td>
-                <td><span class="badge-status badge-green">Permission Active</span></td>
+              <tr class="loc-row" data-search="{{ loc.state | lower }} {{ loc.district | lower }} {{ loc.tehsil | lower }}">
+                <td style="color: #64748b; font-family: monospace;">#{{ loc.id }}</td>
+                <td><strong style="color: white; font-size: 14px;">{{ loc.state }}</strong></td>
+                <td><strong style="color: var(--owner-gold); font-size: 14px;">{{ loc.district }}</strong></td>
+                <td><strong style="color: #38bdf8; font-size: 14.5px;">{{ loc.tehsil }}</strong></td>
                 <td>
-                  <form action="{{ url_for('owner_delete_location', loc_id=loc.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Kya aap is location ki permission hatana chahte hain?');">
-                    <button type="submit" class="btn-action-sm btn-reject">🗑️ Revoke Permission</button>
-                  </form>
+                  {% if loc.is_active == 1 %}
+                    <span class="badge-status badge-green" style="background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
+                      🟢 LIVE (Active)
+                    </span>
+                  {% else %}
+                    <span class="badge-status" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
+                      ⏸️ PAUSED (Hidden)
+                    </span>
+                  {% endif %}
+                </td>
+                <td style="text-align: right;">
+                  <div style="display: inline-flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                    <!-- Toggle Live / Pause -->
+                    <form action="/owner/toggle_location/{{ loc.id }}" method="POST" style="margin: 0;">
+                      {% if loc.is_active == 1 %}
+                        <button type="submit" class="btn-action-sm" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.5); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;" title="अस्थायी रूप से छुपाएं">
+                          ⏸️ Pause
+                        </button>
+                      {% else %}
+                        <button type="submit" class="btn-action-sm" style="background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.5); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;" title="वेबसाइट पर चालू करें">
+                          ▶️ Go Live
+                        </button>
+                      {% endif %}
+                    </form>
+
+                    <!-- Edit / Rename Modal Trigger -->
+                    <button type="button" onclick="openEditLocationModal('{{ loc.id }}', '{{ loc.state | escape }}', '{{ loc.district | escape }}', '{{ loc.tehsil | escape }}')" style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.5); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;" title="नाम बदलें या सुधारें">
+                      ✏️ Edit
+                    </button>
+
+                    <!-- Delete Permanently -->
+                    <form action="/owner/delete_location/{{ loc.id }}" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ क्या आप निश्चित हैं कि आप {{ loc.tehsil }} ({{ loc.district }}) की अनुमति स्थायी रूप से हटाना चाहते हैं?');">
+                      <button type="submit" class="btn-action-sm btn-reject" style="padding: 6px 12px; font-size: 12px;" title="हमेशा के लिए हटाएं">
+                        🗑️ Delete
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             {% else %}
-              <tr>
-                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">
-                  No permitted locations found. Please add a location above!
+              <tr id="emptyLocRow">
+                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 25px; font-size: 14px;">
+                  ⚠️ कोई अनुमति प्राप्त लोकेशन नहीं मिली। ऊपर फ़ॉर्म से नई लोकेशन जोड़ें या '1-Click Pre-fill' बटन दबाएं!
                 </td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
+    </div>
+
+    <!-- Edit Location Modal -->
+    <div id="editLocationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.75); z-index: 99999; justify-content: center; align-items: center; padding: 20px;">
+      <div style="background: #1e293b; border: 1.5px solid var(--owner-gold); border-radius: 14px; max-width: 480px; width: 100%; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative;">
+        <button type="button" onclick="closeEditLocationModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #94a3b8; font-size: 22px; cursor: pointer; line-height: 1;">✕</button>
+        <h3 style="color: var(--owner-gold); font-size: 18px; margin: 0 0 16px 0; font-family: 'Outfit', sans-serif;">
+          ✏️ Edit Permitted Location (लोकेशन विवरण सुधारें)
+        </h3>
+        <form id="editLocationForm" method="POST" action="">
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 12px; color: #94a3b8; font-weight: 700; margin-bottom: 5px;">STATE / राज्य</label>
+            <input type="text" id="editModalState" name="state" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box;">
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 12px; color: #94a3b8; font-weight: 700; margin-bottom: 5px;">DISTRICT / ज़िला</label>
+            <input type="text" id="editModalDistrict" name="district" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box;">
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 12px; color: #94a3b8; font-weight: 700; margin-bottom: 5px;">TEHSIL / तहसील</label>
+            <input type="text" id="editModalTehsil" name="tehsil" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box;">
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" onclick="closeEditLocationModal()" style="background: #334155; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 700;">रद्द करें</button>
+            <button type="submit" style="background: linear-gradient(135deg, var(--owner-gold), #b8860b); color: black; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 800;">💾 Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
     <!-- Customer Blacklist & Anti-Fake Account Control Desk -->
     <div class="switchboard-card" style="margin-top: 30px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1.5px solid rgba(239, 68, 68, 0.4); border-radius: 16px; padding: 25px;">
       <h3 style="color: #ef4444; font-size: 20px; font-family: 'Outfit', sans-serif; margin-top: 0;">
@@ -854,8 +1351,89 @@
   </main>
 
   <footer style="text-align: center; padding: 25px; color: #64748b; font-size: 13px; border-top: 1px solid #1e293b;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+      <img src="{{ url_for('static', filename='image/apna_infotech_logo.png') }}" alt="Apna Infotech Pvt. Ltd." style="height: 30px; border-radius: 6px; background: white; padding: 2px 8px; vertical-align: middle;">
+      <span style="font-weight: 700; color: #94a3b8;">Apna Infotech Pvt. Ltd.</span>
+    </div>
     © 2026 Shubhlo (शुभलो) Master Owner Panel. All Rights Reserved.
   </footer>
 
+
+  <script>
+    function filterLocationTable() {
+      const q = (document.getElementById('locationSearchInput').value || '').toLowerCase().trim();
+      const rows = document.querySelectorAll('#permittedLocationsTable tbody tr.loc-row');
+      let visibleCount = 0;
+      rows.forEach(r => {
+        const text = r.getAttribute('data-search') || '';
+        if (text.includes(q)) {
+          r.style.display = '';
+          visibleCount++;
+        } else {
+          r.style.display = 'none';
+        }
+      });
+      const emptyRow = document.getElementById('emptyLocRow');
+      if (emptyRow) {
+        emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : (rows.length === 0 ? '' : 'none');
+      }
+    }
+
+    function openEditLocationModal(id, state, district, tehsil) {
+      const form = document.getElementById('editLocationForm');
+      form.action = '/owner/edit_location/' + id;
+      document.getElementById('editModalState').value = state;
+      document.getElementById('editModalDistrict').value = district;
+      document.getElementById('editModalTehsil').value = tehsil;
+      const modal = document.getElementById('editLocationModal');
+      modal.style.display = 'flex';
+    }
+
+    function closeEditLocationModal() {
+      document.getElementById('editLocationModal').style.display = 'none';
+    }
+
+    window.addEventListener('click', function(e) {
+      const modal = document.getElementById('editLocationModal');
+      if (e.target === modal) {
+        closeEditLocationModal();
+      }
+    });
+  
+    function filterOwnerVendorTable() {
+      const input = document.getElementById('ownerVendorSearchInput');
+      if (!input) return;
+      const filter = input.value.toLowerCase().trim();
+      const rows = document.querySelectorAll('.owner-vendor-row');
+      let visibleCount = 0;
+      rows.forEach(r => {
+        const text = (r.getAttribute('data-search') || '').toLowerCase();
+        if (text.includes(filter)) {
+          r.style.display = '';
+          visibleCount++;
+        } else {
+          r.style.display = 'none';
+        }
+      });
+      const emptyRow = document.getElementById('ownerVendorSearchEmptyRow');
+      if (emptyRow) {
+        emptyRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+      }
+      const countEl = document.getElementById('ownerVendorTotalCount');
+      if (countEl) {
+        countEl.textContent = filter ? `${visibleCount} / ${rows.length}` : `${rows.length}`;
+      }
+    }
+
+  
+    function toggleFast2smsVisibility() {
+      const el = document.getElementById('fast2smsApiKeyInput');
+      if (el) {
+        el.type = el.type === 'password' ? 'text' : 'password';
+      }
+    }
+
+  </script>
 </body>
+
 </html>

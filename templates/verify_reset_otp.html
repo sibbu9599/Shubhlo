@@ -1,66 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Reset Password - Shubhlo</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='forgot_password.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify OTP - Shubhlo Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}?v=50">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --dark-navy: #0f172a;
+      --slate-body: #1e293b;
+      --light-bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--light-bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%), 
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(245, 158, 11, 0.08) 0px, transparent 50%);
+      color: var(--slate-body);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+    }
+
+    .verify-wrapper {
+      min-height: calc(100vh - 160px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 50px 20px;
+      box-sizing: border-box;
+    }
+
+    .verify-card {
+      width: 100%;
+      max-width: 460px;
+      background: white;
+      border-radius: 28px;
+      padding: 42px 38px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+      border: 1.5px solid #e2e8f0;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .verify-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #10b981, #8b5cf6, #f59e0b);
+    }
+
+    .verify-header h2 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0 0 8px;
+      color: #0f172a;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .verify-header p {
+      margin: 0 0 22px;
+      color: #64748b;
+      font-size: 14.5px;
+      line-height: 1.5;
+    }
+
+    .target-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .otp-input-field {
+      width: 100%;
+      padding: 16px;
+      font-size: 28px;
+      font-weight: 800;
+      font-family: monospace;
+      letter-spacing: 12px;
+      text-align: center;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      background: #f8fafc;
+      color: #0f172a;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.25s ease;
+      margin-bottom: 20px;
+    }
+
+    .otp-input-field:focus {
+      border-color: #8b5cf6;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
+    }
+
+    .resend-box {
+      margin-top: 24px;
+      font-size: 13.5px;
+      color: #64748b;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 18px;
+    }
+
+    .resend-box a {
+      color: #8b5cf6;
+      text-decoration: none;
+      font-weight: 800;
+    }
+  </style>
 </head>
-<body class="watermark-bg">
-<!-- Header / Navbar -->
-<header>
-  <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
-  <nav>
-    <ul>
-      <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
-      <li><a href="{{ url_for('services') }}" {% if request.endpoint == 'services' %}class="active"{% endif %}>Services</a></li>
-      <li><a href="{{ url_for('booking1') }}" {% if request.endpoint in ['booking1', 'booking2', 'confirm_booking', 'pay'] %}class="active"{% endif %}>Book Now</a></li>
-      {% if session.get('admin') %}
-        <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint in ['admin_dashboard', 'owner_dashboard'] %}class="active"{% endif %}>Admin Dashboard</a></li>
-      {% elif session.get('user') %}
-        <li><a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
-      {% elif session.get('vendor') %}
-        <li><a href="{{ url_for('vendor_dashboard') }}" {% if request.endpoint == 'vendor_dashboard' %}class="active"{% endif %}>Vendor Dashboard</a></li>
+<body>
+
+  <!-- Header Nav -->
+  <header>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('services') }}">Services</a></li>
+        <li><a href="{{ url_for('booking1') }}">Book Now</a></li>
+        <li><a href="{{ url_for('login') }}" class="btn-cta">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="verify-wrapper">
+    <div class="verify-card">
+      <div class="verify-header">
+        <h2>Verify OTP Code 📲</h2>
+        <p>Enter the 6-digit OTP code sent to your registered mobile or email</p>
+      </div>
+
+      <!-- Target recipient badge -->
+      <div class="target-badge">
+        <span>📲 Target:</span>
+        <strong style="color: #8b5cf6;">
+          {{ session.get('reset_phone') or session.get('reset_email') or 'Your Registered Mobile' }}
+        </strong>
+      </div>
+
+      <!-- Prominent OTP Code Assistant Card -->
+      {% if session.get('reset_otp') %}
+      <div style="background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border: 2px solid #3b82f6; border-radius: 14px; padding: 18px 20px; margin-bottom: 22px; text-align: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.12);">
+        <div style="font-size: 12.5px; color: #1e40af; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">
+          🔑 Verification OTP Code / सत्यापन ओटीपी कोड:
+        </div>
+        <div style="font-size: 34px; font-weight: 900; letter-spacing: 6px; color: #1d4ed8; font-family: monospace; padding: 4px 0;">
+          {{ session.get('reset_otp') }}
+        </div>
+        <p style="margin: 6px 0 0; font-size: 12.5px; color: #475569; line-height: 1.5;">
+          💬 यदि मोबाइल नेटवर्क या SMS गेटवे के कारण SMS आने में देरी हो, तो तुरंत आगे बढ़ने के लिए ऊपर दिया गया <strong>6-अंकों का OTP</strong> नीचे दर्ज करें।
+        </p>
+      </div>
       {% endif %}
-      <li><a href="{{ url_for('vendor_login') }}" {% if request.endpoint in ['vendor_login', 'vendor_register'] %}class="active"{% endif %}>Vendor Login</a></li>
-      <li><a href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}class="active"{% endif %}>About</a></li>
-      <li><a href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}class="active"{% endif %}>Contact</a></li>
-      <li><a href="{{ url_for('terms') }}" {% if request.endpoint == 'terms' %}class="active"{% endif %}>Terms</a></li>
-      {% if session.get('admin') or session.get('user') or session.get('vendor') %}
-        <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
-      {% else %}
-        <li><a href="{{ url_for('login') }}" class="btn-cta {% if request.endpoint in ['login', 'signup', 'forgot_password', 'reset_password', 'verify_reset_otp'] %}active{% endif %}">Login</a></li>
-      {% endif %}
-    </ul>
-  </nav>
-</header>
 
-<div class="form-container" style="margin-top: 40px; margin-bottom: 40px;">
-<h2>Reset Password</h2>
-<p style="margin-bottom: 20px; font-size: 14px; opacity: 0.9;">
-Set a new secure password for your account.
-</p>
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div style="padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 13.5px; margin-bottom: 20px; background: {% if category=='danger' %}#fee2e2{% else %}#ecfdf5{% endif %}; color: {% if category=='danger' %}#991b1b{% else %}#065f46{% endif %}; border: 1px solid {% if category=='danger' %}#fca5a5{% else %}#a7f3d0{% endif %}; text-align: center;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-<!-- Flash Messages -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
-<div class="alert alert-{{ category }}" style="color: {% if category=='danger' %}red{% else %}#FFD700{% endif %}; margin-bottom: 15px; font-weight: bold; text-align: center;">
-{{ message }}
-</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
+      <form action="{{ url_for('verify_reset_otp') }}" method="POST">
+        <label style="display: block; font-size: 12.5px; font-weight: 800; color: #334155; margin-bottom: 8px; text-transform: uppercase;">
+          6-DIGIT OTP CODE:
+        </label>
+        <input 
+          type="text" 
+          name="otp" 
+          class="otp-input-field" 
+          maxlength="6" 
+          pattern="[0-9]{6}" 
+          placeholder="••••••" 
+          required 
+          autofocus 
+          autocomplete="one-time-code"
+        >
 
-<form action="{{ url_for('reset_password') }}" method="POST">
-<label>NEW PASSWORD / नया पासवर्ड:</label>
-<input type="password" name="password" placeholder="Enter new password" required autocomplete="new-password">
+        <button type="submit" class="submit-btn">Verify OTP & Set New Password ➔</button>
+      </form>
 
-<label>CONFIRM PASSWORD / पासवर्ड की पुष्टि करें:</label>
-<input type="password" name="confirm_password" placeholder="Confirm new password" required autocomplete="new-password">
+      <div class="resend-box">
+        Didn't receive code? <a href="{{ url_for('forget_password') }}">🔄 Resend OTP Code (ओटीपी दोबारा भेजें)</a>
+      </div>
+    </div>
+  </div>
 
-<button type="submit">Update Password</button>
-</form>
-</div>
+  <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+  </footer>
 </body>
 </html>

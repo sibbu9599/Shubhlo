@@ -212,7 +212,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -362,8 +362,8 @@
               <p>📍 {{ b.tehsil or b.district or 'Madhya Pradesh' }}</p>
             </div>
             <div class="summary-meta">
-              <label>Total Amount</label>
-              <p style="color: #10b981;">₹{{ "{:,.2f}".format(b.total_price) if b.total_price else '0.00' }}</p>
+              <label>Deal / सौदा</label>
+              <p style="color: #7c3aed; font-weight: 800; font-size: 13.5px;">🤝 Customer-Vendor Direct Deal</p>
             </div>
             <div class="summary-meta">
               <label>Token Money Paid</label>
@@ -375,10 +375,53 @@
             </div>
           </div>
 
-          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-top: 15px; line-height: 1.5;">
-            <strong>💡 Vendor Deal Note / वेंडर बिल छूट रसीद:</strong><br>
-            Aapne <strong>₹5,118</strong> Token Money pay kiya hai (₹5,000 Vendor Deposit + ₹100 Platform Fee + ₹18 GST). Vender ke saath final deal bill mein se <strong>₹5,000 kam kar diye jayenge</strong>.
+          <div style="background: #f0fdf4; border: 1.5px solid #86efac; color: #166534; padding: 12px 16px; border-radius: 10px; font-size: 12.5px; margin-top: 15px; line-height: 1.6;">
+            <strong style="color: #15803d; font-size: 13.5px;">💡 Direct Deal & Token Policy (सीधा वेंडर सौदा व टोकन रसीद):</strong><br>
+            आपने <strong>₹5,118</strong> टोकन मनी जमा की है (₹5,000 वेंडर एडवांस + ₹100 प्लेटफॉर्म फीस + ₹18 GST)। बाकी सभी चीजें (पैकेज रेट, मेन्यू, सुविधाएं और अंतिम भुगतान) आप और वेंडर सीधे आपस में तय करेंगे। वेंडर के फाइनल बिल में से <strong>₹5,000 सीधे कम (Deduct)</strong> कर दिए जाएंगे।
           </div>
+
+          <!-- 🛡️ 100% Safe Guarantee & Dispute/Refund Status Trackers -->
+          {% if b.dispute_status == 'Refund Requested' or b.booking_status == 'Refund Requested' %}
+            <div style="background: linear-gradient(135deg, #fef2f2, #fff1f2); border: 1.5px solid #fecaca; color: #991b1b; padding: 14px 18px; border-radius: 12px; margin-top: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 28px;">💸</span>
+                <div>
+                  <strong style="font-size: 14.5px; display: block; color: #b91c1c;">100% TOKEN REFUND IN PROGRESS (रिफंड प्रक्रिया जारी)</strong>
+                  <span style="font-size: 12.5px; color: #7f1d1d;">Refund of <strong>₹{{ "{:,.2f}".format(b.refund_amount if b.refund_amount else (b.advance_paid or 5118.00)) }}</strong> under Shubhlo Safe Guarantee is currently being processed to your original payment method / UPI.</span>
+                  <div style="font-size: 11.5px; margin-top: 4px; color: #991b1b;"><strong>Reason:</strong> {{ b.dispute_reason or 'Deal could not be finalized with vendor' }}</div>
+                </div>
+              </div>
+              <span style="background: #fee2e2; color: #991b1b; font-weight: 800; font-size: 11.5px; padding: 5px 14px; border-radius: 20px; border: 1px solid #fca5a5;">
+                ⏳ STATUS: {{ b.refund_status or 'Pending Review (24-48 Hrs)' }}
+              </span>
+            </div>
+          {% elif b.dispute_status in ['Refund Approved', 'Refund Completed'] or b.booking_status == 'Refunded' %}
+            <div style="background: #f0fdf4; border: 1.5px solid #86efac; color: #166534; padding: 14px 18px; border-radius: 12px; margin-top: 15px; display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 28px;">✅</span>
+              <div>
+                <strong style="font-size: 14.5px; display: block; color: #15803d;">100% TOKEN REFUND COMPLETED / रिफंड सफल</strong>
+                <span style="font-size: 12.5px; color: #166534;">₹{{ "{:,.2f}".format(b.refund_amount if b.refund_amount else (b.advance_paid or 5118.00)) }} has been successfully refunded to your original payment account. Thank you for trusting Shubhlo Safe Guarantee!</span>
+              </div>
+            </div>
+          {% elif b.dispute_status == 'Alternate Vendor Assigned' %}
+            <div style="background: #eff6ff; border: 1.5px solid #93c5fd; color: #1e40af; padding: 14px 18px; border-radius: 12px; margin-top: 15px; display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 28px;">🔄</span>
+              <div>
+                <strong style="font-size: 14.5px; display: block; color: #1d4ed8;">ALTERNATE VENDOR ASSIGNED / नया वेंडर आवंटित</strong>
+                <span style="font-size: 12.5px; color: #1e40af;">Under Shubhlo 100% Safe Guarantee, an alternative verified vendor has been assigned to your booking with zero extra charges. Your ₹5,000 token is fully active!</span>
+              </div>
+            </div>
+          {% elif not is_otp_verified and b.status not in ['Cancelled', 'Rejected'] %}
+            <div style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 1.5px solid #a7f3d0; padding: 12px 16px; border-radius: 10px; margin-top: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 22px;">🛡️</span>
+                <div style="font-size: 12.5px; color: #065f46; line-height: 1.5;">
+                  <strong style="color: #047857; font-size: 13px;">Shubhlo 100% Safe Deal Guarantee (सौदा सुरक्षा गारंटी):</strong><br>
+                  अगर किसी भी कारण से वेंडर के साथ आपका सौदा तय नहीं होता है, तो बेफिक्र रहें! आप तुरंत <strong>फ्री में दूसरा वेंडर बदल सकते हैं</strong> या <strong>100% टोकन रिफंड</strong> प्राप्त कर सकते हैं।
+                </div>
+              </div>
+            </div>
+          {% endif %}
 
           <!-- 🔑 Deal Verification OTP Status Box -->
           {% set is_otp_verified = b.is_otp_verified or b.otp_status == 'Verified' %}
@@ -433,11 +476,22 @@
               </a>
             {% endif %}
 
+            <a href="https://wa.me/917067883131?text=Namaste%20Shubhlo%20Owner!%20I%20am%20customer%20{{ user_name|urlencode }}%20regarding%20Booking%20%23{{ b.booking_id or b.id }}%20(Event%20Date:%20{{ b.event_date }},%20Total:%20%E2%82%B9{{ b.total_price }}).%20I%20have%20a%20query..." target="_blank" class="btn-action" style="background: linear-gradient(135deg, #25d366, #128c7e); color: white; box-shadow: 0 4px 15px rgba(37,211,102,0.3); text-decoration: none;">
+              💬 Chat with Owner on WhatsApp
+            </a>
+
+            <!-- 🤝 Deal Unsuccessful / Safe Guarantee Action Button -->
+            {% if not is_otp_verified and b.status not in ['Cancelled', 'Rejected'] and b.booking_status not in ['Cancelled', 'Rejected', 'Refund Requested', 'Refunded'] and b.dispute_status != 'Refund Requested' %}
+              <button type="button" onclick="openDealModal('{{ b.booking_id or b.id }}')" class="btn-action" style="background: linear-gradient(135deg, #d97706, #b45309); color: white; border: none; cursor: pointer; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 13px; box-shadow: 0 4px 15px rgba(217,119,6,0.3); display: inline-flex; align-items: center; gap: 6px;">
+                🤝 सौदा तय नहीं हुआ? (Deal Unsuccessful?)
+              </button>
+            {% endif %}
+
             <a href="{{ url_for('rate_vendor', booking_id=b.booking_id or b.id) }}" class="btn-action btn-rating">
               ⭐ Rate Vendor Services
             </a>
 
-            {% if b.status not in ['Cancelled', 'Rejected'] and b.booking_status not in ['Cancelled', 'Rejected'] %}
+            {% if b.status not in ['Cancelled', 'Rejected'] and b.booking_status not in ['Cancelled', 'Rejected', 'Refund Requested', 'Refunded'] %}
               <form action="{{ url_for('cancel_booking', booking_id=b.booking_id or b.id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('क्या आप वाकई यह बुकिंग रद्द करना चाहते हैं? Are you sure you want to cancel this booking?');">
                 <input type="hidden" name="cancellation_reason" value="Customer Cancelled via Dashboard / ग्राहक द्वारा रद्द">
                 <button type="submit" class="btn-action" style="background: #ef4444; color: white; border: none; cursor: pointer; padding: 10px 18px; border-radius: 10px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 12px rgba(239,68,68,0.25);">
@@ -445,6 +499,87 @@
                 </button>
               </form>
             {% endif %}
+          </div>
+
+          <!-- 🛡️ Deal Unsuccessful Assistance Modal for this Booking -->
+          <div id="dealModal_{{ b.booking_id or b.id }}" class="safe-modal-backdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); z-index: 99999; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+            <div style="background: white; border-radius: 20px; max-width: 540px; width: 100%; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.35); border: 1.5px solid #e2e8f0; position: relative; max-height: 90vh; overflow-y: auto;">
+              <button type="button" onclick="closeDealModal('{{ b.booking_id or b.id }}')" style="position: absolute; top: 18px; right: 20px; background: #f1f5f9; border: none; font-size: 18px; cursor: pointer; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: bold;">✕</button>
+
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: flex; align-items: center; justify-content: center; font-size: 22px;">🛡️</div>
+                <div>
+                  <h3 style="font-family: 'Outfit', sans-serif; margin: 0; font-size: 19px; color: #0f172a; font-weight: 800;">100% Safe Deal Guarantee</h3>
+                  <p style="margin: 0; font-size: 12.5px; color: #64748b;">Booking #{{ b.booking_id or b.id }} • Token Deposit: ₹{{ "{:,.2f}".format(b.advance_paid or 5118.00) }}</p>
+                </div>
+              </div>
+
+              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px 14px; border-radius: 10px; font-size: 12.5px; line-height: 1.5; margin-bottom: 18px;">
+                <strong>आपकी टोकन राशि 100% सुरक्षित है!</strong> अगर वेंडर के साथ आपकी बात नहीं बनी या वेंडर उपलब्ध नहीं है, तो आप बिना किसी अतिरिक्त शुल्क के नया वेंडर ले सकते हैं या 100% रिफंड पा सकते हैं।
+              </div>
+
+              <form action="/booking/report_deal_issue/{{ b.booking_id or b.id }}" method="POST">
+                <!-- Step 1: Reason -->
+                <div style="margin-bottom: 18px;">
+                  <label style="display: block; font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">
+                    1. सौदा तय न होने का मुख्य कारण चुनें (Select Reason) *
+                  </label>
+                  <select name="deal_issue_reason" required style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 13.5px; color: #0f172a; background: #f8fafc;">
+                    <option value="Vendor call/message ka uttar nahi de raha">वेंडर कॉल/मैसेज का जवाब नहीं दे रहा (Vendor unresponsive)</option>
+                    <option value="Vendor ne pehle tay kiye rate se zyada manga">वेंडर ने बजट से ज्यादा रेट मांगा (Price disagreement / Overquoting)</option>
+                    <option value="Date ya services par sahmati nahi bani">तारीख या जरूरी सुविधाओं पर सहमति नहीं बनी (Requirements mismatch)</option>
+                    <option value="Vendor ne service dene se mana kiya">वेंडर ने सेवा देने से मना कर दिया (Vendor cancelled / unavailable)</option>
+                    <option value="Customer changed personal mind">मैंने खुद कार्यक्रम का विचार बदल दिया (Change of mind)</option>
+                    <option value="Any other reason">अन्य कारण (Other issue)</option>
+                  </select>
+                </div>
+
+                <!-- Step 2: Resolution Choice -->
+                <div style="margin-bottom: 20px;">
+                  <label style="display: block; font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+                    2. आप क्या समाधान चाहते हैं? (Choose Resolution) *
+                  </label>
+
+                  <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Option 1: Alternate Vendor -->
+                    <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 2px solid #86efac; background: #f0fdf4; border-radius: 12px; cursor: pointer;">
+                      <input type="radio" name="resolution_choice" value="alternate_vendor" checked style="margin-top: 3px; accent-color: #10b981;">
+                      <div>
+                        <strong style="color: #15803d; font-size: 13.5px; display: block;">🔄 फ्री में दूसरा वेंडर बदलें (Request Free Alternate Vendor) <span style="background: #15803d; color: white; font-size: 10px; padding: 2px 6px; border-radius: 6px; margin-left: 6px;">RECOMMENDED</span></strong>
+                        <span style="font-size: 12px; color: #166534; display: block; margin-top: 2px;">हम आपको उसी बजट में तुरंत दूसरा वेरीफाइड वेंडर देंगे। आपका ₹5,000 टोकन नए वेंडर के फाइनल बिल में कटेगा (0 अतिरिक्त चार्ज)।</span>
+                      </div>
+                    </label>
+
+                    <!-- Option 2: 100% Refund -->
+                    <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 2px solid #fecaca; background: #fef2f2; border-radius: 12px; cursor: pointer;">
+                      <input type="radio" name="resolution_choice" value="refund" style="margin-top: 3px; accent-color: #ef4444;">
+                      <div>
+                        <strong style="color: #b91c1c; font-size: 13.5px; display: block;">💸 100% टोकन रिफंड पाएं (Claim 100% Token Refund)</strong>
+                        <span style="font-size: 12px; color: #991b1b; display: block; margin-top: 2px;">पूरा टोकन अमाउंट <strong>₹{{ "{:,.2f}".format(b.advance_paid or 5118.00) }}</strong> बिना किसी कटौती के आपके बैंक/UPI खाते में 24-48 घंटे में वापस आएगा।</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Optional Note -->
+                <div style="margin-bottom: 20px;">
+                  <label style="display: block; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px;">
+                    वैकल्पिक टिप्पणी (Additional Notes, if any):
+                  </label>
+                  <textarea name="custom_note" rows="2" placeholder="Tell us more about the conversation with the vendor..." style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 13px; box-sizing: border-box;"></textarea>
+                </div>
+
+                <!-- Submit & Close Buttons -->
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                  <button type="button" onclick="closeDealModal('{{ b.booking_id or b.id }}')" style="padding: 10px 18px; border-radius: 10px; border: 1.5px solid #cbd5e1; background: white; color: #475569; font-weight: 700; font-size: 13px; cursor: pointer;">
+                    रद्द करें (Close)
+                  </button>
+                  <button type="submit" style="padding: 10px 22px; border-radius: 10px; border: none; background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">
+                    🚀 अनुरोध भेजें (Submit Request)
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       {% endfor %}
@@ -459,7 +594,8 @@
       </div>
     {% endif %}
 
-    <!-- Interactive Event Countdown & Wedding Task Checklist -->
+    <!-- Interactive Event Countdown & Wedding Task Checklist (Shown only when customer has bookings) -->
+    {% if bookings and bookings|length > 0 %}
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 35px;">
       <!-- Event Countdown Widget -->
       <div style="background: linear-gradient(135deg, #1e1b4b, #312e81); color: white; border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(30,27,75,0.25);">
@@ -514,6 +650,7 @@
         </div>
       </div>
     </div>
+    {% endif %}
 
     <!-- Customer Contact Messages & Owner Replies Section -->
     <div style="margin-top: 40px; background: white; border-radius: 24px; padding: 28px; box-shadow: 0 10px 30px rgba(15,23,42,0.06); border: 1.5px solid #e2e8f0;">
@@ -572,7 +709,12 @@
         </div>
       {% else %}
         <div style="text-align: center; padding: 25px; background: #f8fafc; border-radius: 16px; color: #64748b; font-size: 13.5px;">
-          💬 Have a query or special request? Send us a message on the <a href="{{ url_for('contact') }}" style="color: #8b5cf6; font-weight: 700; text-decoration: underline;">Contact Page</a> and track the Owner's direct response here!
+          💬 Have a query or special request? Send us a message on the <a href="{{ url_for('contact') }}" style="color: #8b5cf6; font-weight: 700; text-decoration: underline;">Contact Page</a> or chat directly with the Owner:
+          <div style="margin-top: 15px;">
+            <a href="https://wa.me/917067883131?text=Namaste%20Shubhlo%20Owner!%20I%20need%20assistance%20with%20my%20event%20booking." target="_blank" style="background: linear-gradient(135deg, #25d366, #128c7e); color: white; padding: 10px 22px; border-radius: 50px; font-weight: 800; font-size: 13.5px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(37,211,102,0.3);">
+              💬 Direct WhatsApp Helpline (+91 7067883131)
+            </a>
+          </div>
         </div>
       {% endif %}
     </div>
@@ -580,7 +722,35 @@
   </main>
 
   <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 60px;">
-    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+      <img src="{{ url_for('static', filename='image/apna_infotech_logo.png') }}" alt="Apna Infotech Pvt. Ltd." style="height: 36px; border-radius: 6px; background: #ffffff; padding: 3px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+      <span style="font-weight: 700; font-size: 14px; color: #f8fafc;">Apna Infotech Pvt. Ltd.</span>
+    </div>
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo - A Venture of Apna Infotech Pvt. Ltd. All Rights Reserved.</p>
   </footer>
+  <script>
+    function openDealModal(id) {
+      var modal = document.getElementById('dealModal_' + id);
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    function closeDealModal(id) {
+      var modal = document.getElementById('dealModal_' + id);
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    }
+    // Close modal if backdrop is clicked
+    window.addEventListener('click', function(e) {
+      if (e.target && e.target.classList && e.target.classList.contains('safe-modal-backdrop')) {
+        e.target.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    });
+  </script>
+  {% include 'chatbot_include.html' %}
 </body>
 </html>

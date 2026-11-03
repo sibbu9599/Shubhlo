@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 130" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="techGradDark1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="50%" stop-color="#1D4ED8" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+
+    <linearGradient id="techGradDark2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="60%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+
+    <linearGradient id="goldGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <linearGradient id="bgGlowLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(2, 132, 199, 0.08)" />
+      <stop offset="100%" stop-color="rgba(99, 102, 241, 0.04)" />
+    </linearGradient>
+
+    <filter id="subtleShadowLight" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0F172A" flood-opacity="0.1" />
+    </filter>
+  </defs>
+
+  <!-- Left Icon: Modern Tech Prism & Interlocking 'A' + 'I' Wings -->
+  <g transform="translate(18, 15)">
+    <!-- Back Glow Base -->
+    <rect x="0" y="0" width="100" height="100" rx="24" fill="url(#bgGlowLight)" stroke="rgba(2, 132, 199, 0.2)" stroke-width="1.5" />
+
+    <!-- Hexagonal Geometric Tech Shield -->
+    <g filter="url(#subtleShadowLight)">
+      <!-- Left Wing / 'A' Stroke -->
+      <path d="M 50 18 L 22 76 L 36 76 L 50 46 L 64 76 L 78 76 Z" fill="url(#techGradDark1)" />
+      
+      <!-- Central Dynamic Tech Crossbar with Circuit Node -->
+      <path d="M 32 58 L 68 58 L 63 48 L 37 48 Z" fill="url(#techGradDark2)" />
+
+      <!-- Intersecting 'I' Pillar with Future Light Core -->
+      <path d="M 46 28 L 54 28 L 54 82 L 46 82 Z" fill="url(#goldGradDark)" rx="2" />
+
+      <!-- Glowing Circuit Dots -->
+      <circle cx="50" cy="22" r="4.5" fill="#FFFFFF" stroke="#0284C7" stroke-width="2" />
+      <circle cx="22" cy="76" r="3.5" fill="#0284C7" />
+      <circle cx="78" cy="76" r="3.5" fill="#059669" />
+      <circle cx="50" cy="82" r="3.5" fill="#D97706" />
+    </g>
+  </g>
+
+  <!-- Corporate Typography (Right Side) -->
+  <g transform="translate(138, 26)">
+    <!-- Main Company Name: APNA -->
+    <text x="0" y="44" font-family="'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="38" letter-spacing="2" fill="#0F172A">
+      APNA
+      <tspan fill="#0284C7" font-weight="900">INFOTECH</tspan>
+    </text>
+
+    <!-- Sub-badge / Legal Extension -->
+    <g transform="translate(0, 56)">
+      <!-- Gold Ribbon Pill -->
+      <rect x="0" y="2" width="94" height="20" rx="6" fill="rgba(245, 158, 11, 0.12)" stroke="#D97706" stroke-width="1.2" />
+      <text x="47" y="16.5" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="800" fill="#B45309" text-anchor="middle" letter-spacing="1.2">
+        PVT. LTD.
+      </text>
+
+      <!-- Subline descriptor -->
+      <text x="108" y="16.5" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#475569" letter-spacing="2.5">
+        DIGITAL SOLUTIONS &amp; INNOVATIONS
+      </text>
+    </g>
+  </g>
+</svg>
+

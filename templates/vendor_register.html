@@ -302,7 +302,7 @@
 
   <!-- Header / Navbar -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -484,30 +484,25 @@
             <h4 style="margin: 0 0 12px 0; color: #1e8449; font-size: 13.5px; font-weight: 700; text-transform: uppercase;">
               📍 Registered Business Location / कार्यक्षेत्र स्थान
             </h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label for="state">State / राज्य *</label>
                 <select id="state" name="state" class="form-control" required>
-                  <option value="Madhya Pradesh">Madhya Pradesh</option>
+                  <option value="">-- Select State / राज्य चुनें --</option>
                 </select>
               </div>
 
               <div class="form-group" style="margin-bottom: 0;">
                 <label for="district">District / ज़िला *</label>
                 <select id="district" name="district" class="form-control" required>
-                  <option value="Hoshangabad">Hoshangabad</option>
+                  <option value="">-- Select District / ज़िला चुनें --</option>
                 </select>
               </div>
 
               <div class="form-group" style="margin-bottom: 0;">
                 <label for="tehsil">Tehsil / तहसील *</label>
                 <select id="tehsil" name="tehsil" class="form-control" required>
-                  <option value="Itarsi">Itarsi</option>
-                  <option value="Pipariya">Pipariya</option>
-                  <option value="Hoshangabad">Hoshangabad</option>
-                  <option value="Seoni Malwa">Seoni Malwa</option>
-                  <option value="Indore">Indore</option>
-                  <option value="Bhopal">Bhopal</option>
+                  <option value="">-- Select Tehsil / तहसील चुनें --</option>
                 </select>
               </div>
             </div>
@@ -539,6 +534,51 @@
             </div>
           </div>
 
+          <!-- Venue Specific Details Block -->
+          <div id="venue-specific-fields" style="display: block; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 18px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <h4 style="margin: 0; color: #166534; font-size: 14.5px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                🏰 Venue Classification & Event Suitability / वेन्यू का प्रकार व क्षमता विवरण
+              </h4>
+              <span style="font-size: 11.5px; background: #dcfce7; color: #15803d; font-weight: 700; padding: 2px 8px; border-radius: 10px;">
+                Required for Venue Partners
+              </span>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="venue_type">Venue Type / वेन्यू श्रेणी *</label>
+                <select id="venue_type" name="venue_type" class="form-control" onchange="handleVenueTypeChange(this.value)">
+                  <option value="marriage_garden" selected>🏰 Marriage Garden & Lawn / मैरिज गार्डन (500 - 2500+ Guests)</option>
+                  <option value="banquet_hall">🏢 AC Banquet Hall / बैंक्वेट हॉल (150 - 500 Guests)</option>
+                  <option value="restaurant">🍽️ Restaurant & Party Hall / रेस्टोरेंट एवं पार्टी हॉल (30 - 100 Guests)</option>
+                  <option value="resort">👑 Luxury Resort & Farmhouse / रिसॉर्ट एवं फार्महाउस (300 - 2000 Guests)</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="guest_capacity">Guest Capacity / अधिकतम मेहमान क्षमता *</label>
+                <select id="guest_capacity" name="guest_capacity" class="form-control">
+                  <option value="500 - 2500+ Guests" selected>500 - 2500+ Guests (Royal Wedding / भव्य शादी)</option>
+                  <option value="150 - 500 Guests">150 - 500 Guests (Banquet / सगाई व रिसेप्शन)</option>
+                  <option value="30 - 100 Guests (Small Gathering)">30 - 100 Guests (Small Party / जन्मदिन व छोटी पार्टी)</option>
+                  <option value="300 - 2000 Guests">300 - 2000 Guests (Resort / रिसॉर्ट)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 14px; margin-bottom: 0;">
+              <label for="can_host_wedding">Can Host Full Weddings? / क्या शादी-विवाह कराते हैं? *</label>
+              <select id="can_host_wedding" name="can_host_wedding" class="form-control">
+                <option value="yes" selected>✅ Yes, can host full wedding ceremonies / हाँ, शादी-विवाह करा सकते हैं</option>
+                <option value="no">🚫 No, only birthdays, anniversaries & small parties / नहीं, केवल जन्मदिन व छोटी पार्टियां</option>
+              </select>
+              <small id="wedding_hint" style="color: #15803d; font-size: 11.5px; margin-top: 4px; display: block;">
+                💡 यदि आप रेस्टोरेंट या छोटा पार्टी हॉल हैं तो 'No' चुनें ताकि ग्राहक गलती से शादी के लिए बुकिंग न करें।
+              </small>
+            </div>
+          </div>
+
           <!-- Identity Verification Block -->
           <div style="background: rgba(30, 132, 73, 0.05); border: 1.5px solid rgba(39, 174, 96, 0.25); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
             <h4 style="margin: 0 0 10px 0; color: #1e8449; font-size: 13.5px; font-weight: 700;">
@@ -565,22 +605,38 @@
 
           <!-- Terms and Conditions Checkbox -->
           <div class="form-group">
-            <label style="font-weight: 800; color: #991b1b; margin-bottom: 8px; display: block;">🛡️ STRICT VENDOR LEGAL DECLARATION & ZERO LIABILITY AGREEMENT / वेंडर वैधानिक घोषणा व दायित्व मुक्ती</label>
-            <div class="terms-scroll-box" style="border: 2px solid #fca5a5; background: #fff5f5; color: #7f1d1d; max-height: 160px; overflow-y: auto; padding: 14px; border-radius: 12px; font-size: 12.5px; line-height: 1.6;">
-              <h4 style="color: #991b1b; margin-top: 0; font-size: 13px;">1. ABSOLUTE ZERO LIABILITY OF COMPANY & OWNER / कंपनी व मालिक पूर्ण दायित्व मुक्ती</h4>
-              <p>Under no circumstances shall Shubhlo, Setu Infotech Pvt Ltd, its Owner, Directors, or Management be liable for any direct, indirect, or accidental losses, property damages, cancellations, food safety issues, police/sound permit fines, or customer disputes. Vendor operates as an independent business entity and assumes 100% legal responsibility for their services.</p>
+            <label style="font-weight: 800; color: #991b1b; margin-bottom: 8px; display: block; font-size: 13.5px;">
+              🛡️ STRICT VENDOR ZERO LIABILITY & LEGAL INDEMNITY AGREEMENT / वेंडर वैधानिक घोषणा व कंपनी/मालिक दायित्व मुक्ती
+            </label>
+            <div class="terms-scroll-box" style="border: 2px solid #ef4444; background: #fff5f5; color: #7f1d1d; max-height: 190px; overflow-y: auto; padding: 16px; border-radius: 12px; font-size: 12.5px; line-height: 1.65;">
+              <h4 style="color: #991b1b; margin-top: 0; font-size: 13.5px;">
+                1. ABSOLUTE ZERO LIABILITY OF WEBSITE, COMPANY & OWNER / किसी भी परिस्थिति में वेबसाइट, कंपनी व मालिक ज़िम्मेदार नहीं होंगे
+              </h4>
+              <p>
+                वेंडर (सेवा प्रदाता) शपथपूर्वक स्वीकार करता है कि <strong>Shubhlo</strong>, <strong>Apna Infotech Pvt. Ltd.</strong>, कंपनी के फाउंडर, डायरेक्टर, शेयरधारक या <strong>कंपनी मालिक (Platform Owner)</strong> केवल एक डिजिटल सूचना व मध्यस्थ प्लेटफ़ॉर्म हैं। किसी भी परिस्थिति में — चाहे सेवा में कमी हो, कार्यक्रम में देरी हो, भोजन में विषाक्तता (Food Poisoning) हो, आगजनी/शॉर्ट-सर्किट हो, टेंट या मंच गिरे, डीजे जब्ती या पुलिस चालान हो, अथवा पैसों का विवाद हो — <strong>वेबसाइट, कंपनी व कंपनी का मालिक 100% दायित्व मुक्त (Zero Liable) रहेंगे।</strong>
+              </p>
               
-              <h4 style="color: #991b1b; font-size: 13px;">2. PERMITS & TAX COMPLIANCE / पुलिस व टैक्स अनुपालन</h4>
-              <p>Vendor is 100% responsible for local government permits, police sound permissions, FSSAI hygiene standards, and GST tax filings. Shubhlo shall never be named in any legal notice or court dispute.</p>
+              <h4 style="color: #991b1b; font-size: 13.5px;">
+                2. COMPLETE VENDOR LEGAL & STATUTORY INDEMNITY / वेंडर की वैधानिक व कानूनी ज़िम्मेदारी
+              </h4>
+              <p>
+                वेंडर अपने सभी कर्मचारियों, उपकरणों, वाहन, पुलिस व ध्वनि विस्तारक (10 PM DJ Rule) अनुमति, खाद्य सुरक्षा (FSSAI) व GST टैक्स अनुपालन के लिए 100% स्वयं ज़िम्मेदार है। यदि ग्राहक या कोई तीसरा पक्ष विवाद करता है, तो वेंडर कंपनी और उसके मालिक को सभी कानूनी खर्चों, हरजाने व मुकदमों से पूर्णतः क्षतिपूर्ति मुक्त (Indemnify) रखेगा।
+              </p>
               
-              <h4 style="color: #991b1b; font-size: 13px;">3. JURISDICTION / कानूनी क्षेत्राधिकार</h4>
-              <p>All legal disputes shall be subject exclusively to the courts of Itarsi / Hoshangabad, Madhya Pradesh.</p>
+              <h4 style="color: #991b1b; font-size: 13.5px;">
+                3. EXCLUSIVE COURT JURISDICTION / एकमात्र कानूनी क्षेत्राधिकार
+              </h4>
+              <p>
+                किसी भी कानूनी विवाद या नोटिस की स्थिति में केवल और केवल <strong>इटारसी / होशंगाबाद (नर्मदापुरम), मध्य प्रदेश</strong> न्यायालय का क्षेत्राधिकार ही मान्य होगा। देश का अन्य कोई भी न्यायालय पूर्णतः वर्जित है।
+              </p>
             </div>
 
-            <div class="terms-checkbox-box" style="padding: 12px 14px; background: #fee2e2; border: 1.5px solid #fca5a5; border-radius: 10px; margin-top: 10px;">
-              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 800; color: #991b1b;">
-                <input type="checkbox" name="accept_terms_vendor" id="vendorTermsCheckbox" style="width: 20px; height: 20px; accent-color: #dc2626; cursor: pointer;" required>
-                <span>मैं घोषणा करता हूँ कि किसी भी विवाद या दुर्घटना में कंपनी व कंपनी मालिक पूरी तरह दायित्व मुक्त (Not Liable) रहेंगे। I agree to Strict Zero Liability Terms. *</span>
+            <div class="terms-checkbox-box" style="padding: 14px 16px; background: #fee2e2; border: 2px solid #dc2626; border-radius: 12px; margin-top: 12px;">
+              <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; font-size: 13px; font-weight: 800; color: #991b1b; line-height: 1.5;">
+                <input type="checkbox" name="accept_terms_vendor" id="vendorTermsCheckbox" style="width: 22px; height: 22px; accent-color: #dc2626; cursor: pointer; margin-top: 2px;" required>
+                <span>
+                  मैं (वेंडर) घोषणा करता हूँ कि अपने काम, सुरक्षा, पुलिस अनुमति व ग्राहक लेन-देन के लिए मैं स्वयं 100% ज़िम्मेदार रहूँगा। <strong>किसी भी परिस्थिति में वेबसाइट, कंपनी और कंपनी का मालिक ज़िम्मेदार नहीं होंगे (Strict Zero Liability Agreement)।</strong> *
+                </span>
               </label>
             </div>
           </div>
@@ -637,49 +693,117 @@
 
       if (stateSel && distSel && tehsilSel) {
         fetch('/api/allowed-locations')
-          .then(res => res.json())
-          .then(data => {
-            if (Object.keys(data).length > 0) {
-              stateSel.innerHTML = '';
-              Object.keys(data).forEach(st => {
-                const opt = document.createElement('option');
-                opt.value = st;
-                opt.textContent = st;
-                stateSel.appendChild(opt);
-              });
+        .then(res => res.json())
+        .then(data => {
+          const states = Object.keys(data);
+          if (states.length > 0) {
+            stateSel.innerHTML = '<option value="">-- Select State / राज्य चुनें --</option>';
+            states.forEach(st => {
+              const opt = document.createElement('option');
+              opt.value = st;
+              opt.textContent = st;
+              stateSel.appendChild(opt);
+            });
 
-              stateSel.addEventListener('change', function() {
-                const stateVal = this.value;
-                distSel.innerHTML = '';
-                tehsilSel.innerHTML = '';
-                if (data[stateVal]) {
-                  Object.keys(data[stateVal]).forEach(dist => {
-                    const opt = document.createElement('option');
-                    opt.value = dist;
-                    opt.textContent = dist;
-                    distSel.appendChild(opt);
-                  });
-                }
-              });
+            function populateDistricts(stVal, preselectDist, preselectTeh) {
+              distSel.innerHTML = '<option value="">-- Select District / ज़िला चुनें --</option>';
+              tehsilSel.innerHTML = '<option value="">-- Select Tehsil / तहसील चुनें --</option>';
 
-              distSel.addEventListener('change', function() {
-                const stateVal = stateSel.value;
-                const distVal = this.value;
-                tehsilSel.innerHTML = '';
-                if (data[stateVal] && data[stateVal][distVal]) {
-                  data[stateVal][distVal].forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t;
-                    opt.textContent = t;
-                    tehsilSel.appendChild(opt);
-                  });
+              if (stVal && data[stVal]) {
+                const districts = Object.keys(data[stVal]);
+                districts.forEach(dist => {
+                  const opt = document.createElement('option');
+                  opt.value = dist;
+                  opt.textContent = dist;
+                  if (preselectDist && dist.toLowerCase() === preselectDist.toLowerCase()) {
+                    opt.selected = true;
+                  }
+                  distSel.appendChild(opt);
+                });
+
+                if (distSel.value) {
+                  populateTehsils(stVal, distSel.value, preselectTeh);
                 }
-              });
+              }
             }
-          })
-          .catch(err => console.log('Location API:', err));
+
+            function populateTehsils(stVal, distVal, preselectTeh) {
+              tehsilSel.innerHTML = '<option value="">-- Select Tehsil / तहसील चुनें --</option>';
+
+              if (stVal && distVal && data[stVal] && data[stVal][distVal]) {
+                data[stVal][distVal].forEach(t => {
+                  const opt = document.createElement('option');
+                  opt.value = t;
+                  opt.textContent = t;
+                  if (preselectTeh && t.toLowerCase() === preselectTeh.toLowerCase()) {
+                    opt.selected = true;
+                  }
+                  tehsilSel.appendChild(opt);
+                });
+              }
+            }
+
+            stateSel.addEventListener('change', function() {
+              populateDistricts(this.value, null, null);
+            });
+
+            distSel.addEventListener('change', function() {
+              populateTehsils(stateSel.value, this.value, null);
+            });
+
+            // Default to first state (e.g. Madhya Pradesh)
+            stateSel.value = states[0];
+            populateDistricts(states[0], 'Hoshangabad', 'Itarsi');
+          }
+        })
+        .catch(err => console.error('Location API Error:', err));
+      // Venue Specific dynamic handler
+      const venueCheckbox = document.querySelector('input[type="checkbox"][value="venue"]');
+      const venueFields = document.getElementById('venue-specific-fields');
+      if (venueCheckbox && venueFields) {
+        function checkVenueDisplay() {
+          venueFields.style.display = venueCheckbox.checked ? 'block' : 'none';
+        }
+        venueCheckbox.addEventListener('change', checkVenueDisplay);
+        checkVenueDisplay();
       }
     });
+
+    function handleVenueTypeChange(val) {
+      const capSel = document.getElementById('guest_capacity');
+      const wedSel = document.getElementById('can_host_wedding');
+      const hint = document.getElementById('wedding_hint');
+
+      if (val === 'restaurant') {
+        if (capSel) capSel.value = '30 - 100 Guests (Small Gathering)';
+        if (wedSel) wedSel.value = 'no';
+        if (hint) {
+          hint.textContent = "ℹ️ रेस्टोरेंट व कैफे केवल जन्मदिन व 30-100 मेहमानों की छोटी पार्टियों के लिए मान्य हैं। शादी-विवाह विकल्प स्वतः 'No' सेट किया गया है।";
+          hint.style.color = "#b91c1c";
+        }
+      } else if (val === 'banquet_hall') {
+        if (capSel) capSel.value = '150 - 500 Guests';
+        if (wedSel) wedSel.value = 'yes';
+        if (hint) {
+          hint.textContent = "✅ बैंक्वेट हॉल सगाई, रिसेप्शन व मध्यम शादी समारोह हेतु उपयुक्त है।";
+          hint.style.color = "#15803d";
+        }
+      } else if (val === 'resort') {
+        if (capSel) capSel.value = '300 - 2000 Guests';
+        if (wedSel) wedSel.value = 'yes';
+        if (hint) {
+          hint.textContent = "✅ लग्जरी रिसॉर्ट डेस्टिनेशन वेडिंग व भव्य आयोजनों हेतु उपयुक्त है।";
+          hint.style.color = "#15803d";
+        }
+      } else {
+        if (capSel) capSel.value = '500 - 2500+ Guests';
+        if (wedSel) wedSel.value = 'yes';
+        if (hint) {
+          hint.textContent = "✅ मैरिज गार्डन बड़े भव्य शादी-विवाह व रिसेप्शन हेतु सर्वोत्तम है।";
+          hint.style.color = "#15803d";
+        }
+      }
+    }
   </script>
 </body>
 </html>

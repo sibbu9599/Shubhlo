@@ -9,7 +9,7 @@
 </head>
 <body class="watermark-bg">
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -95,6 +95,47 @@
           </div>
         </div>
 
+        <!-- VENDOR EARNINGS & ANALYTICS INSIGHTS CARD -->
+        <div style="background: white; padding: 25px; border-radius: 14px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1.5px solid #e2e8f0;">
+          <h3 style="margin: 0 0 16px 0; color: #1e293b; font-family: 'Outfit', sans-serif; font-size: 20px; display: flex; align-items: center; gap: 10px;">
+            📊 Earnings & Monthly Performance Analytics / आय व बुकिंग आंकड़े
+          </h3>
+
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Token Advances</div>
+              <div style="font-size: 20px; font-weight: 800; color: #059669; margin-top: 4px;">{{ "₹{:,.0f}".format(total_bookings * 5000) if total_bookings > 0 else '₹0' }}</div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Net Bank Payout</div>
+              <div style="font-size: 20px; font-weight: 800; color: #2563eb; margin-top: 4px;">{{ "₹{:,.0f}".format(total_bookings * 4500) if total_bookings > 0 else '₹0' }}</div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Active Orders</div>
+              <div style="font-size: 20px; font-weight: 800; color: #d97706; margin-top: 4px;">{{ total_bookings }} Booking(s)</div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Business Model</div>
+              <div style="font-size: 16px; font-weight: 800; color: #8b5cf6; margin-top: 4px;">🤝 Direct Deal</div>
+            </div>
+          </div>
+
+          <!-- Monthly Earnings Visual Progress Bars -->
+          <div style="background: #f1f5f9; padding: 18px; border-radius: 12px;">
+            <div style="font-weight: 700; color: #334155; font-size: 13.5px; margin-bottom: 12px;">📈 Monthly Revenue Trend (2026 Season)</div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; height: 100px; padding: 0 10px;">
+              <div style="text-align: center; flex: 1;"><div style="height: 40px; background: #9333ea; border-radius: 4px 4px 0 0; margin: 0 6px;"></div><span style="font-size: 11px; font-weight: 700; color: #64748b;">Jan</span></div>
+              <div style="text-align: center; flex: 1;"><div style="height: 65px; background: #9333ea; border-radius: 4px 4px 0 0; margin: 0 6px;"></div><span style="font-size: 11px; font-weight: 700; color: #64748b;">Feb</span></div>
+              <div style="text-align: center; flex: 1;"><div style="height: 50px; background: #9333ea; border-radius: 4px 4px 0 0; margin: 0 6px;"></div><span style="font-size: 11px; font-weight: 700; color: #64748b;">Mar</span></div>
+              <div style="text-align: center; flex: 1;"><div style="height: 85px; background: #e11d48; border-radius: 4px 4px 0 0; margin: 0 6px;"></div><span style="font-size: 11px; font-weight: 700; color: #64748b;">Apr</span></div>
+              <div style="text-align: center; flex: 1;"><div style="height: 95px; background: #10b981; border-radius: 4px 4px 0 0; margin: 0 6px;"></div><span style="font-size: 11px; font-weight: 700; color: #64748b;">May</span></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Registered Services Selector & Dynamic Manager -->
         <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1.5px solid #e2e8f0;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
@@ -121,9 +162,9 @@
             <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px;">
                 {% for s in all_services %}
                     {% set s_name = s.service if (s.service is defined and s.service) else (s['service'] if (s is mapping and 'service' in s and s['service']) else (s if (s is string and s) else 'venue')) %}
-                    <div style="display: inline-flex; align-items: center; border-radius: 8px; overflow: hidden; border: 1.5px solid {% if s_name == vendor.service %}#8e44ad{% else %}#cbd5e1{% endif %}; background: {% if s_name == vendor.service %}#8e44ad{% else %}#f8fafc{% endif %}; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                        <a href="{{ url_for('vendor_switch_service', service_name=s_name) }}" style="padding: 10px 16px; text-decoration: none; font-weight: 800; font-size: 14px; color: {% if s_name == vendor.service %}white{% else %}#334155{% endif %}; display: flex; align-items: center; gap: 6px;">
-                            <span>{% if s_name == vendor.service %}🟢{% endif %} {{ s_name | replace('_', ' ') | title }}</span>
+                    <div style="display: inline-flex; align-items: center; border-radius: 8px; overflow: hidden; border: 1.5px solid {% if s_name|lower == (vendor.service|lower) %}#8e44ad{% else %}#cbd5e1{% endif %}; background: {% if s_name|lower == (vendor.service|lower) %}#8e44ad{% else %}#f8fafc{% endif %}; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                        <a href="{{ url_for('vendor_switch_service', service_name=s_name) }}" style="padding: 10px 16px; text-decoration: none; font-weight: 800; font-size: 14px; color: {% if s_name|lower == (vendor.service|lower) %}white{% else %}#334155{% endif %}; display: flex; align-items: center; gap: 6px;">
+                            <span>{% if s_name|lower == (vendor.service|lower) %}🟢{% endif %} {{ s_name | replace('_', ' ') | title }}</span>
                         </a>
                         {% if all_services|length > 1 %}
                         <form action="{{ url_for('vendor_remove_service', service_name=s_name) }}" method="POST" style="margin: 0; display: inline;" onsubmit="return confirm('Are you sure you want to remove {{ s_name | upper }} service from customer bookings? / क्या आप वाकई {{ s_name | upper }} सेवा हटाना चाहते हैं?');">
@@ -136,6 +177,27 @@
                     </div>
                 {% endfor %}
             </div>
+
+            {% if vendor.service|lower == 'venue' %}
+              <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 16px; margin-top: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div style="font-size: 13px; color: #166534;">
+                  <strong>🏰 Venue Classification:</strong> {{ vendor.venue_type_label or 'Marriage Garden & Lawn / मैरिज गार्डन' }} 
+                  <span style="margin: 0 8px; color: #cbd5e1;">|</span>
+                  <strong>👥 Capacity:</strong> {{ vendor.capacity_label or '500 - 2500+ Guests' }}
+                </div>
+                <div>
+                  {% if vendor.can_host_wedding %}
+                    <span style="background: #dcfce7; color: #15803d; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 12px; border: 1px solid #86efac;">
+                      ✅ Weddings & Receptions Approved
+                    </span>
+                  {% else %}
+                    <span style="background: #fee2e2; color: #991b1b; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 12px; border: 1px solid #fca5a5;">
+                      🎂 Birthdays & Small Parties Only (Weddings Not Hosted)
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
 
             <!-- Collapsible Form to Add New Service -->
             <div id="add-service-form-card" style="display: none; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 20px; margin-top: 20px; animation: fadeIn 0.3s ease;">
@@ -323,10 +385,10 @@
                                 <strong>👤 Name:</strong> {{ b.name or 'Customer' }} | <strong>📞 Phone:</strong> {{ b.phone }} | <strong>✉️ Email:</strong> {{ b.email }}<br>
                                 <strong>🏠 Address:</strong> {{ b.address or 'N/A' }}
                                 <div style="margin-top: 8px; display: flex; gap: 8px;">
-                                  <a href="https://wa.me/{{ b.phone | clean_phone_indian }}?text={{ ('Namaste ' ~ (b.name or 'Customer') ~ ' ji! Main Celebrato Vendor hoon. Aapki booking #' ~ b.id ~ ' ke silsile me baat karni hai.') | urlquote }}" target="_blank" style="background: #25D366; color: white; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                  <a href="https://wa.me/{{ b.phone | clean_phone_indian }}?text={{ ('Namaste ' ~ (b.name or 'Customer') ~ ' ji! Main Shubhlo Vendor hoon. Aapki booking #' ~ b.id ~ ' ke silsile me baat karni hai.') | urlquote }}" target="_blank" style="background: #25D366; color: white; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                                     💬 WA Customer
                                   </a>
-                                  <a href="sms:+91{{ b.phone }}?body={{ ('Namaste! Main Celebrato Vendor hoon. Booking #' ~ b.id ~ ' ke silsile me sampark kar raha hoon.') | urlquote }}" style="background: #3498db; color: white; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                  <a href="sms:+91{{ b.phone }}?body={{ ('Namaste! Main Shubhlo Vendor hoon. Booking #' ~ b.id ~ ' ke silsile me sampark kar raha hoon.') | urlquote }}" style="background: #3498db; color: white; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                                     ✉️ SMS Customer
                                   </a>
                                 </div>
@@ -334,8 +396,49 @@
                         {% endif %}
                         
                         <p style="margin: 6px 0; font-size: 14px; color: #8e44ad;"><strong>🎉 Event Name & Type / कार्यक्रम:</strong> {{ b.event_name or 'Wedding / शादी विवाह' }}</p>
-                        <p style="margin: 6px 0; font-size: 14px;"><strong>📅 Event Date:</strong> {{ b.event_date or '25/12/2026' }}</p>
                         <p style="margin: 6px 0; font-size: 14px;"><strong>📍 Location / District:</strong> {{ b.district or 'Hoshangabad' }}, {{ b.tehsil or 'Itarsi' }}</p>
+
+                        <!-- Date Availability & 1-Click Blocking Box for this Booking -->
+                        <div style="margin: 12px 0; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: {% if b.is_date_blocked %}#fef2f2; border: 1.5px solid #fca5a5;{% else %}#f0fdf4; border: 1.5px solid #86efac;{% endif %};">
+                            <div>
+                                <div style="font-size: 13.5px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <span>📅 <strong>Event Date:</strong> <span style="font-family: monospace; font-size: 14px; color: #1e1b4b;">{{ b.event_date }}</span></span>
+                                    {% if b.is_date_blocked %}
+                                        <span style="background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #fca5a5;">
+                                            🔒 DATE BLOCKED (इस तारीख की नई बुकिंग बंद है)
+                                        </span>
+                                    {% else %}
+                                        <span style="background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #86efac;">
+                                            🟢 DATE OPEN (अन्य ग्राहकों को बुकिंग हेतु खुली है)
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <small style="color: #64748b; font-size: 11.5px; margin-top: 4px; display: block;">
+                                    {% if b.is_date_blocked %}
+                                        ✓ आपकी यह तारीख ब्लॉक है — वेबसाइट पर कोई अन्य ग्राहक इस तारीख को आपको बुक नहीं कर सकेगा।
+                                    {% else %}
+                                        💡 यदि आप इस कार्यक्रम की वजह से इस तारीख को व्यस्त हैं, तो सामने बटन दबाकर तारीख ब्लॉक करें।
+                                    {% endif %}
+                                </small>
+                            </div>
+
+                            <!-- 1-Click Action to Block / Unblock this Booking's Date -->
+                            <form action="{{ url_for('vendor_toggle_date_availability') }}" method="POST" style="margin: 0;">
+                                <input type="hidden" name="event_date" value="{{ b.event_date }}">
+                                {% if b.is_date_blocked %}
+                                    <input type="hidden" name="action" value="unblock">
+                                    <button type="submit" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s;">
+                                        🔓 Unblock Date (तारीख खोलें)
+                                    </button>
+                                {% else %}
+                                    <input type="hidden" name="action" value="block">
+                                    <input type="hidden" name="reason" value="Booked for Booking #{{ b.id }} ({{ b.event_name or 'Event' }})">
+                                    <button type="submit" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 8px rgba(239,68,68,0.3); transition: all 0.2s;">
+                                        🔒 Block This Date (तारीख ब्लॉक करें)
+                                    </button>
+                                {% endif %}
+                            </form>
+                        </div>
 
                         <!-- Token Deposit & Bank Payout Declaration Box -->
                         <div style="background: #fdf4ff; border: 1.5px solid #f0abfc; padding: 14px; border-radius: 10px; margin: 12px 0;">
@@ -482,5 +585,13 @@
         </div>
 
     </main>
+    <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 60px;">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+      <img src="{{ url_for('static', filename='image/apna_infotech_logo.png') }}" alt="Apna Infotech Pvt. Ltd." style="height: 36px; border-radius: 6px; background: #ffffff; padding: 3px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+      <span style="font-weight: 700; font-size: 14px; color: #f8fafc;">Apna Infotech Pvt. Ltd.</span>
+    </div>
+      <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo - A Venture of Apna Infotech Pvt. Ltd. All Rights Reserved.</p>
+    </footer>
+    {% include 'chatbot_include.html' %}
 </body>
 </html>

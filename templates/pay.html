@@ -220,7 +220,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -288,6 +288,14 @@
         <span style="display: block; margin-top: 6px; font-weight: 700; color: #047857;">Total Token Money Payable: ₹5,118 per selected vendor</span>
       </div>
 
+      <!-- 🛡️ 100% Safe Guarantee Trust Card -->
+      <div style="background: linear-gradient(135deg, #eff6ff, #f0fdf4); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 12px 14px; margin-bottom: 22px; text-align: left; font-size: 12.5px; color: #1e40af; line-height: 1.5;">
+        <strong style="color: #1d4ed8; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+          🛡️ Shubhlo 100% Safe Deal Guarantee (सुरक्षित सौदा गारंटी):
+        </strong>
+        अगर किसी भी कारण से वेंडर के साथ आपका सौदा तय नहीं होता है, तो <strong>फ्री में दूसरा वेंडर बदलने</strong> या <strong>100% टोकन रिफंड</strong> की पक्की गारंटी। आपका पैसा पूर्णतः सुरक्षित है!
+      </div>
+
       <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 14px;">
         Choose Payment Method
       </h4>
@@ -318,7 +326,7 @@
   </div>
 
   <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
-    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved.</p>
+    <p style="margin: 0; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo - A Venture of Apna Infotech Pvt. Ltd. All Rights Reserved.</p>
   </footer>
 </body>
 </html>

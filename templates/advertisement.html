@@ -394,7 +394,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -592,7 +592,7 @@
     <div class="print-flyer-card">
       <div style="text-align: center; border-bottom: 2.5px solid #8b5cf6; padding-bottom: 18px; margin-bottom: 22px;">
         <h1 style="color: #8b5cf6; font-family: 'Outfit', sans-serif; font-size: 38px; margin: 0; font-weight: 900;">Shubhlo👑</h1>
-        <p style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 6px 0 0 0;">भारत का अपना पारदर्शी इवेंट व बुकिंग प्लेटफ़ॉर्म (Setu Infotech Pvt. Ltd.)</p>
+        <p style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 6px 0 0 0;">भारत का अपना पारदर्शी इवेंट व बुकिंग प्लेटफ़ॉर्म (Apna Infotech Pvt. Ltd.)</p>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px;">
@@ -626,10 +626,8 @@
 
   <!-- Footer -->
   <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
-    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo (Setu Infotech Pvt. Ltd.). All Rights Reserved. | Official Website: <a href="https://shubhlo.com" target="_blank" style="color: #38bdf8; text-decoration: none; font-weight: bold;">shubhlo.com</a> | Helpline: <a href="tel:7067883131" style="color: #f59e0b; text-decoration: none; font-weight: bold;">+91 7067883131</a></p>
-    <div style="text-align: center; margin-top: 15px;">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Shubhlo Brand Logo" style="max-height: 52px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
-    </div>
+    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo (Apna Infotech Pvt. Ltd.). All Rights Reserved. | Official Website: <a href="https://shubhlo.com" target="_blank" style="color: #38bdf8; text-decoration: none; font-weight: bold;">shubhlo.com</a> | Helpline: <a href="tel:7067883131" style="color: #f59e0b; text-decoration: none; font-weight: bold;">+91 7067883131</a></p>
+    
   </footer>
 
   <script>

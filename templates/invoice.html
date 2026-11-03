@@ -195,10 +195,13 @@
     
     <!-- Invoice Header -->
     <div class="invoice-header">
-      <div class="invoice-logo">
-        Shubhlo<span>👑</span>
-        <div style="font-size: 12px; font-weight: 500; color: #7f8c8d; margin-top: 2px;">
-          Setu Infotech Pvt Ltd | GSTIN: 23AAAAA0000A1Z5
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <img src="{{ url_for('static', filename='image/apna_infotech_logo.png') }}" alt="Apna Infotech Pvt. Ltd. Logo" style="height: 48px; object-fit: contain; border-radius: 8px; background: #ffffff; padding: 3px 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div class="invoice-logo">
+          Shubhlo<span>👑</span>
+          <div style="font-size: 12px; font-weight: 600; color: #475569; margin-top: 2px;">
+            Apna Infotech Pvt. Ltd. • Platform Operator
+          </div>
         </div>
       </div>
       <div class="invoice-title-badge">
@@ -287,6 +290,12 @@
       <strong>📞 Vendor Contact Notice / वेंडर प्रत्यक्ष संपर्क निर्देश:</strong><br>
       <strong>ENGLISH:</strong> Selected vendors will contact you directly on your phone/WhatsApp to confirm the event date, time, and service details.<br>
       <em><strong>हिंदी:</strong> चुने गए वेंडर तारीख, समय और आवश्यकताओं की पुष्टि के लिए आपसे सीधे फोन या व्हाट्सएप पर संपर्क करेंगे।</em>
+    </div>
+
+    <!-- Absolute Zero Liability Legal Disclaimer Notice -->
+    <div class="legal-notice" style="background: #fff5f5; border-left: 4px solid #ef4444; color: #7f1d1d; margin-top: 15px;">
+      <strong style="color: #991b1b;">⚖️ ZERO LIABILITY LEGAL DISCLAIMER / कंपनी व मालिक पूर्ण दायित्व मुक्ती:</strong><br>
+      किसी भी परिस्थिति में वेबसाइट (Shubhlo), कंपनी (Apna Infotech Pvt. Ltd.) अथवा कंपनी का मालिक (Platform Owner) वेंडर द्वारा सेवा में कमी, दुर्घटना, खाद्य सुरक्षा, पुलिस अनुमति या आपसी लेन-देन के लिए ज़िम्मेदार नहीं होंगे। ग्राहक व वेंडर सीधे आपस में ज़िम्मेदार हैं। क्षेत्राधिकार: केवल इटारसी / होशंगाबाद, म.प्र.।
     </div>
 
     <!-- Action Buttons -->

@@ -215,7 +215,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -263,6 +263,18 @@
         </div>
       </div>
 
+      <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #25d366; padding: 18px; border-radius: 16px; margin: 18px 0; text-align: center; box-shadow: 0 6px 20px rgba(37,211,102,0.18);">
+        <h4 style="margin: 0 0 6px 0; color: #166534; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          💬 Chat with Owner on WhatsApp
+        </h4>
+        <p style="margin: 0 0 12px 0; font-size: 13px; color: #15803d; font-weight: 600;">
+          Direct 1-on-1 communication with Platform Owner for instant booking queries, counter-offers, or customization.
+        </p>
+        <a href="https://wa.me/917067883131?text=Namaste%20Shubhlo%20Owner!%20I%20have%20an%20inquiry%20regarding%20event%20services." target="_blank" style="background: linear-gradient(135deg, #25d366, #128c7e); color: white; padding: 11px 20px; border-radius: 50px; font-weight: 900; font-size: 13.5px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(37,211,102,0.35);">
+          💬 Launch WhatsApp Chat (+91 7067883131)
+        </a>
+      </div>
+
       <div class="info-item">
         <div class="info-icon">📧</div>
         <div class="info-content">
@@ -276,8 +288,9 @@
         <div class="info-icon">📍</div>
         <div class="info-content">
           <h5>Headquarters / मुख्य कार्यालय</h5>
-          <p>Setu Infotech Pvt Ltd</p>
-          <span style="font-size: 13px; color: #64748b;">Saket, Madhya Pradesh, India</span>
+          <div style="margin: 6px 0;"><img src="{{ url_for('static', filename='image/apna_infotech_logo.png') }}" alt="Apna Infotech Logo" style="max-height: 40px; border-radius: 8px; background: white; padding: 3px 8px; border: 1px solid #e2e8f0;"></div>
+          <p>Apna Infotech Pvt. Ltd.</p>
+          <span style="font-size: 13px; color: #64748b;">Madhya Pradesh, India</span>
         </div>
       </div>
 
@@ -342,11 +355,9 @@
 
   <!-- Footer -->
   <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
-    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved. Powered by Setu Infotech Pvt Ltd.</p>
-    <div style="text-align: center; margin-top: 15px;">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Shubhlo Brand Logo" style="max-height: 52px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
-    </div>
+    <p style="margin: 0 0 10px; font-weight: 600; font-size: 14px; color: #94a3b8;">&copy; 2026 Shubhlo. All Rights Reserved. Operated & Powered by Apna Infotech Pvt. Ltd.</p>
+    
   </footer>
-
+  {% include 'chatbot_include.html' %}
 </body>
 </html>

@@ -128,7 +128,7 @@
 
   <!-- Glassmorphic Header Nav -->
   <header>
-    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span></a>
+    <a href="{{ url_for('home') }}" class="logo">Shubhlo<span class="halo">👑</span><span class="brand-byline">by Apna Infotech</span></a>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
@@ -158,51 +158,129 @@
     <div class="terms-card">
       <div class="terms-header">
         <h1>Terms & Conditions / नियम एवं शर्तें 📜</h1>
-        <p>Official user agreement and booking policy powered by Setu Infotech Pvt Ltd</p>
+        <p>Official user agreement and booking policy powered by Apna Infotech Pvt. Ltd.</p>
       </div>
 
-      <div class="terms-section" style="border: 2px solid #ef4444; background: #fff5f5;">
-        <h3 style="color: #991b1b;">
-          🛡️ 1. ABSOLUTE ZERO LIABILITY OF COMPANY & OWNER / सर्वोच्च कंपनी व मालिक पूर्ण दायित्व मुक्ती
+      <!-- TOP CRITICAL LEGAL DISCLAIMER BANNER -->
+      <div style="background: linear-gradient(135deg, #7f1d1d, #991b1b); color: white; padding: 22px 26px; border-radius: 18px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(153,27,27,0.3); border: 2px solid #ef4444;">
+        <div style="display: flex; align-items: flex-start; gap: 15px;">
+          <span style="font-size: 32px; line-height: 1;">🛡️</span>
+          <div>
+            <h2 style="font-family: 'Outfit', sans-serif; margin: 0 0 8px 0; font-size: 20px; font-weight: 900; color: #fef08a; letter-spacing: 0.5px;">
+              वैधानिक घोषणा: किसी भी परिस्थिति में वेबसाइट, कंपनी व कंपनी का मालिक ज़िम्मेदार नहीं होंगे
+            </h2>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.6; color: #fee2e2; font-weight: 600;">
+              <strong>ABSOLUTE & UNCONDITIONAL ZERO LIABILITY DISCLAIMER:</strong><br>
+              Shubhlo एक डिजिटल मध्यस्थ (Technology Intermediary) है। किसी भी परिस्थिति, घटना, दुर्घटना, सेवा में कमी, खाने-पीने के नुकसान, आगजनी, पुलिस/प्रशासनिक विवाद या आपसी लेन-देन में <strong>वेबसाइट, ऑपरेटिंग कंपनी (Apna Infotech Pvt. Ltd.) और कंपनी के मालिक (Platform Owner) 100% दायित्व मुक्त (Zero Liable)</strong> रहेंगे। ग्राहक और वेंडर अपने सभी सौदों व अनुबंधों के लिए स्वयं पूर्ण रूप से ज़िम्मेदार हैं।
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 1: MASTER ZERO LIABILITY CLAUSE -->
+      <div class="terms-section" style="border: 2px solid #dc2626; background: #fff5f5;">
+        <h3 style="color: #991b1b; font-size: 21px;">
+          ⚖️ 1. ABSOLUTE ZERO LIABILITY OF WEBSITE, COMPANY & OWNER / सर्वोच्च दायित्व मुक्ती नियम
         </h3>
-        <p style="color: #7f1d1d; font-weight: 600; line-height: 1.7;">
-          <strong>STRICT LEGAL DISCLAIMER & INDEMNIFICATION CLAUSE:</strong><br>
-          Under no circumstances shall <strong>Shubhlo</strong>, <strong>Setu Infotech Pvt Ltd</strong>, its Directors, Shareholders, Platform Owners, Management, Officers, Employees, or Affiliates be held liable, accountable, or responsible for any direct, indirect, accidental, consequential, or punitive damages, financial losses, cancellations, quality disputes, food safety issues, accidents, noise pollution violations, police permissions, or defaults caused by independent Vendors, Customers, or Third Parties during any event or booking transaction.
+        <p style="color: #7f1d1d; font-size: 14.5px; font-weight: 700; line-height: 1.8;">
+          NOTWITHSTANDING ANYTHING TO THE CONTRARY CONTAINED IN ANY DOCUMENT, AGREEMENT, OR COMMUNICATION, UNDER NO CIRCUMSTANCES WHATSOEVER SHALL <strong>SHUBHLO</strong>, <strong>APNA INFOTECH PVT. LTD.</strong>, ITS FOUNDERS, PLATFORM OWNERS, DIRECTORS, SHAREHOLDERS, PARTNERS, AGENTS, MANAGERS, EMPLOYEES, OR AFFILIATES BE HELD LIABLE, ACCOUNTABLE, RESPONSIBLE, OR GUILTY UNDER ANY CIVIL, CRIMINAL, CONSUMER, OR STATUTORY LAW FOR:
         </p>
-        <p class="hindi-text" style="border-left: 4px solid #ef4444; background: #fee2e2; color: #991b1b; font-weight: 700;">
-          <strong>मालिक व कंपनी दायित्व मुक्ती (हिंदी):</strong><br>
-          किसी भी परिस्थिति अथवा स्थिति में <strong>शुभलो (Shubhlo)</strong>, <strong>सेतु इन्फोटेक प्रा. लि. (Setu Infotech Pvt Ltd)</strong>, कंपनी के निदेशक, शेयरधारक, कंपनी मालिक, अधिकारी अथवा कर्मचारी किसी भी प्रकार के नुकसान, दुर्घटना, रद्दीकरण, सेवा की गुणवत्ता विवाद, खाद्य सुरक्षा, पुलिस/प्रशासनिक अनुमति विवाद अथवा वेंडर/ग्राहक के बीच हुए किसी भी लेन-देन के लिए <strong>ज़िम्मेदार या उत्तरदायी नहीं होंगे</strong>। प्लेटफ़ॉर्म केवल एक डिजिटल मध्यस्थ (Intermediary Marketplace) है।
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin: 16px 0;">
+          <div style="background: white; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 18px;">
+            <strong style="color: #991b1b; font-size: 14px;">A. Service Deficiency, Delays & Absenteeism (सेवा में कमी, देरी व अनुपस्थिति):</strong>
+            <p style="margin: 4px 0 0; font-size: 13.5px; color: #475569; line-height: 1.6;">
+              वेंडर द्वारा कार्यक्रम में देर से पहुंचना, अनुपस्थित रहना, काम अधूरा छोड़ना, पैकेज की गुणवत्ता में कमी या अंतिम समय में मना करना। इन सभी परिस्थितियों में केवल वेंडर व्यक्तिगत रूप से ज़िम्मेदार होगा। वेबसाइट/मालिक पर कोई दावा मान्य नहीं होगा।
+            </p>
+          </div>
+
+          <div style="background: white; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 18px;">
+            <strong style="color: #991b1b; font-size: 14px;">B. Food Safety, Hygiene & Health / FSSAI (खाद्य सुरक्षा, विषाक्तता व स्वच्छता):</strong>
+            <p style="margin: 4px 0 0; font-size: 13.5px; color: #475569; line-height: 1.6;">
+              केटरिंग, भोजन, जल, पेय पदार्थ या स्वच्छता से संबंधित किसी भी समस्या (Food Poisoning, पेट खराब, एलर्जी, बासी भोजन आदि) के लिए केटरर/हलवाई वेंडर स्वयं FSSAI व खाद्य सुरक्षा कानून के तहत 100% ज़िम्मेदार होगा। कंपनी या मालिक का भोजन निर्माण या वितरण में कोई हस्तक्षेप नहीं है।
+            </p>
+          </div>
+
+          <div style="background: white; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 18px;">
+            <strong style="color: #991b1b; font-size: 14px;">C. Accidents, Fire, Electrocution & Property Damage (आग, करंट, दुर्घटना व संपत्ति हानि):</strong>
+            <p style="margin: 4px 0 0; font-size: 13.5px; color: #475569; line-height: 1.6;">
+              मैरिज गार्डन, बारात, स्टेज, टेंट गिरने, सिलेंडर ब्लास्ट, शॉर्ट-सर्किट, आतिशबाजी (Fireworks), शाही सवारी/घोड़ी/बग्गी से होने वाली किसी भी जनहानि, चोट, आगजनी या दुर्घटना के लिए स्थल मालिक व संबंधित वेंडर ही सीधे उत्तरदायी होंगे।
+            </p>
+          </div>
+
+          <div style="background: white; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 18px;">
+            <strong style="color: #991b1b; font-size: 14px;">D. Police, Sound Limits (10 PM Rule), Music Licenses & NOCs (पुलिस, डीजे व प्रशासनिक अनुमति):</strong>
+            <p style="margin: 4px 0 0; font-size: 13.5px; color: #475569; line-height: 1.6;">
+              रात 10 बजे के बाद ध्वनि विस्तारक यंत्र (DJ/Sound), पुलिस अनुमति, नगर निगम NOC, फायर सेफ्टी और ध्वनि प्रदूषण नियमों के उल्लंघन की दशा में पुलिस कार्यवाही, एफआईआर या जब्ती के लिए वेंडर व आयोजक स्वयं ज़िम्मेदार होंगे।
+            </p>
+          </div>
+
+          <div style="background: white; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 18px;">
+            <strong style="color: #991b1b; font-size: 14px;">E. Financial Disputes & Direct Cash Dealings (आर्थिक व नगद लेन-देन विवाद):</strong>
+            <p style="margin: 4px 0 0; font-size: 13.5px; color: #475569; line-height: 1.6;">
+              टोकन राशि के अतिरिक्त शेष भुगतान, पैकेज की दरें, एडवांस या नगद लेन-देन ग्राहक और वेंडर के बीच का व्यक्तिगत मामला है। शेष भुगतान न मिलने या अतिरिक्त वसूली की स्थिति में प्लेटफ़ॉर्म या मालिक की कोई आर्थिक या वैधानिक देनदारी नहीं होगी।
+            </p>
+          </div>
+
+          <div style="background: white; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 18px;">
+            <strong style="color: #991b1b; font-size: 14px;">F. Force Majeure & Acts of God (दैवीय आपदाएं व अपरिहार्य परिस्थितियां):</strong>
+            <p style="margin: 4px 0 0; font-size: 13.5px; color: #475569; line-height: 1.6;">
+              अत्यधिक बारिश, आंधी-तूफान, बाढ़, भूकंप, दंगा, कर्फ्यू, चुनाव आचार संहिता, सरकारी प्रतिबंध या महामारी के कारण कार्यक्रम प्रभावित होने पर कंपनी/मालिक किसी भी प्रकार के मुआवजे के उत्तरदायी नहीं होंगे।
+            </p>
+          </div>
+        </div>
+
+        <p class="hindi-text" style="border-left: 4px solid #dc2626; background: #fee2e2; color: #991b1b; font-weight: 800; font-size: 14.5px;">
+          📌 संक्षेप में स्पष्ट नियम: ग्राहक और वेंडर इस बात को भली-भांति समझते हैं और स्वीकार करते हैं कि वेबसाइट और उसका मालिक केवल सूचना व संपर्क का माध्यम हैं। किसी भी प्रकार की क्षति, हानि, मृत्यु, चोट या विवाद में कंपनी और उसके मालिक के विरुद्ध किसी भी न्यायालय, उपभोक्ता फोरम या पुलिस थाने में कोई भी दावा या शिकायत पूर्णतः अमान्य व विधि-विरुद्ध होगी।
         </p>
       </div>
 
+      <!-- SECTION 2: STATUTORY INTERMEDIARY STATUS -->
       <div class="terms-section" style="border-left: 4px solid #f59e0b;">
-        <h3>🏛️ 2. Digital Intermediary Facilitator Role / केवल मध्यस्थ प्लेटफ़ॉर्म श्रेणी</h3>
-        <p>Shubhlo is an independent IT marketplace facilitator connecting customers with independent vendor service providers. Shubhlo does NOT own, operate, manage, or employ any vendor staff, marriage garden, catering kitchen, or sound equipment. All contractual obligations, service performance, safety standards, and local law compliance are the sole responsibility of the respective vendor and customer.</p>
-        <p class="hindi-text">शुभलो केवल एक डिजिटल मध्यस्थ प्लेटफ़ॉर्म है। कंपनी किसी भी वेंडर, मैरिज गार्डन या सर्विस स्टाफ की मालिक अथवा नियोक्ता नहीं है। सभी सेवा समझौतों व कानूनी अनुपालनों की पूर्ण ज़िम्मेदारी संबंधित वेंडर व ग्राहक की अपनी होगी।</p>
+        <h3>🏛️ 2. IT Act 2000 Section 79 Intermediary Protection / मध्यस्थ सुरक्षा धारा 79</h3>
+        <p>Shubhlo operates strictly as an "Intermediary" as defined under Section 2(1)(w) and protected under Section 79 of the Information Technology Act, 2000 (India). Shubhlo does not initiate the transmission, does not select the receiver of the transmission, and does not select or modify the information contained in the transmission. The platform does not own, inspect, guarantee, or supervise vendor equipment, marriage gardens, catering vehicles, or event execution.</p>
+        <p class="hindi-text">यह प्लेटफ़ॉर्म भारतीय सूचना प्रौद्योगिकी अधिनियम, 2000 की धारा 79 के अंतर्गत पूर्ण सुरक्षित मध्यस्थ (Safe Harbor Intermediary) है। प्लेटफ़ॉर्म किसी भी वेंडर का नियोक्ता या ठेकेदार नहीं है।</p>
       </div>
 
+      <!-- SECTION 3: VENDOR INDEMNITY -->
       <div class="terms-section" style="border-left: 4px solid #8b5cf6;">
-        <h3>⚖️ 3. Vendor Legal & Tax Compliance / वेंडर की पूर्ण वैधानिक ज़िम्मेदारी</h3>
-        <p>All registered Vendors are independent legal entities. Vendors are 100% responsible for obtaining local municipal permissions, police sound permits, FSSAI food hygiene licenses, fire safety NOCs, and proper GST tax filings. Vendors agree to indemnify and hold harmless the Company and its Owner against any claims, fines, or litigation.</p>
-        <p class="hindi-text">सभी वेंडर स्वतंत्र सेवा प्रदाता हैं। पुलिस/ध्वनि प्रदूषण अनुमति, खाद्य सुरक्षा (FSSAI) व अग्निशमन अनुमति हेतु वेंडर स्वयं पूर्ण रूप से ज़िम्मेदार होंगे। कंपनी या मालिक के विरुद्ध कोई भी दावा मान्य नहीं होगा।</p>
+        <h3>🛡️ 3. Mandatory Indemnification by Vendors & Customers / क्षतिपूर्ति प्रतिज्ञा</h3>
+        <p>Both registered Vendors and Customers expressly agree to defend, indemnify, and hold harmless Shubhlo, Apna Infotech Pvt. Ltd., its Owner, Directors, and Employees from and against any and all claims, demands, liabilities, suits, damages, penalties, fines, and legal costs (including advocate fees) arising out of or resulting from breach of local laws, safety standards, non-performance, or negligence during any event.</p>
+        <p class="hindi-text">वेंडर और ग्राहक दोनों यह प्रतिज्ञा करते हैं कि वे किसी भी विवाद की स्थिति में कंपनी व उसके मालिक को सभी कानूनी खर्चों, नोटिसों व मुकदमों से पूर्णतः सुरक्षित व क्षतिपूर्ति मुक्त रखेंगे।</p>
       </div>
 
+      <!-- SECTION 4: ADVANCE TOKEN POLICY -->
       <div class="terms-section">
-        <h3>💰 4. Advance Token Booking Policy / अग्रिम टोकन नीति</h3>
-        <p>Customers can lock event dates by paying an initial advance token of ₹5,100 or 20% of total package amount. Balance payment is cleared on event day directly to vendor partners.</p>
-        <p class="hindi-text">ग्राहक अपनी कार्यक्रम तिथि को ₹5,100 या पैकेज राशि का 20% अग्रिम टोकन देकर बुक कर सकते हैं। शेष राशि का भुगतान कार्यक्रम के दिन वेंडर को किया जाएगा।</p>
+        <h3>💰 4. Advance Token Booking & Direct Deal Policy / अग्रिम टोकन व सीधा सौदा नीति</h3>
+        <p>Customers lock event dates and vendor partners by paying a nominal Token Money of ₹5,118 per vendor (₹5,000 vendor advance deposit + ₹100 platform fee + ₹18 GST). Exactly ₹5,000 is 100% deducted from the customer's final invoice. All event package rates, custom requirements, menus, and final bill settlements are decided directly between the customer and vendor partner.</p>
+        <p class="hindi-text">ग्राहक केवल ₹5,118 टोकन मनी (₹5,000 वेंडर अग्रिम राशि + ₹100 प्लेटफॉर्म शुल्क + ₹18 GST) जमा कर अपनी तारीख व वेंडर बुक करते हैं। वेंडर के अंतिम बिल में से पूरे ₹5,000 कम (Deduct) किए जाएंगे। बाकी सभी चीजें (पैकेज रेट, मेन्यू, सुविधाएं और कुल बिल) ग्राहक और वेंडर सीधे आपस में तय करते हैं।</p>
       </div>
 
+      <!-- SECTION 5: 100% SAFE DEAL GUARANTEE -->
+      <div class="terms-section" style="border-left: 4px solid #10b981; background: #f0fdf4;">
+        <h3 style="color: #15803d;">🛡️ 5. Shubhlo 100% Safe Deal Guarantee / असफल सौदा व 100% टोकन रिफंड सुरक्षा नीति</h3>
+        <p>If for any reason (including vendor unavailability, pricing disagreements, date conflicts, or requirement mismatch) the direct deal between Customer and Vendor cannot be finalized, the customer is 100% protected under our two-step guarantee:</p>
+        <ul>
+          <li><strong>Step 1 - Free Alternate Vendor Replacement:</strong> Shubhlo will connect the customer with another top-rated verified vendor in the same category and budget with zero additional token charge. The paid token deposit will transfer completely to the new vendor's invoice.</li>
+          <li><strong>Step 2 - 100% Instant Token Refund:</strong> If an alternative vendor is not suitable or the customer prefers to cancel, Shubhlo guarantees a full 100% refund of the token money within 24 to 48 hours to the customer's original payment method (Bank/UPI/Card) without penalties or deduction.</li>
+        </ul>
+        <p class="hindi-text">यदि किसी भी कारणवश (वेंडर की अनुपलब्धता, रेट पर असहमति, तारीख या मेन्यू का तालमेल न बैठना) ग्राहक और वेंडर का सीधा सौदा तय नहीं हो पाता, तो ग्राहक की टोकन राशि 100% सुरक्षित है। ग्राहक को <strong>(1) बिना किसी अतिरिक्त शुल्क के दूसरा वेरीफाइड वेंडर</strong> दिया जाएगा, अथवा <strong>(2) 24-48 घंटे में 100% टोकन राशि बिना किसी कटौती के मूल बैंक/UPI खाते में वापस (Refund)</strong> कर दी जाएगी। इसके अतिरिक्त कंपनी या मालिक पर अन्य किसी भी प्रकार का हर्जाना लागू नहीं होगा।</p>
+      </div>
+
+      <!-- SECTION 6: CANCELLATIONS -->
       <div class="terms-section">
-        <h3>🚫 5. Cancellation & Refund Policy / रद्दीकरण व रिफंड नीति</h3>
-        <p>Free cancellation with 100% refund is valid if cancelled at least 15 days prior to event date. Cancellations within 15 days of event carry a standard processing deduction.</p>
-        <p class="hindi-text">कार्यक्रम तिथि से 15 दिन पहले रद्द करने पर 100% रिफंड देय होगा। 15 दिनों के भीतर रद्दीकरण पर नियमानुसार प्रोसेसिंग शुल्क काटा जाएगा।</p>
+        <h3>🚫 6. Standard Cancellation & General Refund Policy / सामान्य रद्दीकरण नीति</h3>
+        <p>Customer cancellation with 100% refund is available if requested prior to service confirmation or in the event of vendor failure. After deal completion and OTP verification, standard contract settlement applies between customer and vendor.</p>
+        <p class="hindi-text">सौदा तय न होने या वेंडर की ओर से समस्या होने पर 100% टोकन रिफंड देय होगा। ओटीपी वेरिफिकेशन व सर्विस डिलीवरी के बाद अंतिम बिल का हिसाब ग्राहक व वेंडर के आपसी अनुबंध पर निर्भर करेगा।</p>
       </div>
 
-      <div class="terms-section" style="border-left: 4px solid #0f172a;">
-        <h3>⚖️ 6. Exclusive Legal Jurisdiction / कानूनी क्षेत्राधिकार</h3>
-        <p>Any dispute, claim, legal notice, or arbitration arising out of the use of this website or service bookings shall be governed exclusively by the laws of India and subject strictly to the exclusive jurisdiction of the competent courts in <strong>Itarsi / Hoshangabad, Madhya Pradesh, India</strong>.</p>
-        <p class="hindi-text">किसी भी विवाद या कानूनी प्रक्रिया की स्थिति में केवल <strong>इटारसी / होशंगाबाद, मध्य प्रदेश</strong> न्यायालय का क्षेत्राधिकार ही मान्य होगा।</p>
+      <!-- SECTION 7: EXCLUSIVE JURISDICTION -->
+      <div class="terms-section" style="border: 2px solid #0f172a; background: #f8fafc;">
+        <h3 style="color: #0f172a;">⚖️ 7. Exclusive Legal Jurisdiction / एकमात्र कानूनी क्षेत्राधिकार</h3>
+        <p>Any dispute, claim, controversy, legal notice, consumer complaint, or litigation arising out of or related to this platform, website, booking, token money, or vendor services shall be governed exclusively by the laws of India and subject strictly and exclusively to the sole jurisdiction of the competent courts in <strong>Itarsi / Hoshangabad (Narmadapuram), Madhya Pradesh, India</strong>. The parties expressly waive and forfeit the jurisdiction of all other courts across India.</p>
+        <p class="hindi-text" style="background: #e2e8f0; color: #0f172a; font-weight: 800; border-left: 4px solid #0f172a;">
+          ⚖️ कानूनी क्षेत्राधिकार: किसी भी कानूनी विवाद, नोटिस या वाद की स्थिति में केवल और केवल <strong>इटारसी / होशंगाबाद (नर्मदापुरम), मध्य प्रदेश</strong> स्थित सक्षम न्यायालय का क्षेत्राधिकार ही मान्य होगा। देश के किसी अन्य न्यायालय का क्षेत्राधिकार सर्वथा वर्जित है।
+        </p>
       </div>
     </div>
   </div>
