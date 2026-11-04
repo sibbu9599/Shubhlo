@@ -762,7 +762,7 @@ def home():
 
 @app.route('/index')
 def index():
-    return redirect(url_for('home'))
+    return home()
 
 # Home Page (Publicly accessible to everyone)
 
@@ -6344,12 +6344,13 @@ app.url_build_error_handlers.append(handle_url_build_error)
 @app.errorhandler(404)
 def page_not_found(e):
     path = request.path.lower().rstrip('/')
+    if path in ('', '/home', '/index', '/api/index', '/api'):
+        return home()
     if path.endswith('.html'):
         clean_page = path.rsplit('/', 1)[-1].replace('.html', '')
         return handle_html_extension_redirect(clean_page)
 
-    flash("The requested page was not found. Redirected to Shubhlo Home! / मांगी गई URL नहीं मिली, होमपेज पर रिडायरेक्ट किया गया।", "info")
-    return redirect(url_for('home'))
+    return home()
 
 if __name__ == '__main__':
     try:
