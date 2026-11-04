@@ -755,6 +755,8 @@ def fetch_vendors_by_service(service_name, tehsil=None):
 
 @app.route('/')
 @app.route('/home')
+@app.route('/api')
+@app.route('/api/index')
 def home():
     return render_template('home.html')
 
