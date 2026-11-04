@@ -6,6 +6,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import app
 
-# Vercel entrypoint
+# Vercel entrypoints (supports both WSGI app and handler conventions)
 app.debug = False
-
+handler = app
