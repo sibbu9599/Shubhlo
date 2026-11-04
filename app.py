@@ -755,10 +755,13 @@ def fetch_vendors_by_service(service_name, tehsil=None):
 
 @app.route('/')
 @app.route('/home')
-@app.route('/api')
-@app.route('/api/index')
 def home():
     return render_template('home.html')
+
+@app.route('/api')
+@app.route('/api/index')
+def api_index():
+    return home()
 
 # Advertisement & Marketing Hub (प्रचार एवं विज्ञापन केंद्र)
 
