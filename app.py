@@ -1042,7 +1042,13 @@ def login():
             ]
             session_users = session.get('mock_users', [])
             all_users = list(session_users) + list(GLOBAL_REGISTERED_USERS) + default_mock_users
-            user = next((u for u in all_users if (str(u.get('email', '')).lower() == email.lower() or str(u.get('phone', '')) == email) and str(u.get('password', '')) == password), None)
+            digits = ''.join(c for c in email if c.isdigit())
+            clean_p = digits[-10:] if len(digits) >= 10 else None
+            user = next((u for u in all_users if (
+                str(u.get('email', '')).lower() == email.lower() or
+                str(u.get('phone', '')) == email or
+                (clean_p and (str(u.get('phone', '')) == clean_p or str(u.get('phone', ''))[-10:] == clean_p))
+            ) and str(u.get('password', '')) == password), None)
             if user:
                 session['user'] = user['email']
                 session['user_name'] = user.get('name', 'Customer')
@@ -1363,12 +1369,23 @@ def reset_password():
         else:
             # Fallback mock mode
             if role == 'customer':
+                matched = False
                 for u in session.get('users', []):
-                    if (email and u.get('email') == email) or (phone and u.get('phone') == phone):
+                    if (email and u.get('email') == email) or (phone and (u.get('phone') == phone or (clean_phone_10 and str(u.get('phone', ''))[-10:] == clean_phone_10))):
                         u['password'] = new_password
+                        matched = True
                 for u in GLOBAL_REGISTERED_USERS:
-                    if (email and u.get('email') == email) or (phone and u.get('phone') == phone):
+                    if (email and u.get('email') == email) or (phone and (u.get('phone') == phone or (clean_phone_10 and str(u.get('phone', ''))[-10:] == clean_phone_10))):
                         u['password'] = new_password
+                        matched = True
+                if not matched and (email or phone):
+                    GLOBAL_REGISTERED_USERS.append({
+                        'id': user_id or 9999,
+                        'name': 'Customer',
+                        'email': email or f"{clean_phone_10 or phone}@customer.com",
+                        'phone': clean_phone_10 or phone or '',
+                        'password': new_password
+                    })
             elif role == 'vendor':
                 session_vendors = session.get('mock_vendors', [])
                 for v in session_vendors:
@@ -5435,7 +5452,7 @@ def ai_assistant_api():
                    "• Head Office: Saket, Madhya Pradesh<br>"
                    "• Support Hours: 24/7 Available")
         elif any(w in q_lower for w in ["vendor", "register", "join", "partner"]):
-          reply = ("🤝 <strong>Become a Shubhlo Vendor Partner:</strong><br>"
+          reply = ("<strong>Become a Shubhlo Vendor Partner:</strong><br>"
                    "Grow your business with zero commission listings on Shubhlo!<br>"
                    "👉 <a href='/vendor/register' style='color:#10b981; font-weight:bold;'>Register as a Vendor Here ➔</a>")
         else:
@@ -6208,9 +6225,9 @@ def api_assistant():
         all_vendors = GLOBAL_REGISTERED_VENDORS + session.get('mock_vendors', [])
     
     # 0. Parent Company & Ownership
-    if any(w in q_lower for w in ['company', 'apna infotech', 'who owns', 'parent', 'कंपनी', 'मालिक', 'संचालक']):
+    if any(w in q_lower for w in ['company', 'sangam infotech', 'sangam', 'apna infotech', 'who owns', 'parent', 'कंपनी', 'मालिक', 'संचालक']):
         return jsonify({
-            'reply': "🏢 <strong>Apna Infotech Pvt. Ltd.</strong><br><strong>Shubhlo (शुभलो)</strong> is proudly owned, managed, and operated by <strong>Apna Infotech Pvt. Ltd.</strong><br>We provide India's most transparent and verified event management platform.<br><br>📞 Helpline: <strong>+91 7067883131</strong><br>📧 Email: <strong>support@shubhlo.com</strong>"
+            'reply': "🏢 <strong>Sangam InfoTech Pvt. Ltd.</strong><br><strong>Shubhlo (शुभलो)</strong> is proudly owned, managed, and operated by <strong>Sangam InfoTech Pvt. Ltd.</strong><br>We provide India's most transparent and verified event management platform.<br><br>📞 Helpline: <strong>+91 7067883131</strong><br>📧 Email: <strong>support@shubhlo.com</strong>"
         })
 
     # 1. Greetings & Help
@@ -6335,5 +6352,10 @@ def page_not_found(e):
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    migrate_db_schema()
-    app.run(debug=True, use_reloader=True, host='0.0.0.0', port=8080)
+    try:
+        migrate_db_schema()
+    except Exception as _e:
+        print(f"[SHUBHLO STARTUP] Migration check: {_e}")
+    port = int(os.environ.get('PORT', 8080))
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 't')
+    app.run(debug=debug_mode, use_reloader=debug_mode, host='0.0.0.0', port=port)

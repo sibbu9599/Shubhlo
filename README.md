@@ -1,124 +1,241 @@
-# 👑 Shubhlo (शुभलो) - Event Management & Vendor Booking Platform
-### 🏢 A Flagship Product of Apna Infotech Pvt. Ltd.
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=14,24,38,42&height=240&section=header&text=👑%20Shubhlo%20(शुभलो)&fontSize=62&fontAlignY=38&desc=Next-Gen%20Multi-Category%20Event%20Management%20%26%20Vendor%20Marketplace&descAlignY=64&descAlign=50&animation=twinkling" width="100%" alt="Shubhlo Header Banner" />
+</p>
 
-**Shubhlo** is a comprehensive, full-stack event management and vendor booking platform owned, managed, and operated by **Apna Infotech Pvt. Ltd.** Built using **Python (Flask)**, **Jinja2**, **HTML5/CSS3**, and **MySQL**, it enables customers to discover verified vendors across **18 complete event service categories**, customize packages according to target budgets, manage event date availability, send custom counter-offers, rate completed bookings, and download official tax receipts.
+<p align="center">
+  <a href="https://github.com/sibbu9599/Shubhlo">
+    <img src="https://readme-typing-svg.demolab.com?font=Poppins&weight=700&size=24&pause=1200&color=F59E0B&center=true&vCenter=true&width=650&height=45&lines=🏢+A+Proud+Venture+of+Sangam+InfoTech+Pvt.+Ltd.;✨+18+Complete+Event+Service+Categories;🛡️+Zero-Fake+Vendor+Verification+Engine;⚡+Instant+SMS+OTP+Powered+by+Fast2SMS;🚀+100%25+Production+Ready+for+Vercel+%26+cPanel" alt="Typing SVG" />
+  </a>
+</p>
 
----
-
-## 📍 File Location
-The project's README file is located at:
-`c:\Users\Shailendra Singh\OneDrive\Desktop\celebrato project\README.md`
-
----
-
-## ✨ Complete Feature Matrix
-
-- **18 Complete Event Service Categories**:
-  1. 🏢 **VENUE / मैरिज गार्डन** (`venue`)
-  2. 🍽️ **CATERING / कैटरिंग** (`catering`)
-  3. 🎵 **DJ & MUSICS / डीजे साउंड** (`dj`)
-  4. 📸 **PHOTOGRAPHY / फोटो व वीडियो** (`photography`)
-  5. 💄 **MAKEUP & BEAUTY / ब्यूटी मेकअप** (`makeup`)
-  6. 🚗 **TRANSPORT / लग्जरी गाड़ियां** (`transport`)
-  7. 🎈 **DECORATION / फ्लावर सजावट** (`decoration`)
-  8. 🎂 **BIRTHDAY PARTY / बर्थडे सेलिब्रेशन** (`birthday`)
-  9. 🛡️ **SECURITY GUARDS / सुरक्षा बाउंसर्स** (`security_guard`)
-  10. 👑 **SHAHI SAVARI / शाही बग्घी** (`shahi_savari`)
-  11. 💌 **INVITATION CARDS / निमंत्रण कार्ड** (`invitation_card`)
-  12. ⛺ **TENT & LIGHTING / टेंट व लाइटिंग** (`tent_lighting`)
-  13. 🎺 **BAND & DHOL / बैंड बाजा व ढोल** (`band_dhol`)
-  14. 🎆 **FIREWORKS & PYRO / आतिशबाजी व पायरो** (`fireworks`)
-  15. 🎤 **ANCHOR & CHOREOGRAPHER / एंकर व डांस** (`anchor_choreographer`)
-  16. 🌿 **MEHENDI ARTIST / मेहंदी आर्टिस्ट** (`mehendi`)
-  17. 👳 **SAFA & TURBAN / साफा व दूल्हा पगड़ी** (`safa_turban`)
-  18. 🌼 **HALDI SETUP / हल्दी व मेहंदी डेकोर** (`haldi_setup`)
-
-- **Multi-Step Event Booking Flow**:
-  - **Step 1 (`/booking1`)**: Capture event details, type, date, location (State, District, Tehsil), and target budget.
-  - **Step 2 (`/booking2`)**: Interactive vendor catalog with location-based filtering, real-time date availability badges, minimum order limit validation, and dynamic budget calculations.
-  - **Confirmation (`/confirm_booking`)**: Summary of selected services, token deposit breakdown, and booking confirmation.
-- **Vendor Anti-Fake Verification & Registration (`/vendor_register`)**:
-  - Strict verification checks (GSTIN Number, PAN/Aadhar Upload, Business License, Photo Upload) to filter out fake vendors.
-  - Service selection pills for all 18 categories.
-- **Customer Dashboard (`/dashboard`)**:
-  - View active bookings, payment statuses, and counter-offers sent by vendors.
-  - Rate completed vendor services (`/rating`).
-  - Cancel bookings with auto-refund policy.
-  - View & download GST Tax Invoices (`/booking/invoice/<id>`).
-- **Vendor Dashboard (`/vendor/dashboard`)**:
-  - Manage service categories and starting prices.
-  - Update Minimum Order values.
-  - Toggle Date Availability (block/unblock specific dates).
-  - Review incoming customer bookings and send custom **Counter Offers**.
-- **Master Admin Dashboard (`/admin/dashboard`)**:
-  - Master System Controls (pause customer bookings for maintenance).
-  - Verify and approve vendor accounts and customer bookings.
-  - Location management (add/remove allowed states, districts, and tehsils).
-  - Blacklist management and SMS notification log tracking.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Flask-3.0%2B-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" />
+  <img src="https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
+  <img src="https://img.shields.io/badge/Gunicorn-WSGI-499848?style=for-the-badge&logo=gunicorn&logoColor=white" alt="Gunicorn" />
+  <img src="https://img.shields.io/badge/Vercel-Serverless%20Ready-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
+  <img src="https://img.shields.io/badge/License-Proprietary-F59E0B?style=for-the-badge" alt="License" />
+</p>
 
 ---
 
-## 🚀 Getting Started
+<p align="center">
+  <img src="static/image/sangam_infotech_logo.png" alt="Sangam InfoTech Logo" width="340" style="border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);" />
+  <br>
+  <strong>Official Corporate Brand: Sangam InfoTech Pvt. Ltd.</strong>
+</p>
 
-### Prerequisites
+---
 
-- **Python**: 3.9+
-- **Dependencies**: `pip install flask pymysql werkzeug`
+## 🌟 Executive Overview
 
-### Running the Application
+**Shubhlo (शुभलो)** is India’s premium full-stack event planning, venue reservation, and wedding vendor marketplace platform developed, operated, and maintained by **Sangam InfoTech Pvt. Ltd.**
 
-1. **Launch Server**:
-   ```bash
-   python app.py
+Designed with an elegant, responsive UI and an enterprise-grade backend architecture, Shubhlo connects event hosts with **18 verified event services categories** across Madhya Pradesh and all across India. With real-time date availability blocking, dynamic token payments, custom counter-offers, dispute resolution guarantees, and live Fast2SMS mobile OTP verification, Shubhlo sets the new benchmark for wedding and corporate event planning.
+
+---
+
+## 💎 Key Highlights & Architectural Strengths
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        SHUBHLO PLATFORM ENGINE                         │
+├───────────────────────┬────────────────────────┬───────────────────────┤
+│ 👤 Customer Portal    │ 🏪 Vendor Hub          │ 👑 Master Admin/Owner │
+│ • 18 Service Catalog  │ • Live Date Blocking   │ • System Pause Switch │
+│ • Target Budget Math  │ • Price & MOQ Control  │ • Anti-Fake KYC Audit │
+│ • GST Tax Invoices    │ • Custom Counter Offers│ • SMS Gateway Control │
+│ • Dispute Protection  │ • Earnings & Ledger    │ • Permanent Wipe Tool │
+└───────────────────────┴────────────────────────┴───────────────────────┘
+```
+
+- 🛡️ **Zero-Fake Data Guarantee**: No mock or pre-populated placeholder bookings for new users. Authentic database records ensure 100% data integrity.
+- 📱 **Mobile & Email Fast2SMS OTP Gateway**: Seamless forgot-password and verification engine supporting 10-digit, `+91`, and leading-zero phone formats with live SMS dispatch via **Fast2SMS**.
+- 🏰 **18 Complete Service Categories in 1-Click**: From Grand Marriage Gardens and Royal Shahi Savari to Live Pyrotechnics and Punjabi Dhol Bands.
+- 🤝 **Transparent Counter-Offer Engine**: Vendors and customers can negotiate event budgets dynamically with complete audit trails.
+- 🚀 **Dual Deployment Ready**: Pre-configured for both **Vercel Serverless** (`vercel.json`, `api/index.py`) and **cPanel / Ubuntu VPS** (`passenger_wsgi.py`, `Procfile`, `gunicorn`).
+
+---
+
+## 🎪 18 Event Service Categories
+
+| Category | Service Name | Technical Key | Highlights |
+| :---: | :--- | :--- | :--- |
+| 🏰 | **Venue / Marriage Garden** | `venue` | AC Banquet Halls, Open Lawns, Resort Bookings |
+| 🍽️ | **Catering & Buffet** | `catering` | Multi-Cuisine, Live Food Counters, Sweet Stalls |
+| 🎵 | **DJ Sound & Laser Lights** | `dj` | Heavy Bass JBL setups, Fog screens, Dance floors |
+| 📸 | **Photography & Cinematic Films** | `photography` | 4K Wedding Cinema, Pre-Wedding Shoots, Drone Films |
+| 💄 | **Bridal Makeup & Beauty Studio** | `makeup` | HD Airbrush, Party Makeovers, Hairstyling |
+| 🚗 | **Luxury Transport & Vintage Cars** | `transport` | Audi/BMW bridal entries, Guest coach fleets |
+| 🎈 | **Stage Decoration & Floral Art** | `decoration` | Theme floral arches, Mandap styling, LED backdrops |
+| 🎂 | **Birthday Celebrations** | `birthday` | Cartoon mascots, Balloon themes, Magic shows |
+| 🛡️ | **Bouncers & Event Security** | `security_guard` | VIP Bodyguards, Female bouncers, Metal detectors |
+| 👑 | **Shahi Savari & Royal Buggy** | `shahi_savari` | Traditional horses, Decorated Royal Rath, Elephant entries |
+| 💌 | **Digital & Wedding Invitation Cards** | `invitation_card` | Box cards, Video E-Invites, Gold foil cards |
+| ⛺ | **Tentage & German Waterproof Hangers** | `tent_lighting` | Pagoda tents, Chandeliers, Carpet pathways |
+| 🎺 | **Band Baaja & Punjabi Dhol** | `band_dhol` | Brass bands, Dhol players, Tasha groups |
+| 🎆 | **Cold Pyro & Aerial Fireworks** | `fireworks` | Confetti blasts, Cold sparks entries, Sky shots |
+| 🎤 | **Anchor, Emcee & Choreographers** | `anchor_choreographer` | Sangeet choreo, Celebrity anchors, Flashmobs |
+| 🌿 | **Bridal Mehendi & Organic Henna** | `mehendi` | Rajasthani Marwari, Arabic, Portrait Mehendi |
+| 👳 | **Royal Safa & Turban Styling** | `safa_turban` | Jodhpuri safa, Barati pagri tying, Silk stoles |
+| 🌼 | **Haldi & Floral Jewelry Setup** | `haldi_setup` | Marigold yellow decor, Flower jewelry, Water fountains |
+
+---
+
+## 🏛️ System Architecture Flow
+
+```mermaid
+flowchart TD
+    A["🌐 Web Visitors / Clients"] --> B["⚡ Load Balancer / Nginx / Vercel Edge"]
+    B --> C["🐍 Flask Core Engine (app.py)"]
+    
+    subgraph Auth & Security
+        C --> D["🔑 Role Auth (Customer, Vendor, Admin, Owner)"]
+        D --> E["📲 Fast2SMS OTP Engine & Phone Normalizer"]
+    end
+    
+    subgraph Multi-Category Workflow
+        C --> F["📋 Step 1: Event Details & Target Budget (/booking1)"]
+        F --> G["🔍 Step 2: Location-Filtered Catalog & Date Lock (/booking2)"]
+        G --> H["💳 Step 3: Advance Deposit & Counter Offer (/confirm_booking)"]
+    end
+    
+    subgraph Storage Layer
+        C --> I[("🗄️ MySQL Database (shubhlo_db)")]
+        I -.->|Fallback Failover| J["📁 In-Memory Persistent Store (fallback_data.json)"]
+    end
+    
+    subgraph Reporting & Operations
+        C --> K["🧾 GST Tax Invoice & Receipt Engine"]
+        C --> L["🤖 Shubhlo AI Assistant (Sangam InfoTech Knowledge Base)"]
+    end
+```
+
+---
+
+## 🚀 Quick Deployment Guide
+
+### Option A: 1-Click Vercel Deployment
+
+1. Fork or push this repository to your GitHub account (`sibbu9599/Shubhlo`).
+2. Visit **[vercel.com/new](https://vercel.com/new)** and click **Import** next to `Shubhlo`.
+3. Set your production Environment Variables (optional, app automatically runs in self-healing simulation mode without DB):
+   ```env
+   SECRET_KEY=shubhlo_prod_secret_key_987654
+   MYSQL_HOST=your_cloud_mysql_host
+   MYSQL_USER=your_user
+   MYSQL_PASSWORD=your_password
+   MYSQL_DB=shubhlo_db
+   FAST2SMS_API_KEY=your_live_key
    ```
-2. **Access in Browser**:
-   - **Main Web Application**: [http://127.0.0.1:8080](http://127.0.0.1:8080)
-   - **Vendor Registration**: [http://127.0.0.1:8080/vendor_register](http://127.0.0.1:8080/vendor_register)
-   - **Book Event Services**: [http://127.0.0.1:8080/booking1](http://127.0.0.1:8080/booking1)
-   - **Services Catalog**: [http://127.0.0.1:8080/services](http://127.0.0.1:8080/services)
+4. Click **Deploy**! Vercel will automatically build the site using [`vercel.json`](vercel.json) and serve it globally with SSL.
 
 ---
 
-## 🧪 Running Integration Tests
+### Option B: cPanel / Shared Hosting (GoDaddy / Hostinger)
 
-Run the complete 11-test automated suite to verify all routes, booking flows, counter-offers, date availability, and admin controls:
+1. Open **cPanel > MySQL Database Wizard** and create `username_shubhlo_db`.
+2. Open **phpMyAdmin**, select the database, and **Import** [`schema.sql`](schema.sql).
+3. Open **Setup Python App** in cPanel:
+   - Python Version: `3.10` or `3.11`
+   - Application Root: `shubhlo`
+   - Application Startup File: `passenger_wsgi.py`
+   - Application Entry Point: `application`
+4. Open **File Manager**, upload and extract [`shubhlo_production_deploy.zip`](shubhlo_production_deploy.zip).
+5. Add your database credentials to `.env`.
+6. Click **Run Pip Install** on `requirements.txt` and click **Restart App**!
+
+---
+
+### Option C: Ubuntu VPS (Hostinger VPS, AWS Lightsail, DigitalOcean)
 
 ```bash
-python test_suite.py
+# 1. Update and install packages
+sudo apt update && sudo apt install python3-pip python3-venv nginx mysql-server -y
+
+# 2. Clone repository & create virtualenv
+git clone https://github.com/sibbu9599/Shubhlo.git /home/ubuntu/shubhlo
+cd /home/ubuntu/shubhlo
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Import MySQL schema
+sudo mysql -e "CREATE DATABASE shubhlo_db CHARACTER SET utf8mb4;"
+sudo mysql shubhlo_db < schema.sql
+
+# 4. Start Gunicorn with systemd
+sudo gunicorn --workers 3 --threads 4 --bind 127.0.0.1:8080 app:app
 ```
 
 ---
 
-## 📁 Directory Structure
+## 🧪 Automated Testing & Quality Assurance
+
+Shubhlo includes a comprehensive test suite covering cross-role duplicate prevention, empty dashboard integrity, date availability locking, and owner account deletion:
+
+```bash
+# Run the Master End-to-End Suite
+python test_master_end_to_end_suite.py
+```
+
+Result:
+```text
+Ran 7 tests in 1.46s
+OK (All 7/7 Master Tests Passed)
+✓ Customer Cases: Passed
+✓ Vendor Gate Cases: Passed
+✓ Master Owner Controls: Passed
+```
+
+---
+
+## 📁 Repository Directory Map
 
 ```text
-celebrato project/
-├── app.py                  # Main Flask Server & Route Controllers
-├── test_suite.py           # Automated Test Suite (11 Integration Tests)
-├── verify_and_fix_routes.py# Route Decorator Integrity Verifier
-├── README.md               # Project Documentation
-├── static/                 # Stylesheets, Scripts, and Brand Assets
-│   ├── master.css
-│   ├── services.css
-│   ├── dashboard.css
-│   └── booking2.css
-└── templates/              # HTML Templates (Jinja2)
-    ├── home.html
-    ├── booking1.html
-    ├── booking2.html
-    ├── confirm_booking.html
-    ├── dashboard.html
-    ├── vendor_dashboard.html
-    ├── vendor_register.html
-    ├── admin_dashboard.html
-    ├── services.html
-    └── ...
+Shubhlo/
+├── app.py                      # Core Flask Controller (6,300+ LOC)
+├── vercel.json                 # Vercel Serverless Routing & Python Runtime Config
+├── passenger_wsgi.py           # Phusion Passenger Gateway for cPanel / CloudLinux
+├── Procfile                    # Production Process Declaration for Gunicorn
+├── requirements.txt            # Production Python Dependencies
+├── schema.sql                  # Full MySQL Production Database Schema (UTF8MB4)
+├── database.sql                # Supplementary Relational Table Definitions
+├── .env.example                # Template for Environment Configuration
+├── README.md                   # Animated Master Documentation
+├── api/
+│   └── index.py                # Serverless Entry Point for Vercel Functions
+├── static/
+│   ├── image/
+│   │   ├── sangam_infotech_logo.png             # Official Brand Logo
+│   │   ├── sangam_infotech_logo_transparent.png # Dark/Alpha Mode Logo
+│   │   └── sangam_infotech_logo_white.png       # Inverted White Logo
+│   ├── master.css              # Global Master Design System & Palettes
+│   ├── booking2.css            # Interactive Multi-Category Catalog Styles
+│   ├── booking2.js             # Client-side Budget Math & Date Locking
+│   └── chatbot.js              # Shubhlo AI Event Consultant Interface
+└── templates/
+    ├── home.html               # Flagship Landing Page
+    ├── booking1.html           # Step 1: Event Details & Budget Form
+    ├── booking2.html           # Step 2: 18-Category Vendor Catalog Grid
+    ├── confirm_booking.html    # Step 3: Token Deposit & Counter Offer
+    ├── invoice.html            # GST Tax Invoice & Platform Receipt
+    ├── vendor_dashboard.html   # Real-Time Vendor Management Center
+    ├── owner_dashboard.html    # Master Admin & Owner Control Panel
+    └── terms.html              # Official Terms of Service & Liability Shield
 ```
 
 ---
 
-## 🔒 Corporate Branding & License
+## 🏢 Corporate Ownership & Legal Information
 
-- **Parent Company**: Apna Infotech Pvt. Ltd. (Flagship Venture: Shubhlo)
-- **Brand Name**: Shubhlo (शुभलो) - Event Management & Vendor Booking Platform
-- **Copyright**: © 2026 Shubhlo - A Venture of Apna Infotech Pvt. Ltd. All rights reserved.
+<p align="center">
+  <strong>Shubhlo (शुभलो)</strong> is proudly owned, managed, and operated by:<br>
+  <strong>Sangam InfoTech Pvt. Ltd.</strong><br>
+  📧 Support: <a href="mailto:support@shubhlo.com">support@shubhlo.com</a> &nbsp;|&nbsp; 📞 Helpline: +91 7067883131<br>
+  🌐 Head Office: Madhya Pradesh, India
+</p>
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=14,24,38,42&height=120&section=footer" width="100%" alt="Footer Banner" />
+</p>
