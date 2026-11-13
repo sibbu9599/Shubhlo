@@ -5203,7 +5203,10 @@ def owner_send_test_fast2sms():
     if success:
         flash(f"🎉 Live Test SMS sent successfully to {test_phone} via Fast2SMS! Response: {msg} / असली टेस्ट SMS आपके फोन पर भेज दिया गया है!", "success")
     else:
-        flash(f"⚠️ Fast2SMS Live Dispatch Failed: {msg}. Please check your Fast2SMS API Key or Wallet Balance on fast2sms.com. / कृपया अपनी API Key या Fast2SMS बैलेंस चेक करें।", "danger")
+        if "Quick API Access is disabled" in str(msg):
+            flash(f"⚠️ Fast2SMS सूचना: Fast2SMS ने TRAI (सरकारी) नियमों के कारण बिना DLT के डायरेक्ट Quick SMS API बंद (disabled) किया हुआ है। चिंता न करें — Shubhlo में ऑन-स्क्रीन OTP और ईमेल OTP चालू है, जिससे आपकी वेबसाइट 100% काम कर रही है! (Fast2SMS Response: {msg})", "warning")
+        else:
+            flash(f"⚠️ Fast2SMS Live Dispatch Failed: {msg}. Please check your Fast2SMS API Key or Wallet Balance on fast2sms.com. / कृपया अपनी API Key या Fast2SMS बैलेंस चेक करें।", "danger")
 
     return redirect(request.referrer or (url_for('owner_dashboard') + "#fast2sms-section"))
 
