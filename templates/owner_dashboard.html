@@ -502,6 +502,7 @@
           </p>
 
           <form action="{{ url_for('owner_send_test_fast2sms') }}" method="POST">
+            <input type="hidden" name="api_key_override" value="{{ fast2sms_api_key or '' }}">
             <div style="margin-bottom: 14px;">
               <label style="display: block; color: #94a3b8; font-size: 12.5px; margin-bottom: 6px; font-weight: bold;">
                 Recipient Mobile Number (मोबाइल नंबर):

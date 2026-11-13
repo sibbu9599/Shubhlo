@@ -4533,15 +4533,38 @@ def customer_accept_counter_offer(booking_id):
 # Vendor Send Counter Offer
 
 def dispatch_fast2sms(phone, message, api_key=None, return_details=False):
-    if not api_key:
-        api_key = os.environ.get("FAST2SMS_API_KEY", FAST2SMS_API_KEY).strip()
-    if not api_key:
+    if not api_key or str(api_key).startswith('test_fast2sms'):
+        api_key = ''
+        # 1. Check database setting
         try:
             api_key_setting, _ = get_system_setting("fast2sms_api_key")
-            if api_key_setting and api_key_setting not in ['ON', 'OFF']:
+            if api_key_setting and api_key_setting not in ['ON', 'OFF'] and not str(api_key_setting).startswith('test_fast2sms'):
                 api_key = str(api_key_setting).strip()
         except Exception:
             pass
+
+        # 2. Check environment variable
+        if not api_key:
+            env_key = os.environ.get("FAST2SMS_API_KEY", "").strip()
+            if env_key and not env_key.startswith('test_fast2sms'):
+                api_key = env_key
+
+        # 3. Read directly from .env file
+        if not api_key and os.path.exists('.env'):
+            try:
+                with open('.env', 'r', encoding='utf-8') as f:
+                    for line in f:
+                        if line.strip().startswith('FAST2SMS_API_KEY='):
+                            val = line.strip().split('=', 1)[1].strip().strip('"\'')
+                            if val and not val.startswith('test_fast2sms'):
+                                api_key = val
+                                break
+            except Exception:
+                pass
+
+        # 4. Check global FAST2SMS_API_KEY
+        if not api_key and FAST2SMS_API_KEY and not FAST2SMS_API_KEY.startswith('test_fast2sms'):
+            api_key = FAST2SMS_API_KEY.strip()
 
     if not api_key or api_key.startswith('test_fast2sms'):
         err = "Fast2SMS API Key not configured. Please enter your API Key in Owner Dashboard."
@@ -5247,8 +5270,20 @@ def owner_dashboard():
 
     fast2sms_enabled_val, _ = get_system_setting('fast2sms_enabled')
     fast2sms_api_key_val, _ = get_system_setting('fast2sms_api_key')
-    if not fast2sms_api_key_val or fast2sms_api_key_val in ['ON', 'OFF']:
+    if not fast2sms_api_key_val or fast2sms_api_key_val in ['ON', 'OFF'] or str(fast2sms_api_key_val).startswith('test_fast2sms'):
         fast2sms_api_key_val = os.environ.get('FAST2SMS_API_KEY', FAST2SMS_API_KEY)
+    if not fast2sms_api_key_val or fast2sms_api_key_val in ['ON', 'OFF'] or str(fast2sms_api_key_val).startswith('test_fast2sms'):
+        if os.path.exists('.env'):
+            try:
+                with open('.env', 'r', encoding='utf-8') as f:
+                    for line in f:
+                        if line.strip().startswith('FAST2SMS_API_KEY='):
+                            val = line.strip().split('=', 1)[1].strip().strip('"\'')
+                            if val and not val.startswith('test_fast2sms'):
+                                fast2sms_api_key_val = val
+                                break
+            except Exception:
+                pass
 
     return render_template(
         'owner_dashboard.html',
