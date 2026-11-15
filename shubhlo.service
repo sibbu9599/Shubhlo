@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn daemon to serve Shubhlo Event Platform
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/var/www/shubhlo
+Environment="PATH=/var/www/shubhlo/venv/bin"
+ExecStart=/var/www/shubhlo/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 --timeout 120 --access-logfile /var/log/shubhlo_access.log --error-logfile /var/log/shubhlo_error.log wsgi:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

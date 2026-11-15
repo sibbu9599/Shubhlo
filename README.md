@@ -113,60 +113,49 @@ flowchart TD
 
 ---
 
-## 🚀 Quick Deployment Guide
+## 🚀 Hostinger Deployment Guide (Official & Recommended)
 
-### Option A: 1-Click Vercel Deployment
+### Option A: Hostinger VPS (1-Click Automated Setup)
 
-1. Fork or push this repository to your GitHub account (`sibbu9599/Shubhlo`).
-2. Visit **[vercel.com/new](https://vercel.com/new)** and click **Import** next to `Shubhlo`.
-3. Set your production Environment Variables (optional, app automatically runs in self-healing simulation mode without DB):
-   ```env
-   SECRET_KEY=shubhlo_prod_secret_key_987654
-   MYSQL_HOST=your_cloud_mysql_host
-   MYSQL_USER=your_user
-   MYSQL_PASSWORD=your_password
-   MYSQL_DB=shubhlo_db
-   FAST2SMS_API_KEY=your_live_key
-   ```
-4. Click **Deploy**! Vercel will automatically build the site using [`vercel.json`](vercel.json) and serve it globally with SSL.
+For the best commercial performance, run Shubhlo on Hostinger KVM VPS:
+
+```bash
+# 1. SSH into your Hostinger VPS
+ssh root@YOUR_HOSTINGER_SERVER_IP
+
+# 2. Run the 1-Click Setup Script directly:
+curl -sSL https://raw.githubusercontent.com/sibbu9599/Shubhlo/main/setup_hostinger_vps.sh | bash
+
+# 3. Setup your free SSL certificate:
+sudo certbot --nginx -d shubhlo.in -d www.shubhlo.in
+```
+
+The script automatically configures:
+- Python 3 virtual environment (`/var/www/shubhlo/venv`)
+- Production Gunicorn WSGI daemon (`shubhlo.service`)
+- High-performance Nginx reverse proxy (`nginx_shubhlo.conf`)
+- Static assets & uploads caching for lightning-fast speeds
 
 ---
 
-### Option B: cPanel / Shared Hosting (GoDaddy / Hostinger)
+### Option B: Hostinger Web / Cloud Hosting (hPanel)
 
-1. Open **cPanel > MySQL Database Wizard** and create `username_shubhlo_db`.
-2. Open **phpMyAdmin**, select the database, and **Import** [`schema.sql`](schema.sql).
-3. Open **Setup Python App** in cPanel:
+1. Open **Hostinger hPanel > Databases > MySQL Databases** and create `shubhlo_db`.
+2. Open **phpMyAdmin**, click on `shubhlo_db`, and **Import** [`schema.sql`](schema.sql).
+3. Open **Websites > Manage > Advanced > Python** in hPanel:
    - Python Version: `3.10` or `3.11`
-   - Application Root: `shubhlo`
+   - Application Root: `shubhlo` (or `public_html`)
    - Application Startup File: `passenger_wsgi.py`
    - Application Entry Point: `application`
 4. Open **File Manager**, upload and extract [`shubhlo_production_deploy.zip`](shubhlo_production_deploy.zip).
-5. Add your database credentials to `.env`.
+5. Add your database credentials and secret key to `.env`.
 6. Click **Run Pip Install** on `requirements.txt` and click **Restart App**!
 
 ---
 
-### Option C: Ubuntu VPS (Hostinger VPS, AWS Lightsail, DigitalOcean)
+### Option C: Legacy Vercel Serverless (Optional Testing)
 
-```bash
-# 1. Update and install packages
-sudo apt update && sudo apt install python3-pip python3-venv nginx mysql-server -y
-
-# 2. Clone repository & create virtualenv
-git clone https://github.com/sibbu9599/Shubhlo.git /home/ubuntu/shubhlo
-cd /home/ubuntu/shubhlo
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# 3. Import MySQL schema
-sudo mysql -e "CREATE DATABASE shubhlo_db CHARACTER SET utf8mb4;"
-sudo mysql shubhlo_db < schema.sql
-
-# 4. Start Gunicorn with systemd
-sudo gunicorn --workers 3 --threads 4 --bind 127.0.0.1:8080 app:app
-```
+If testing on Vercel without a persistent server, import [`vercel.json`](vercel.json) and [`api/index.py`](api/index.py). Note: For commercial live use, Hostinger VPS or hPanel with persistent MySQL is recommended.
 
 ---
 
