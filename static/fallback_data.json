@@ -2953,5 +2953,15 @@
     }
   ],
   "availability": [],
-  "ratings": {}
+  "ratings": {},
+  "system_settings": {
+    "allow_customer_booking": {
+      "value": "ON",
+      "msg": "Customer bookings are temporarily paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।"
+    },
+    "allow_vendor_registration": {
+      "value": "ON",
+      "msg": "New vendor registrations are currently paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।"
+    }
+  }
 }

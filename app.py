@@ -255,35 +255,104 @@ def migrate_db_schema():
             conn.close()
 
 def get_system_setting(setting_key):
+    # 1. Check DB first if connection available
     conn = get_db_connection()
     if conn is not None:
         try:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT setting_value, custom_message FROM system_settings WHERE setting_key=%s", (setting_key,))
                 row = cursor.fetchone()
-                if row:
-                    return row['setting_value'], row['custom_message']
+                if row and row.get('setting_value') is not None:
+                    return str(row['setting_value']).strip().upper(), (row.get('custom_message') or '')
         except Exception as e:
-            print(f"Error fetching system setting {setting_key}: {e}")
+            print(f"Error fetching system setting {setting_key} from DB: {e}")
         finally:
             conn.close()
 
-    mock_settings = {}
+    # 2. Check GLOBAL_SYSTEM_SETTINGS
+    global GLOBAL_SYSTEM_SETTINGS
+    if isinstance(GLOBAL_SYSTEM_SETTINGS, dict) and setting_key in GLOBAL_SYSTEM_SETTINGS:
+        item = GLOBAL_SYSTEM_SETTINGS[setting_key]
+        if isinstance(item, dict):
+            return str(item.get('value', 'ON')).strip().upper(), (item.get('msg') or '')
+        return str(item).strip().upper(), ''
+
+    # 3. Check Session mock if available
     if has_request_context() and 'mock_system_settings' in session:
         mock_settings = session.get('mock_system_settings', {})
-    if not mock_settings:
-        mock_settings = GLOBAL_SYSTEM_SETTINGS
-    if not mock_settings:
-        mock_settings = {
-            'allow_customer_booking': {'value': 'ON', 'msg': 'Customer bookings are temporarily paused by Shubhlo Admin. Please check back soon! / एडमिन द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।'},
-            'allow_vendor_registration': {'value': 'ON', 'msg': 'New vendor registrations are currently paused by Shubhlo Admin. Please check back soon! / एडमिन द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।'},
-            'fast2sms_enabled': {'value': 'OFF', 'msg': ''},
-            'fast2sms_api_key': {'value': os.environ.get('FAST2SMS_API_KEY', FAST2SMS_API_KEY), 'msg': ''}
+        if setting_key in mock_settings:
+            item = mock_settings[setting_key]
+            if isinstance(item, dict):
+                return str(item.get('value', 'ON')).strip().upper(), (item.get('msg') or '')
+            return str(item).strip().upper(), ''
+
+    # 4. Default fallbacks
+    default_msgs = {
+        'allow_customer_booking': 'Customer bookings are temporarily paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।',
+        'allow_vendor_registration': 'New vendor registrations are currently paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।',
+        'fast2sms_enabled': '',
+        'fast2sms_api_key': os.environ.get('FAST2SMS_API_KEY', FAST2SMS_API_KEY)
+    }
+    default_val = 'ON' if 'allow' in setting_key else 'OFF'
+    return default_val, default_msgs.get(setting_key, '')
+
+def set_system_setting(setting_key, setting_value, custom_message=None):
+    setting_value = str(setting_value).strip().upper()
+    
+    # Default closure messages if not provided
+    if custom_message is None or not str(custom_message).strip():
+        if setting_key == 'allow_customer_booking':
+            custom_message = 'Customer bookings are temporarily paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।'
+        elif setting_key == 'allow_vendor_registration':
+            custom_message = 'New vendor registrations are currently paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।'
+        else:
+            custom_message = ''
+
+    # 1. Update Database
+    conn = get_db_connection()
+    if conn is not None:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS system_settings (
+                        setting_key VARCHAR(50) PRIMARY KEY,
+                        setting_value VARCHAR(50) DEFAULT 'ON',
+                        custom_message TEXT DEFAULT NULL,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    INSERT INTO system_settings (setting_key, setting_value, custom_message) 
+                    VALUES (%s, %s, %s) 
+                    ON DUPLICATE KEY UPDATE setting_value=%s, custom_message=COALESCE(%s, custom_message)
+                """, (setting_key, setting_value, custom_message, setting_value, custom_message))
+                conn.commit()
+        except Exception as e:
+            print(f"Error persisting setting {setting_key} to DB: {e}")
+        finally:
+            conn.close()
+
+    # 2. Update Global In-Memory
+    global GLOBAL_SYSTEM_SETTINGS
+    if not isinstance(GLOBAL_SYSTEM_SETTINGS, dict):
+        GLOBAL_SYSTEM_SETTINGS = {}
+    GLOBAL_SYSTEM_SETTINGS[setting_key] = {
+        'value': setting_value,
+        'msg': custom_message
+    }
+
+    # 3. Save to fallback_data.json
+    save_fallback_data()
+
+    # 4. Sync session if request context exists
+    if has_request_context():
+        mock_settings = session.get('mock_system_settings', {})
+        mock_settings[setting_key] = {
+            'value': setting_value,
+            'msg': custom_message
         }
-    st = mock_settings.get(setting_key, {'value': 'ON' if 'allow' in setting_key else 'OFF', 'msg': ''})
-    if isinstance(st, dict):
-        return st.get('value', 'OFF'), st.get('msg', '')
-    return str(st), ''
+        session['mock_system_settings'] = mock_settings
+        session.modified = True
 
 
 def is_email_or_phone_registered(email, phone, conn=None):
@@ -435,7 +504,7 @@ GLOBAL_VENDOR_RATINGS = {}
 FALLBACK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'fallback_data.json')
 
 def load_fallback_data():
-    global GLOBAL_REGISTERED_USERS, GLOBAL_REGISTERED_VENDORS, GLOBAL_REGISTERED_BOOKINGS, GLOBAL_MOCK_VERIFICATIONS, GLOBAL_VENDOR_AVAILABILITY, GLOBAL_VENDOR_RATINGS
+    global GLOBAL_REGISTERED_USERS, GLOBAL_REGISTERED_VENDORS, GLOBAL_REGISTERED_BOOKINGS, GLOBAL_MOCK_VERIFICATIONS, GLOBAL_VENDOR_AVAILABILITY, GLOBAL_VENDOR_RATINGS, GLOBAL_SYSTEM_SETTINGS
     if os.path.exists(FALLBACK_FILE):
         try:
             with open(FALLBACK_FILE, 'r', encoding='utf-8') as f:
@@ -446,6 +515,7 @@ def load_fallback_data():
                 GLOBAL_MOCK_VERIFICATIONS = data.get('verifications', [])
                 GLOBAL_VENDOR_AVAILABILITY = data.get('availability', [])
                 GLOBAL_VENDOR_RATINGS = data.get('ratings', {})
+                GLOBAL_SYSTEM_SETTINGS = data.get('system_settings', {})
         except Exception as e:
             print(f"Error loading fallback data file: {e}")
 
@@ -457,7 +527,8 @@ def save_fallback_data():
             'bookings': GLOBAL_REGISTERED_BOOKINGS,
             'verifications': GLOBAL_MOCK_VERIFICATIONS,
             'availability': GLOBAL_VENDOR_AVAILABILITY,
-            'ratings': GLOBAL_VENDOR_RATINGS
+            'ratings': GLOBAL_VENDOR_RATINGS,
+            'system_settings': GLOBAL_SYSTEM_SETTINGS
         }
         os.makedirs(os.path.dirname(FALLBACK_FILE), exist_ok=True)
         with open(FALLBACK_FILE, 'w', encoding='utf-8') as f:
@@ -1516,7 +1587,7 @@ def admin_dashboard():
 @app.route('/admin/update_system_settings', methods=['POST'])
 @app.route('/admin/toggle_master_control', methods=['POST'])
 def admin_update_system_settings():
-    if 'admin' not in session:
+    if not (session.get('admin') or session.get('is_owner')):
         flash("Unauthorized access. Admin login required.", "danger")
         return redirect(url_for('login'))
 
@@ -1526,37 +1597,10 @@ def admin_update_system_settings():
     vendor_status = request.form.get('allow_vendor_registration', 'ON')
     vendor_msg = request.form.get('vendor_closure_msg', 'New vendor registrations are currently paused by Shubhlo Admin. Please check back soon! / एडमिन द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।')
 
-    conn = get_db_connection()
-    if conn is not None:
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO system_settings (setting_key, setting_value, custom_message) 
-                    VALUES ('allow_customer_booking', %s, %s)
-                    ON DUPLICATE KEY UPDATE setting_value=%s, custom_message=%s
-                """, (booking_status, booking_msg, booking_status, booking_msg))
+    set_system_setting('allow_customer_booking', booking_status, booking_msg)
+    set_system_setting('allow_vendor_registration', vendor_status, vendor_msg)
 
-                cursor.execute("""
-                    INSERT INTO system_settings (setting_key, setting_value, custom_message) 
-                    VALUES ('allow_vendor_registration', %s, %s)
-                    ON DUPLICATE KEY UPDATE setting_value=%s, custom_message=%s
-                """, (vendor_status, vendor_msg, vendor_status, vendor_msg))
-
-                conn.commit()
-                flash("Owner Master Controls saved successfully! / प्लेटफॉर्म मास्टर सेटिंग्स सफलतापूर्वक अपडेट की गईं!", "success")
-        except Exception as e:
-            flash(f"Error updating system settings: {e}", "danger")
-        finally:
-            conn.close()
-    else:
-        # Mock mode fallback
-        session['mock_system_settings'] = {
-            'allow_customer_booking': {'value': booking_status, 'msg': booking_msg},
-            'allow_vendor_registration': {'value': vendor_status, 'msg': vendor_msg}
-        }
-        session.modified = True
-        flash("Owner Master Controls saved successfully (Simulated)! / मास्टर सेटिंग्स अपडेट हुईं (सिम्युलेटेड)!", "success")
-
+    flash("Owner Master Controls saved successfully! / प्लेटफॉर्म मास्टर सेटिंग्स सफलतापूर्वक अपडेट की गईं!", "success")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/vendor/approve/<int:vendor_id>', methods=['POST'])
@@ -2249,7 +2293,13 @@ def vendor_login_alias():
 
 @app.route('/vendor_register', methods=['GET', 'POST'])
 def vendor_register():
+    v_status, v_msg = get_system_setting('allow_vendor_registration')
+    is_closed = (str(v_status).strip().upper() == 'OFF')
+
     if request.method == 'POST':
+        if is_closed:
+            flash(v_msg or "New vendor registrations are currently paused by Shubhlo Owner. Please check back soon! / नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।", "danger")
+            return redirect(url_for('vendor_register'))
         # Verify vendor terms and conditions checkbox
         accept_terms = request.form.get('accept_terms_vendor')
         if not accept_terms:
@@ -2396,7 +2446,7 @@ def vendor_register():
 
         return redirect(url_for('vendor_register'))
 
-    return render_template('vendor_register.html')
+    return render_template('vendor_register.html', registration_closed=is_closed, closure_msg=v_msg)
 
 @app.route('/vendor/register', methods=['GET', 'POST'])
 @app.route('/vendor-registration', methods=['GET', 'POST'])
@@ -3408,6 +3458,11 @@ def booking():
 def booking2():
     if 'user' not in session:
         return redirect(url_for('login'))
+
+    b_status, b_msg = get_system_setting('allow_customer_booking')
+    if str(b_status).strip().upper() == 'OFF':
+        flash(b_msg or "Customer bookings are currently PAUSED by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।", "danger")
+        return redirect(url_for('booking1'))
 
     # Store step 1 inputs in session
     booking_info = session.get('booking_info', {})
@@ -5288,6 +5343,12 @@ def owner_dashboard():
             except Exception:
                 pass
 
+    # Master System ON/OFF Settings
+    allow_booking_val, allow_booking_msg = get_system_setting('allow_customer_booking')
+    allow_vendor_val, allow_vendor_msg = get_system_setting('allow_vendor_registration')
+    is_maintenance = (allow_booking_val == 'OFF')
+    session['is_maintenance'] = is_maintenance
+
     return render_template(
         'owner_dashboard.html',
         fast2sms_enabled=fast2sms_enabled_val,
@@ -5308,7 +5369,11 @@ def owner_dashboard():
         total_deposits_collected=total_deposits_collected,
         commission_rate=commission_rate,
         platform_net_revenue=platform_net_revenue,
-        is_maintenance=is_maintenance
+        is_maintenance=is_maintenance,
+        allow_customer_booking_status=allow_booking_val,
+        allow_customer_booking_msg=allow_booking_msg,
+        allow_vendor_registration_status=allow_vendor_val,
+        allow_vendor_registration_msg=allow_vendor_msg
     )
 
 @app.route('/owner/update_platform_commission', methods=['POST'])
@@ -5324,11 +5389,18 @@ def owner_update_commission():
 
 @app.route('/owner/toggle_maintenance', methods=['POST'])
 def owner_toggle_maintenance():
-    current_state = session.get('is_maintenance', False)
-    session['is_maintenance'] = not current_state
+    if not (session.get('is_owner') or session.get('admin')):
+        flash("Access Denied: Owner or Admin login required.", "danger")
+        return redirect(url_for('login'))
+
+    b_status, _ = get_system_setting('allow_customer_booking')
+    new_status = 'OFF' if b_status == 'ON' else 'ON'
+    set_system_setting('allow_customer_booking', new_status)
+    session['is_maintenance'] = (new_status == 'OFF')
     session.modified = True
-    status_str = "PAUSED (Maintenance)" if not current_state else "ACTIVE"
-    flash(f"Platform bookings are now {status_str}!", "warning" if not current_state else "success")
+
+    status_str = "PAUSED (Maintenance) 🔴" if new_status == 'OFF' else "ACTIVE 🟢"
+    flash(f"Platform bookings are now {status_str}! / ग्राहक बुकिंग अब {status_str} है!", "warning" if new_status == 'OFF' else "success")
     return redirect(url_for('owner_dashboard'))
 
 
@@ -5770,38 +5842,24 @@ def owner_prefill_locations():
 
 @app.route('/owner/toggle_setting', methods=['POST'])
 def owner_toggle_setting():
-    if not session.get('is_owner') or session.get('admin') != 'owner@shubhlo.com':
+    if not (session.get('is_owner') or session.get('admin')):
         flash("Access Denied: Only Platform Owner can toggle system settings!", "danger")
         return redirect(url_for('login'))
 
     setting_key = request.form.get('setting_key')
-    setting_value = request.form.get('setting_value', 'ON')
+    setting_value = request.form.get('setting_value', 'ON').strip().upper()
+    custom_msg = request.form.get('custom_message') or request.form.get('closure_msg')
     
     label = "Customer Booking" if setting_key == "allow_customer_booking" else "Vendor Registration"
-    
-    conn = get_db_connection()
-    if conn is not None:
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    "INSERT INTO system_settings (setting_key, setting_value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE setting_value=%s",
-                    (setting_key, setting_value, setting_value)
-                )
-                conn.commit()
-        except Exception as e:
-            print(f"Error updating system_settings DB: {e}")
-        finally:
-            conn.close()
+    set_system_setting(setting_key, setting_value, custom_msg)
 
-    mock_settings = session.get('mock_system_settings', {})
-    if setting_key not in mock_settings:
-        mock_settings[setting_key] = {}
-    mock_settings[setting_key]['value'] = setting_value
-    session['mock_system_settings'] = mock_settings
-    session.modified = True
+    # Sync maintenance status if customer booking was toggled
+    if setting_key == 'allow_customer_booking':
+        session['is_maintenance'] = (setting_value == 'OFF')
+        session.modified = True
 
     status_txt = "ACTIVATED (ON) 🟢" if setting_value == "ON" else "PAUSED (OFF) 🔴"
-    flash(f"Owner Authority Update: {label} has been {status_txt}!", "success" if setting_value == "ON" else "warning")
+    flash(f"Owner Authority Update: {label} has been {status_txt}! / {label} अब {status_txt} है!", "success" if setting_value == "ON" else "warning")
     return redirect(url_for('owner_dashboard'))
 
 @app.route('/admin/vendor/blacklist/<int:vendor_id>', methods=['POST'])
