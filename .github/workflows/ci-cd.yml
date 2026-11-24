@@ -56,8 +56,7 @@ jobs:
           script: |
             set -e
             cd /var/www/Shubhlo
-            git fetch origin main
-            git reset --hard origin/main
+            git pull
             /var/www/Shubhlo/venv/bin/pip install --upgrade pip
             if [ -f requirements.txt ]; then
               /var/www/Shubhlo/venv/bin/pip install -r requirements.txt
