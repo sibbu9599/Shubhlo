@@ -56,9 +56,9 @@ jobs:
           script: |
             set -e
             cd /var/www/Shubhlo
-            git pull
-            /var/www/Shubhlo/venv/bin/pip install --upgrade pip
+            git pull --ff-only
             if [ -f requirements.txt ]; then
-              /var/www/Shubhlo/venv/bin/pip install -r requirements.txt
+              /var/www/Shubhlo/venv/bin/pip install --upgrade pip -q
+              /var/www/Shubhlo/venv/bin/pip install -r requirements.txt -q
             fi
-            sudo systemctl restart shubhlo
+            sudo systemctl restart shubhlo.service
