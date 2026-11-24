@@ -9,7 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,11 +27,10 @@ jobs:
 
       - name: Run Tests
         run: |
-          # Runs pytest if you have a tests/ directory, or skips gracefully if none exist
           if [ -d "tests" ]; then
-            pytest;
+            pytest
           else
-            echo "No tests directory found, skipping unit tests.";
+            echo "No tests directory found, skipping unit tests."
           fi
 
   deploy:
@@ -41,16 +39,12 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     env:
       SERVER_HOST: ${{ secrets.SERVER_HOST }}
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Check Deployment Configuration
         if: env.SERVER_HOST == ''
         run: |
           echo "Hostinger SSH secrets (SERVER_HOST) not configured in GitHub repository secrets."
-          echo "Skipping automated SSH push; manual git pull or secret setup required."
+          echo "Skipping automated SSH push."
 
       - name: Deploy to Hostinger VPS via SSH
         if: env.SERVER_HOST != ''
@@ -60,9 +54,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
             cd /var/www/Shubhlo
-            git pull origin main
-            source venv/bin/activate
-            pip install -r requirements.txt
+            git fetch origin main
+            git reset --hard origin/main
+            /var/www/Shubhlo/venv/bin/pip install --upgrade pip
+            if [ -f requirements.txt ]; then
+              /var/www/Shubhlo/venv/bin/pip install -r requirements.txt
+            fi
             sudo systemctl restart shubhlo
-#            sudo systemctl restart nginx
