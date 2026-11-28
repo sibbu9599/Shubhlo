@@ -2957,7 +2957,7 @@
   "system_settings": {
     "allow_customer_booking": {
       "value": "ON",
-      "msg": "Customer bookings are temporarily paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।"
+      "msg": "Booking is currently unavailable. Please check back later! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है।"
     },
     "allow_vendor_registration": {
       "value": "ON",

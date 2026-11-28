@@ -269,7 +269,21 @@ def get_system_setting(setting_key):
         finally:
             conn.close()
 
-    # 2. Check GLOBAL_SYSTEM_SETTINGS
+    # 2. Check disk FALLBACK_FILE directly (ensures all multi-worker gunicorn processes share the exact setting)
+    try:
+        if os.path.exists(FALLBACK_FILE):
+            with open(FALLBACK_FILE, 'r', encoding='utf-8') as f:
+                disk_data = json.load(f)
+                sys_set = disk_data.get('system_settings', {})
+                if setting_key in sys_set:
+                    item = sys_set[setting_key]
+                    if isinstance(item, dict):
+                        return str(item.get('value', 'ON')).strip().upper(), (item.get('msg') or '')
+                    return str(item).strip().upper(), ''
+    except Exception as e:
+        print(f"Error reading setting {setting_key} from disk: {e}")
+
+    # 3. Check GLOBAL_SYSTEM_SETTINGS memory cache
     global GLOBAL_SYSTEM_SETTINGS
     if isinstance(GLOBAL_SYSTEM_SETTINGS, dict) and setting_key in GLOBAL_SYSTEM_SETTINGS:
         item = GLOBAL_SYSTEM_SETTINGS[setting_key]
@@ -277,7 +291,7 @@ def get_system_setting(setting_key):
             return str(item.get('value', 'ON')).strip().upper(), (item.get('msg') or '')
         return str(item).strip().upper(), ''
 
-    # 3. Check Session mock if available
+    # 4. Check Session mock if available
     if has_request_context() and 'mock_system_settings' in session:
         mock_settings = session.get('mock_system_settings', {})
         if setting_key in mock_settings:
@@ -286,9 +300,9 @@ def get_system_setting(setting_key):
                 return str(item.get('value', 'ON')).strip().upper(), (item.get('msg') or '')
             return str(item).strip().upper(), ''
 
-    # 4. Default fallbacks
+    # 5. Default fallbacks
     default_msgs = {
-        'allow_customer_booking': 'Customer bookings are temporarily paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।',
+        'allow_customer_booking': 'Booking is currently unavailable. Please check back later! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है।',
         'allow_vendor_registration': 'New vendor registrations are currently paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।',
         'fast2sms_enabled': '',
         'fast2sms_api_key': os.environ.get('FAST2SMS_API_KEY', FAST2SMS_API_KEY)
@@ -302,7 +316,7 @@ def set_system_setting(setting_key, setting_value, custom_message=None):
     # Default closure messages if not provided
     if custom_message is None or not str(custom_message).strip():
         if setting_key == 'allow_customer_booking':
-            custom_message = 'Customer bookings are temporarily paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।'
+            custom_message = 'Booking is currently unavailable. Please check back later! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है।'
         elif setting_key == 'allow_vendor_registration':
             custom_message = 'New vendor registrations are currently paused by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा नया वेंडर रजिस्ट्रेशन फ़िलहाल बंद है।'
         else:
@@ -3411,17 +3425,22 @@ def is_vendor_blocked_on_date(vendor_name_or_id, event_date):
 
 @app.route('/booking1', methods=['GET', 'POST'])
 def booking1():
+    b_status, b_msg = get_system_setting('allow_customer_booking')
+    booking_closed = (str(b_status).strip().upper() == 'OFF')
+    unavailable_msg = "Booking is currently unavailable. Please check back later! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है।"
+    active_msg = b_msg if (b_msg and str(b_msg).strip()) else unavailable_msg
+
+    if booking_closed:
+        if request.method == 'POST':
+            flash(active_msg, "danger")
+            return redirect(url_for('booking1'))
+        return render_template('booking1.html', booking_system_closed=True, closure_msg=active_msg)
+
     if 'user' not in session:
         flash("Please log in first to make a booking.", "warning")
         return redirect(url_for('login'))
 
-    b_status, b_msg = get_system_setting('allow_customer_booking')
-    booking_closed = (b_status == 'OFF')
-
     if request.method == 'POST':
-        if booking_closed:
-            flash(b_msg or "Customer bookings are currently PAUSED by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।", "danger")
-            return redirect(url_for('booking1'))
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
@@ -3461,7 +3480,7 @@ def booking2():
 
     b_status, b_msg = get_system_setting('allow_customer_booking')
     if str(b_status).strip().upper() == 'OFF':
-        flash(b_msg or "Customer bookings are currently PAUSED by Shubhlo Owner. Please check back soon! / ऑनर्स द्वारा ग्राहक बुकिंग फ़िलहाल बंद है।", "danger")
+        flash(b_msg or "Booking is currently unavailable. Please check back later! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है।", "danger")
         return redirect(url_for('booking1'))
 
     # Store step 1 inputs in session
@@ -3617,6 +3636,11 @@ def booking2():
 @app.route('/confirm-booking', methods=['GET', 'POST'])
 @app.route('/confirm_booking', methods=['GET', 'POST'])
 def confirm_booking():
+    b_status, b_msg = get_system_setting('allow_customer_booking')
+    if str(b_status).strip().upper() == 'OFF':
+        flash(b_msg or "Booking is currently unavailable. Please check back later! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है।", "danger")
+        return redirect(url_for('booking1'))
+
     if 'user' not in session:
         return redirect(url_for('login'))
 
@@ -3756,6 +3780,11 @@ def confirm_booking():
 
 @app.route('/pay', methods=['GET', 'POST'])
 def pay():
+    b_status, b_msg = get_system_setting('allow_customer_booking')
+    if str(b_status).strip().upper() == 'OFF':
+        flash(b_msg or "Booking is currently unavailable. Please check back later! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है।", "danger")
+        return redirect(url_for('booking1'))
+
     if 'user' not in session:
         return redirect(url_for('login'))
 
@@ -3793,6 +3822,11 @@ def pay():
 
 @app.route('/process-payment', methods=['POST'])
 def process_payment():
+    b_status, b_msg = get_system_setting('allow_customer_booking')
+    if str(b_status).strip().upper() == 'OFF':
+        flash(b_msg or "Booking is currently unavailable. Please check back later! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है।", "danger")
+        return redirect(url_for('booking1'))
+
     if 'user' not in session:
         return redirect(url_for('login'))
 

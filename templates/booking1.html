@@ -295,12 +295,22 @@
       </div>
 
       {% if booking_system_closed %}
-        <div style="background: #fee2e2; border: 1.5px solid #fca5a5; border-radius: 18px; padding: 30px; text-align: center; margin-bottom: 25px; color: #991b1b;">
-          <span style="font-size: 48px; display: block; margin-bottom: 12px;">🚫</span>
-          <h3 style="margin: 0 0 10px; color: #991b1b; font-family: 'Outfit', sans-serif; font-size: 22px;">Customer Bookings Temporarily Closed / ग्राहक बुकिंग सेवा फ़िलहाल बंद है</h3>
-          <p style="font-size: 15px; line-height: 1.6; margin: 0; font-weight: 600;">
-            {{ closure_msg or 'Customer bookings are currently paused by Shubhlo Admin. Please check back soon!' }}
+        <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border: 2.5px solid #ef4444; border-radius: 22px; padding: 45px 30px; text-align: center; margin-bottom: 30px; color: #991b1b; box-shadow: 0 12px 30px rgba(239, 68, 68, 0.18);">
+          <span style="font-size: 58px; display: block; margin-bottom: 16px;">🚫</span>
+          <h3 style="margin: 0 0 14px; color: #991b1b; font-family: 'Outfit', sans-serif; font-size: 27px; font-weight: 900; letter-spacing: -0.5px;">
+            Booking is Currently Unavailable / बुकिंग फ़िलहाल उपलब्ध नहीं है 🚫
+          </h3>
+          <p style="font-size: 16px; line-height: 1.7; margin: 0 auto 24px; font-weight: 700; max-width: 650px; color: #b91c1c;">
+            {{ closure_msg or 'Booking is currently unavailable. Please check back later or contact helpline (+91 7067883131)! / ग्राहक बुकिंग सेवा फ़िलहाल उपलब्ध नहीं है। कृपया बाद में प्रयास करें।' }}
           </p>
+          <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <a href="{{ url_for('services') }}" style="background: #0f172a; color: white; padding: 13px 26px; border-radius: 12px; font-weight: 800; text-decoration: none; font-size: 14.5px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+              🔍 Explore Verified Services / सेवाएँ देखें
+            </a>
+            <a href="{{ url_for('home') }}" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; padding: 13px 26px; border-radius: 12px; font-weight: 800; text-decoration: none; font-size: 14.5px;">
+              🏠 Return to Home / मुख्य पृष्ठ
+            </a>
+          </div>
         </div>
       {% else %}
         <form id="bookingForm" action="{{ url_for('booking2') }}" method="GET">
